@@ -8,6 +8,9 @@
   --muted: #4a4a4a;
   --line: #cfc7b8;
   --panel: #fffdf8;
+  --island: #111111;
+  --island-elevated: #1c1c1e;
+  --island-success: #1f8f4e;
 }
 
 @theme inline {
@@ -26,4 +29,85 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@keyframes yaku-star-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+.yaku-star {
+  animation-name: yaku-star-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes yaku-kanji-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.yaku-kanji-stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 128;
+  stroke-linecap: round;
+  stroke-dasharray: 3337;
+  stroke-dashoffset: 3339;
+  animation: yaku-kanji-stroke var(--t, 0.48s) linear forwards var(--d, 0s);
+}
+
+@keyframes yaku-wordmark-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.yaku-wordmark {
+  opacity: 0;
+  animation: yaku-wordmark-in 0.7s ease-out 3.9s forwards;
+}
+
+.yaku-calendar-stage {
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+}
+
+.yaku-calendar-stage > * {
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yaku-star {
+    animation: none;
+  }
+
+  .yaku-kanji-stroke {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .yaku-wordmark {
+    animation: none;
+    opacity: 1;
+  }
+
+  .yaku-calendar-stage > * {
+    transform: none !important;
+    opacity: 1 !important;
+  }
 }

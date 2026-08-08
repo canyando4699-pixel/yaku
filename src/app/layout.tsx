@@ -11,19 +11,19 @@ const sans = Noto_Sans_JP({
 const display = Shippori_Mincho({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "700"],
+  weight: ["400", "500", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "Yaku (約) — Open-source scheduling",
+  title: "Yaku (約) — Open-Source Terminbuchung",
   description:
-    "Yaku turns open time into real appointments. Lightweight, open source, self-hostable — a booking link without the bloat.",
+    "Yaku macht aus freier Zeit echte Termine. Leichtgewichtig, open source, selbst hostbar.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="de"
       className={`${sans.variable} ${display.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">{children}</body>
