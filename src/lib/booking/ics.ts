@@ -16,6 +16,13 @@ function escapeText(value: string) {
 }
 
 export function buildIcs(booking: Booking, host: HostProfile) {
+  const durationMin = Math.round(
+    (new Date(booking.endsAt).getTime() - new Date(booking.startsAt).getTime()) /
+      60_000,
+  );
+  const summary =
+    durationMin > 0 ? `${durationMin}-min meeting` : host.eventTitle;
+
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -24,10 +31,10 @@ export function buildIcs(booking: Booking, host: HostProfile) {
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
     `UID:${booking.id}@yaku`,
-    `DTSTAMP:${icsTime(booking.createdAt)}`,
+    `DTSTAMP:${icsTime(booking.updatedAt ?? booking.createdAt)}`,
     `DTSTART:${icsTime(booking.startsAt)}`,
     `DTEND:${icsTime(booking.endsAt)}`,
-    `SUMMARY:${escapeText(host.eventTitle)}`,
+    `SUMMARY:${escapeText(summary)}`,
     `DESCRIPTION:${escapeText(
       `${host.displayName}\\nGuest: ${booking.guestName} (${booking.guestEmail})${
         booking.note ? `\\n${booking.note}` : ""

@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Icon } from "@/components/ui/Icon";
-import { IslandButton, IslandPill, islandClass } from "@/components/ui/Island";
+import { IslandButton, IslandPill } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { localeDate } from "@/i18n/messages";
-import { downloadIcs } from "@/lib/booking/ics";
+import { loadHostProfile } from "@/lib/booking/hostProfile";
 import {
   addMinutes,
   getAvailableSlots,
@@ -21,31 +22,62 @@ import {
 } from "@/lib/booking/storage";
 import type { Booking, HostProfile } from "@/lib/booking/types";
 
-type Step = "schedule" | "details" | "done";
+type Step = "schedule" | "details";
 
-function nextBookableDay(from = new Date()) {
+const GUEST_DURATIONS = [15, 30, 45, 60] as const;
+
+function nextBookableDay(host: HostProfile, from = new Date()) {
   const day = new Date(from.getFullYear(), from.getMonth(), from.getDate());
   for (let i = 0; i < 60; i += 1) {
-    if (isBookableDay(day)) return day;
+    if (isBookableDay(day, host)) return day;
     day.setDate(day.getDate() + 1);
   }
   return from;
 }
 
-export function BookingFlow({ host }: { host: HostProfile }) {
+export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
+  const router = useRouter();
   const { locale, t } = useLocale();
+  const [host, setHost] = useState(initialHost);
+  const [durationMinutes, setDurationMinutes] = useState<number>(
+    GUEST_DURATIONS.includes(
+      initialHost.durationMinutes as (typeof GUEST_DURATIONS)[number],
+    )
+      ? initialHost.durationMinutes
+      : 30,
+  );
   const [step, setStep] = useState<Step>("schedule");
-  const [selectedDate, setSelectedDate] = useState(() => nextBookableDay());
+  const [selectedDate, setSelectedDate] = useState(() =>
+    nextBookableDay(initialHost),
+  );
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
-  const [booking, setBooking] = useState<Booking | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const loaded = loadHostProfile(initialHost.slug);
+    setHost(loaded);
+    setDurationMinutes(
+      GUEST_DURATIONS.includes(
+        loaded.durationMinutes as (typeof GUEST_DURATIONS)[number],
+      )
+        ? loaded.durationMinutes
+        : 30,
+    );
+    setSelectedDate(nextBookableDay(loaded));
+    setSelectedSlot(null);
+  }, [initialHost.slug]);
+
+  const activeHost = useMemo(
+    () => ({ ...host, durationMinutes }),
+    [host, durationMinutes],
+  );
+
   const slots = useMemo(
-    () => getAvailableSlots(host, selectedDate),
-    [host, selectedDate],
+    () => getAvailableSlots(activeHost, selectedDate),
+    [activeHost, selectedDate],
   );
 
   const dateFormatter = useMemo(
@@ -68,17 +100,6 @@ export function BookingFlow({ host }: { host: HostProfile }) {
     [locale],
   );
 
-  function resetFlow() {
-    setStep("schedule");
-    setSelectedDate(nextBookableDay());
-    setSelectedSlot(null);
-    setName("");
-    setEmail("");
-    setNote("");
-    setBooking(null);
-    setError(null);
-  }
-
   function submitBooking(event: React.FormEvent) {
     event.preventDefault();
     if (!selectedSlot) return;
@@ -96,14 +117,21 @@ export function BookingFlow({ host }: { host: HostProfile }) {
       guestEmail: email.trim(),
       note: note.trim(),
       startsAt: selectedSlot,
-      endsAt: addMinutes(selectedSlot, host.durationMinutes),
+      endsAt: addMinutes(selectedSlot, durationMinutes),
       createdAt: new Date().toISOString(),
+      status: "confirmed",
     };
 
     saveBooking(next);
-    setBooking(next);
-    setStep("done");
+    router.push(`/b/${host.slug}/m/${next.id}`);
   }
+
+  const meetingTitle =
+    locale === "de"
+      ? `${durationMinutes}-Min.-Termin`
+      : locale === "ja"
+        ? `${durationMinutes}分ミーティング`
+        : `${durationMinutes}-min meeting`;
 
   return (
     <div className="relative flex min-h-full flex-1 flex-col">
@@ -130,12 +158,33 @@ export function BookingFlow({ host }: { host: HostProfile }) {
             </span>
           </IslandPill>
           <h1 className="mt-2 font-display text-3xl text-ink md:text-4xl">
-            {host.eventTitle}
+            {meetingTitle}
           </h1>
-          <p className="mt-3 inline-flex items-center gap-2 text-muted">
-            <Icon name="clock" className="h-4 w-4" />
-            {host.durationMinutes} min
-          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            {GUEST_DURATIONS.map((minutes) => {
+              const active = minutes === durationMinutes;
+              return (
+                <button
+                  key={minutes}
+                  type="button"
+                  onClick={() => {
+                    setDurationMinutes(minutes);
+                    setSelectedSlot(null);
+                    setError(null);
+                  }}
+                  className={[
+                    "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition active:scale-[0.98]",
+                    active
+                      ? "bg-accent text-white shadow-[0_10px_28px_rgba(225,6,0,0.35)]"
+                      : "bg-[#111111] text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:bg-black",
+                  ].join(" ")}
+                >
+                  <Icon name="clock" className="h-4 w-4" />
+                  {minutes} min
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {step === "schedule" ? (
@@ -151,7 +200,7 @@ export function BookingFlow({ host }: { host: HostProfile }) {
                   setSelectedDate(date);
                   setSelectedSlot(null);
                 }}
-                isDayEnabled={isBookableDay}
+                isDayEnabled={(date) => isBookableDay(date, activeHost)}
               />
             </div>
 
@@ -274,47 +323,6 @@ export function BookingFlow({ host }: { host: HostProfile }) {
               </IslandButton>
             </div>
           </form>
-        ) : null}
-
-        {step === "done" && booking ? (
-          <div className="mx-auto w-full max-w-md rounded-[2rem] bg-[#111111] p-7 text-center text-white shadow-[0_24px_80px_rgba(0,0,0,0.25)]">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#1f8f4e] shadow-[0_0_24px_rgba(31,143,78,0.45)]">
-              <Icon name="check" className="h-6 w-6" />
-            </div>
-            <h2 className="mt-4 font-display text-3xl text-white">
-              {t.bookedTitle}
-            </h2>
-            <p className="mt-3 text-white/65">{t.bookedBody}</p>
-            <IslandPill className="mt-6 bg-[#1c1c1e]">
-              <Icon name="calendar" className="h-3.5 w-3.5 text-white/70" />
-              <span>
-                {dateFormatter.format(new Date(booking.startsAt))} ·{" "}
-                {timeFormatter.format(new Date(booking.startsAt))} –{" "}
-                {timeFormatter.format(new Date(booking.endsAt))}
-              </span>
-            </IslandPill>
-            <div className="mt-8 flex flex-col gap-3">
-              <IslandButton
-                type="button"
-                variant="accent"
-                size="lg"
-                onClick={() => downloadIcs(booking, host)}
-              >
-                <Icon name="download" className="h-4 w-4" />
-                {t.downloadIcs}
-              </IslandButton>
-              <IslandButton type="button" variant="islandMuted" onClick={resetFlow}>
-                {t.bookAnother}
-              </IslandButton>
-              <Link
-                href="/host"
-                className={islandClass("soft", "md", "text-ink")}
-              >
-                <Icon name="list" className="h-4 w-4" />
-                {t.viewBookings}
-              </Link>
-            </div>
-          </div>
         ) : null}
       </main>
     </div>

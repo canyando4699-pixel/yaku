@@ -34,9 +34,10 @@ Yaku turns open time into real appointments. Lightweight, open source, self-host
 Early MVP:
 
 - Public demo booking link (`/b/demo`)
-- Weekday availability + 30-min slots
+- Weekday availability + configurable duration/hours (`/host` → Availability)
 - Booking with name / email (+ `.ics` download)
-- Simple host list (`/host`, localStorage)
+- Manage page: cancel / reschedule (`/b/demo/m/[bookingId]`)
+- Host list with cancel / reschedule (`/host`, localStorage)
 
 ## Develop
 
