@@ -103,16 +103,22 @@ function HomePageContent() {
     <div className="relative flex min-h-full flex-1 flex-col bg-[#0f0d0c]">
       <section className="relative flex min-h-dvh flex-col overflow-hidden">
         <Image
-          src="/images/fuji-hero.jpg"
+          src="/images/fuji-hero-4k.png"
           alt="Mount Fuji at night with a glowing pagoda"
           fill
           priority
+          unoptimized
+          quality={100}
           sizes="100vw"
-          className="object-cover object-center"
+          className="object-cover object-center brightness-[1.06] contrast-[1.1] saturate-[1.08]"
         />
         <div
           aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,8,10,0.4)_0%,rgba(8,8,10,0.22)_38%,rgba(8,8,10,0.58)_78%,rgba(15,13,12,1)_100%)]"
+          className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(8,8,10,0.04)_0%,rgba(8,8,10,0.16)_52%,rgba(8,8,10,0.38)_100%)]"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-[#0f0d0c] via-[#0f0d0c]/70 to-transparent"
         />
         <NightStars />
 

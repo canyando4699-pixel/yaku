@@ -47,7 +47,10 @@ export function ReschedulePicker({
   const [error, setError] = useState<string | null>(null);
 
   const slots = useMemo(
-    () => getAvailableSlots(host, selectedDate, new Date(), excludeBookingId),
+    () =>
+      getAvailableSlots(host, selectedDate, new Date(), excludeBookingId, {
+        durationMinutes: host.durationMinutes,
+      }),
     [host, selectedDate, excludeBookingId],
   );
 

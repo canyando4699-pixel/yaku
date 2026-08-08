@@ -1,5 +1,5 @@
 import { defaultHostProfile } from "@/lib/booking/demo";
-import type { HostProfile } from "@/lib/booking/types";
+import type { EventType, HostProfile } from "@/lib/booking/types";
 
 function storageKey(slug: string) {
   return `yaku-host-${slug}`;
@@ -7,6 +7,56 @@ function storageKey(slug: string) {
 
 function canUseStorage() {
   return typeof window !== "undefined" && !!window.localStorage;
+}
+
+const DURATIONS = [15, 30, 45, 60] as const;
+
+function normalizeEventTypes(
+  raw: unknown,
+  fallbackTitle: string,
+  fallbackDuration: number,
+): EventType[] {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return [
+      {
+        id: "et_default",
+        title: fallbackTitle,
+        durationMinutes: fallbackDuration,
+      },
+    ];
+  }
+
+  const types = raw
+    .map((item, index) => {
+      if (!item || typeof item !== "object") return null;
+      const row = item as Partial<EventType>;
+      const durationMinutes = Number(row.durationMinutes);
+      if (!DURATIONS.includes(durationMinutes as (typeof DURATIONS)[number])) {
+        return null;
+      }
+      return {
+        id: String(row.id || `et_${index}`),
+        title: String(row.title || fallbackTitle).trim() || fallbackTitle,
+        durationMinutes,
+      } satisfies EventType;
+    })
+    .filter((t): t is EventType => !!t);
+
+  return types.length > 0
+    ? types
+    : [
+        {
+          id: "et_default",
+          title: fallbackTitle,
+          durationMinutes: fallbackDuration,
+        },
+      ];
+}
+
+function clampNonNeg(value: unknown, fallback: number) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return fallback;
+  return Math.min(Math.floor(n), 24 * 60);
 }
 
 function normalizeHost(raw: Partial<HostProfile> & { slug: string }): HostProfile {
@@ -29,17 +79,41 @@ function normalizeHost(raw: Partial<HostProfile> & { slug: string }): HostProfil
     windowEndMinutes = base.windowEndMinutes;
   }
 
+  const eventTitle = raw.eventTitle?.trim() || base.eventTitle;
+  const safeDuration = DURATIONS.includes(
+    durationMinutes as (typeof DURATIONS)[number],
+  )
+    ? durationMinutes
+    : base.durationMinutes;
+
   return {
     slug: raw.slug,
     displayName: raw.displayName?.trim() || base.displayName,
-    eventTitle: raw.eventTitle?.trim() || base.eventTitle,
-    durationMinutes: [15, 30, 45, 60].includes(durationMinutes)
-      ? durationMinutes
-      : base.durationMinutes,
+    eventTitle,
+    durationMinutes: safeDuration,
     timezone: raw.timezone || base.timezone,
     weekdays,
     windowStartMinutes,
     windowEndMinutes,
+    bufferBeforeMinutes: clampNonNeg(
+      raw.bufferBeforeMinutes,
+      base.bufferBeforeMinutes,
+    ),
+    bufferAfterMinutes: clampNonNeg(
+      raw.bufferAfterMinutes,
+      base.bufferAfterMinutes,
+    ),
+    minNoticeHours: clampNonNeg(raw.minNoticeHours, base.minNoticeHours),
+    maxBookingsPerDay: clampNonNeg(
+      raw.maxBookingsPerDay,
+      base.maxBookingsPerDay,
+    ),
+    eventTypes: normalizeEventTypes(raw.eventTypes, eventTitle, safeDuration),
+    allowSeries: raw.allowSeries ?? base.allowSeries,
+    maxSeriesCount: Math.min(
+      12,
+      Math.max(1, clampNonNeg(raw.maxSeriesCount, base.maxSeriesCount) || 8),
+    ),
   };
 }
 

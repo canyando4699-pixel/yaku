@@ -7,25 +7,27 @@ import { useEffect, useMemo, useState } from "react";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Icon } from "@/components/ui/Icon";
-import { IslandButton, IslandPill } from "@/components/ui/Island";
+import { IslandButton, IslandPill, islandClass } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { localeDate } from "@/i18n/messages";
 import { loadHostProfile } from "@/lib/booking/hostProfile";
 import {
   addMinutes,
+  buildSeriesStarts,
+  COMMON_TIMEZONES,
+  detectGuestTimezone,
   getAvailableSlots,
   isBookableDay,
 } from "@/lib/booking/slots";
 import {
   createBookingId,
-  isSlotTaken,
+  createSeriesId,
+  isRangeTaken,
   saveBooking,
 } from "@/lib/booking/storage";
-import type { Booking, HostProfile } from "@/lib/booking/types";
+import type { Booking, EventType, HostProfile } from "@/lib/booking/types";
 
 type Step = "schedule" | "details";
-
-const GUEST_DURATIONS = [15, 30, 45, 60] as const;
 
 function nextBookableDay(host: HostProfile, from = new Date()) {
   const day = new Date(from.getFullYear(), from.getMonth(), from.getDate());
@@ -36,16 +38,26 @@ function nextBookableDay(host: HostProfile, from = new Date()) {
   return from;
 }
 
-export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
+function seriesOptions(max: number) {
+  const opts = [1];
+  for (const n of [2, 4, 6, 8, 12]) {
+    if (n <= max) opts.push(n);
+  }
+  return opts;
+}
+
+export function BookingFlow({
+  host: initialHost,
+  fromHost = false,
+}: {
+  host: HostProfile;
+  fromHost?: boolean;
+}) {
   const router = useRouter();
   const { locale, t } = useLocale();
   const [host, setHost] = useState(initialHost);
-  const [durationMinutes, setDurationMinutes] = useState<number>(
-    GUEST_DURATIONS.includes(
-      initialHost.durationMinutes as (typeof GUEST_DURATIONS)[number],
-    )
-      ? initialHost.durationMinutes
-      : 30,
+  const [eventType, setEventType] = useState<EventType>(
+    () => initialHost.eventTypes[0],
   );
   const [step, setStep] = useState<Step>("schedule");
   const [selectedDate, setSelectedDate] = useState(() =>
@@ -55,6 +67,8 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
+  const [seriesCount, setSeriesCount] = useState(1);
+  const [guestTimezone, setGuestTimezone] = useState("UTC");
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
@@ -62,20 +76,18 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
     setHydrated(true);
     const loaded = loadHostProfile(initialHost.slug);
     setHost(loaded);
-    setDurationMinutes(
-      GUEST_DURATIONS.includes(
-        loaded.durationMinutes as (typeof GUEST_DURATIONS)[number],
-      )
-        ? loaded.durationMinutes
-        : 30,
-    );
+    const nextType = loaded.eventTypes[0];
+    setEventType(nextType);
     setSelectedDate(nextBookableDay(loaded));
     setSelectedSlot(null);
+    setSeriesCount(1);
+    const detected = detectGuestTimezone();
+    setGuestTimezone(detected);
   }, [initialHost.slug]);
 
   const activeHost = useMemo(
-    () => ({ ...host, durationMinutes }),
-    [host, durationMinutes],
+    () => ({ ...host, durationMinutes: eventType.durationMinutes }),
+    [host, eventType],
   );
 
   const slots = useMemo(() => {
@@ -87,10 +99,17 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
       );
       return getAvailableSlots(activeHost, selectedDate, dayStart, undefined, {
         skipTakenCheck: true,
+        durationMinutes: eventType.durationMinutes,
       });
     }
-    return getAvailableSlots(activeHost, selectedDate);
-  }, [activeHost, selectedDate, hydrated]);
+    return getAvailableSlots(
+      activeHost,
+      selectedDate,
+      new Date(),
+      undefined,
+      { durationMinutes: eventType.durationMinutes },
+    );
+  }, [activeHost, selectedDate, hydrated, eventType.durationMinutes]);
 
   const dateFormatter = useMemo(
     () =>
@@ -99,8 +118,9 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
         day: "numeric",
         month: "short",
         year: "numeric",
+        timeZone: guestTimezone,
       }),
-    [locale],
+    [locale, guestTimezone],
   );
 
   const timeFormatter = useMemo(
@@ -108,42 +128,83 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
       new Intl.DateTimeFormat(localeDate[locale], {
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: guestTimezone,
       }),
-    [locale],
+    [locale, guestTimezone],
   );
 
   function submitBooking(event: React.FormEvent) {
     event.preventDefault();
     if (!selectedSlot) return;
-    if (isSlotTaken(host.slug, selectedSlot)) {
-      setError(t.noSlots);
+
+    const endsAt = addMinutes(selectedSlot, eventType.durationMinutes);
+    if (
+      isRangeTaken(
+        host.slug,
+        selectedSlot,
+        endsAt,
+        undefined,
+        host.bufferBeforeMinutes,
+        host.bufferAfterMinutes,
+      )
+    ) {
+      setError(t.slotTaken);
       setStep("schedule");
       setSelectedSlot(null);
       return;
     }
 
-    const next: Booking = {
-      id: createBookingId(),
-      slug: host.slug,
-      guestName: name.trim(),
-      guestEmail: email.trim(),
-      note: note.trim(),
-      startsAt: selectedSlot,
-      endsAt: addMinutes(selectedSlot, durationMinutes),
-      createdAt: new Date().toISOString(),
-      status: "confirmed",
-    };
+    const count =
+      host.allowSeries && seriesCount > 1
+        ? Math.min(seriesCount, host.maxSeriesCount)
+        : 1;
 
-    saveBooking(next);
-    router.push(`/b/${host.slug}/m/${next.id}`);
+    const starts = buildSeriesStarts(
+      activeHost,
+      selectedSlot,
+      count,
+      eventType.durationMinutes,
+    );
+
+    if (!starts) {
+      setError(t.seriesUnavailable);
+      return;
+    }
+
+    const seriesId = count > 1 ? createSeriesId() : undefined;
+    let firstId = "";
+
+    starts.forEach((start, index) => {
+      const next: Booking = {
+        id: createBookingId(),
+        slug: host.slug,
+        guestName: name.trim(),
+        guestEmail: email.trim(),
+        note: note.trim(),
+        startsAt: start,
+        endsAt: addMinutes(start, eventType.durationMinutes),
+        createdAt: new Date().toISOString(),
+        status: "confirmed",
+        eventTypeId: eventType.id,
+        eventTitle: eventType.title,
+        guestTimezone,
+        seriesId,
+        seriesIndex: count > 1 ? index + 1 : undefined,
+        seriesTotal: count > 1 ? count : undefined,
+      };
+      saveBooking(next);
+      if (index === 0) firstId = next.id;
+    });
+
+    router.push(
+      `/b/${host.slug}/m/${firstId}${fromHost ? "?from=host" : ""}`,
+    );
   }
 
-  const meetingTitle =
-    locale === "de"
-      ? `${durationMinutes}-Min.-Termin`
-      : locale === "ja"
-        ? `${durationMinutes}分ミーティング`
-        : `${durationMinutes}-min meeting`;
+  const tzOptions = useMemo(() => {
+    const list = [guestTimezone, host.timezone, ...COMMON_TIMEZONES];
+    return list.filter((tz, i, arr) => arr.indexOf(tz) === i);
+  }, [guestTimezone, host.timezone]);
 
   return (
     <div className="relative flex min-h-full flex-1 flex-col bg-[#0a0a0a]">
@@ -163,15 +224,25 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
       />
 
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
-        <Link href="/" className="font-display text-xl tracking-wide text-white">
+        <Link
+          href={fromHost ? "/host" : "/"}
+          className="font-display text-xl tracking-wide text-white"
+        >
           <span className="mr-2 text-accent">約</span>
           Yaku
         </Link>
         <div className="flex items-center gap-2.5">
-          <IslandPill className="hidden sm:inline-flex">
-            <span className="h-2 w-2 rounded-full bg-[#ff9f0a]" />
-            <span>{t.demoOnly}</span>
-          </IslandPill>
+          {fromHost ? (
+            <Link href="/host" className={islandClass("islandMuted", "sm")}>
+              <Icon name="chevronLeft" className="h-3.5 w-3.5 text-white/70" />
+              {t.backToDashboard}
+            </Link>
+          ) : (
+            <IslandPill className="hidden sm:inline-flex">
+              <span className="h-2 w-2 rounded-full bg-[#ff9f0a]" />
+              <span>{t.demoOnly}</span>
+            </IslandPill>
+          )}
           <LanguageSwitcher />
         </div>
       </header>
@@ -185,17 +256,18 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
             </span>
           </IslandPill>
           <h1 className="mt-2 font-display text-3xl text-white md:text-4xl">
-            {meetingTitle}
+            {eventType.title}
           </h1>
+
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-            {GUEST_DURATIONS.map((minutes) => {
-              const active = minutes === durationMinutes;
+            {host.eventTypes.map((et) => {
+              const active = et.id === eventType.id;
               return (
                 <button
-                  key={minutes}
+                  key={et.id}
                   type="button"
                   onClick={() => {
-                    setDurationMinutes(minutes);
+                    setEventType(et);
                     setSelectedSlot(null);
                     setError(null);
                   }}
@@ -207,11 +279,27 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
                   ].join(" ")}
                 >
                   <Icon name="clock" className="h-4 w-4" />
-                  {minutes} min
+                  {et.title} · {et.durationMinutes} min
                 </button>
               );
             })}
           </div>
+
+          <label className="mt-5 inline-flex flex-col items-center gap-1 text-sm text-white/70">
+            <span>{t.guestTimezoneLabel}</span>
+            <select
+              value={guestTimezone}
+              onChange={(e) => setGuestTimezone(e.target.value)}
+              className="rounded-full border-0 bg-[#111111] px-4 py-2 text-white outline-none ring-1 ring-white/15"
+            >
+              {tzOptions.map((tz) => (
+                <option key={tz} value={tz} className="bg-[#111111]">
+                  {tz}
+                  {tz === host.timezone ? ` (${t.hostTimezoneShort})` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
         {step === "schedule" ? (
@@ -333,6 +421,26 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
                 className="mt-1 w-full resize-none rounded-[1.25rem] border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 placeholder:text-white/35 focus:ring-accent"
               />
             </label>
+
+            {host.allowSeries ? (
+              <label className="mt-4 block text-sm text-white/80">
+                {t.seriesCountLabel}
+                <select
+                  value={seriesCount}
+                  onChange={(e) => setSeriesCount(Number(e.target.value))}
+                  className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+                >
+                  {seriesOptions(host.maxSeriesCount).map((n) => (
+                    <option key={n} value={n} className="bg-[#111111]">
+                      {n === 1 ? t.seriesOnce : t.seriesWeekly.replace("{n}", String(n))}
+                    </option>
+                  ))}
+                </select>
+                <span className="mt-1 block text-xs text-white/45">
+                  {t.seriesHint}
+                </span>
+              </label>
+            ) : null}
 
             {error ? <p className="mt-3 text-sm text-[#ff453a]">{error}</p> : null}
 

@@ -30,7 +30,7 @@ function isLocale(value: string | null): value is Locale {
 }
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("de");
+  const [locale, setLocaleState] = useState<Locale>("en");
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);

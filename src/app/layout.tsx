@@ -15,7 +15,7 @@ const display = Shippori_Mincho({
 });
 
 export const metadata: Metadata = {
-  title: "Yaku (約) — Open-Source Terminbuchung",
+  title: "Yaku (約) — Open-source scheduling",
   description:
     "Yaku macht aus freier Zeit echte Termine. Leichtgewichtig, open source, selbst hostbar.",
 };
