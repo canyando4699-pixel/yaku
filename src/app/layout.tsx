@@ -15,15 +15,15 @@ const display = Shippori_Mincho({
 });
 
 export const metadata: Metadata = {
-  title: "Yaku (約) — Open-source scheduling",
+  title: "Yaku (約) — Open-Source Terminbuchung",
   description:
-    "Yaku turns open time into real appointments. Lightweight, open source, self-hostable — a booking link without the bloat.",
+    "Yaku macht aus freier Zeit echte Termine. Leichtgewichtig, open source, selbst hostbar.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="de"
       className={`${sans.variable} ${display.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">{children}</body>

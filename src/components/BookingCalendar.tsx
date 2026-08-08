@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
-const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
+import { Icon } from "@/components/ui/Icon";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { localeDate } from "@/i18n/messages";
 
 function startOfMonth(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -33,18 +34,31 @@ function buildGrid(month: Date) {
   });
 }
 
-function formatMonthYear(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    year: "numeric",
-  }).format(date);
-}
+type BookingCalendarProps = {
+  selected: Date;
+  onSelect: (date: Date) => void;
+  isDayEnabled?: (date: Date) => boolean;
+};
 
-export function BookingCalendar() {
-  const [visibleMonth, setVisibleMonth] = useState(() => new Date(2026, 1, 1));
-  const [selected, setSelected] = useState(() => new Date(2026, 1, 20));
+export function BookingCalendar({
+  selected,
+  onSelect,
+  isDayEnabled,
+}: BookingCalendarProps) {
+  const { locale, t } = useLocale();
+  const [visibleMonth, setVisibleMonth] = useState(() =>
+    startOfMonth(selected),
+  );
 
   const days = useMemo(() => buildGrid(visibleMonth), [visibleMonth]);
+  const monthLabel = useMemo(
+    () =>
+      new Intl.DateTimeFormat(localeDate[locale], {
+        month: "short",
+        year: "numeric",
+      }).format(visibleMonth),
+    [locale, visibleMonth],
+  );
 
   return (
     <div className="relative w-full max-w-[360px]">
@@ -72,27 +86,27 @@ export function BookingCalendar() {
         <div className="relative mb-5 flex items-center justify-between">
           <button
             type="button"
-            aria-label="Previous month"
+            aria-label={t.prevMonth}
             onClick={() => setVisibleMonth((m) => addMonths(m, -1))}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/80 transition hover:border-accent/50 hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-white transition hover:bg-white/14"
           >
-            ‹
+            <Icon name="chevronLeft" className="h-4 w-4" />
           </button>
           <p className="text-lg font-semibold tracking-wide text-white">
-            {formatMonthYear(visibleMonth)}
+            {monthLabel}
           </p>
           <button
             type="button"
-            aria-label="Next month"
+            aria-label={t.nextMonth}
             onClick={() => setVisibleMonth((m) => addMonths(m, 1))}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/80 transition hover:border-accent/50 hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-white transition hover:bg-white/14"
           >
-            ›
+            <Icon name="chevronRight" className="h-4 w-4" />
           </button>
         </div>
 
         <div className="relative mb-2 grid grid-cols-7 gap-y-2 text-center text-[11px] font-medium tracking-[0.14em] text-white/35">
-          {WEEKDAYS.map((day) => (
+          {t.weekdays.map((day) => (
             <span key={day}>{day}</span>
           ))}
         </div>
@@ -101,21 +115,27 @@ export function BookingCalendar() {
           {days.map((day) => {
             const inMonth = day.getMonth() === visibleMonth.getMonth();
             const isSelected = sameDay(day, selected);
+            const enabled = isDayEnabled ? isDayEnabled(day) : true;
 
             return (
               <button
                 key={day.toISOString()}
                 type="button"
+                disabled={!enabled}
                 onClick={() => {
-                  setSelected(day);
+                  onSelect(day);
                   if (!inMonth) setVisibleMonth(startOfMonth(day));
                 }}
                 className={[
                   "mx-auto flex h-10 w-10 items-center justify-center rounded-full text-sm transition",
-                  inMonth ? "text-white" : "text-white/25",
-                  isSelected
-                    ? "bg-accent font-semibold text-white shadow-[0_0_22px_rgba(225,6,0,0.55)]"
-                    : "hover:bg-white/6",
+                  !enabled
+                    ? "cursor-not-allowed text-white/15"
+                    : inMonth
+                      ? "text-white hover:bg-white/6"
+                      : "text-white/25 hover:bg-white/6",
+                  isSelected && enabled
+                    ? "bg-accent font-semibold text-white shadow-[0_0_22px_rgba(225,6,0,0.55)] hover:bg-accent"
+                    : "",
                 ].join(" ")}
               >
                 {day.getDate()}

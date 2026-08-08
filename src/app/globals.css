@@ -8,6 +8,9 @@
   --muted: #4a4a4a;
   --line: #cfc7b8;
   --panel: #fffdf8;
+  --island: #111111;
+  --island-elevated: #1c1c1e;
+  --island-success: #1f8f4e;
 }
 
 @theme inline {
