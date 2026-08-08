@@ -78,7 +78,7 @@ export function rescheduleBooking(
 ): Booking | null {
   const current = getBooking(id);
   if (!current || current.status !== "confirmed") return null;
-  if (isSlotTaken(current.slug, startsAt, id)) return null;
+  if (isRangeTaken(current.slug, startsAt, endsAt, id)) return null;
   return updateBooking(id, {
     startsAt,
     endsAt,
@@ -100,6 +100,56 @@ export function isSlotTaken(
   );
 }
 
+function rangesOverlap(
+  aStart: number,
+  aEnd: number,
+  bStart: number,
+  bEnd: number,
+) {
+  return aStart < bEnd && bStart < aEnd;
+}
+
+export function isRangeTaken(
+  slug: string,
+  startsAt: string,
+  endsAt: string,
+  excludeId?: string,
+  bufferBeforeMinutes = 0,
+  bufferAfterMinutes = 0,
+): boolean {
+  const start =
+    new Date(startsAt).getTime() - bufferBeforeMinutes * 60_000;
+  const end = new Date(endsAt).getTime() + bufferAfterMinutes * 60_000;
+
+  return listBookings(slug).some((b) => {
+    if (b.status !== "confirmed" || b.id === excludeId) return false;
+    const bStart = new Date(b.startsAt).getTime();
+    const bEnd = new Date(b.endsAt).getTime();
+    return rangesOverlap(start, end, bStart, bEnd);
+  });
+}
+
+export function countConfirmedOnDay(
+  slug: string,
+  date: Date,
+  excludeId?: string,
+): number {
+  const y = date.getFullYear();
+  const m = date.getMonth();
+  const d = date.getDate();
+  return listBookings(slug).filter((b) => {
+    if (b.status !== "confirmed" || b.id === excludeId) return false;
+    const at = new Date(b.startsAt);
+    return (
+      at.getFullYear() === y && at.getMonth() === m && at.getDate() === d
+    );
+  }).length;
+}
+
 export function createBookingId() {
   return `bk_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function createSeriesId() {
+  return `sr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }

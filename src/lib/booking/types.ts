@@ -1,5 +1,11 @@
 export type BookingStatus = "confirmed" | "cancelled";
 
+export type EventType = {
+  id: string;
+  title: string;
+  durationMinutes: number;
+};
+
 export type Booking = {
   id: string;
   slug: string;
@@ -12,6 +18,12 @@ export type Booking = {
   status: BookingStatus;
   updatedAt?: string;
   cancelledAt?: string;
+  eventTypeId?: string;
+  eventTitle?: string;
+  guestTimezone?: string;
+  seriesId?: string;
+  seriesIndex?: number;
+  seriesTotal?: number;
 };
 
 export type HostProfile = {
@@ -24,4 +36,13 @@ export type HostProfile = {
   weekdays: number[];
   windowStartMinutes: number;
   windowEndMinutes: number;
+  bufferBeforeMinutes: number;
+  bufferAfterMinutes: number;
+  /** Hours before a slot can be booked */
+  minNoticeHours: number;
+  /** 0 = unlimited */
+  maxBookingsPerDay: number;
+  eventTypes: EventType[];
+  allowSeries: boolean;
+  maxSeriesCount: number;
 };

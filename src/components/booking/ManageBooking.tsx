@@ -22,9 +22,11 @@ type Mode = "view" | "reschedule";
 export function ManageBooking({
   host: initialHost,
   bookingId,
+  fromHost = false,
 }: {
   host: HostProfile;
   bookingId: string;
+  fromHost?: boolean;
 }) {
   const { locale, t } = useLocale();
   const [host, setHost] = useState(initialHost);
@@ -118,15 +120,25 @@ export function ManageBooking({
   return (
     <div className="relative flex min-h-full flex-1 flex-col">
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
-        <Link href="/" className="font-display text-xl tracking-wide text-ink">
+        <Link
+          href={fromHost ? "/host" : "/"}
+          className="font-display text-xl tracking-wide text-ink"
+        >
           <span className="mr-2 text-accent">約</span>
           Yaku
         </Link>
         <div className="flex items-center gap-2.5">
-          <IslandPill className="hidden sm:inline-flex">
-            <span className="h-2 w-2 rounded-full bg-[#ff9f0a]" />
-            <span>{t.demoOnly}</span>
-          </IslandPill>
+          {fromHost ? (
+            <Link href="/host" className={islandClass("islandMuted", "sm")}>
+              <Icon name="chevronLeft" className="h-3.5 w-3.5 text-white/70" />
+              {t.backToDashboard}
+            </Link>
+          ) : (
+            <IslandPill className="hidden sm:inline-flex">
+              <span className="h-2 w-2 rounded-full bg-[#ff9f0a]" />
+              <span>{t.demoOnly}</span>
+            </IslandPill>
+          )}
           <LanguageSwitcher />
         </div>
       </header>
@@ -142,7 +154,14 @@ export function ManageBooking({
           <h1 className="font-display text-3xl text-ink md:text-4xl">
             {cancelled ? t.cancelledTitle : t.manageTitle}
           </h1>
-          <p className="mt-2 text-muted">{host.eventTitle}</p>
+          <p className="mt-2 text-muted">
+            {booking.eventTitle || host.eventTitle}
+          </p>
+          {booking.seriesTotal && booking.seriesIndex ? (
+            <p className="mt-1 text-sm text-muted">
+              {booking.seriesIndex}/{booking.seriesTotal}
+            </p>
+          ) : null}
         </div>
 
         <div className="mx-auto w-full max-w-xl rounded-[2rem] bg-[#111111] p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.25)] md:p-7">
@@ -261,7 +280,7 @@ export function ManageBooking({
                 </>
               ) : (
                 <Link
-                  href={`/b/${host.slug}`}
+                  href={`/b/${host.slug}${fromHost ? "?from=host" : ""}`}
                   className={islandClass("accent", "lg")}
                 >
                   {t.bookAnother}
@@ -269,15 +288,15 @@ export function ManageBooking({
               )}
               {!cancelled ? (
                 <Link
-                  href={`/b/${host.slug}`}
+                  href={`/b/${host.slug}${fromHost ? "?from=host" : ""}`}
                   className={islandClass("soft", "md", "text-ink")}
                 >
                   {t.bookAnother}
                 </Link>
               ) : null}
-              <Link href="/host" className={islandClass("soft", "md", "text-ink")}>
+              <Link href="/host" className={islandClass(fromHost ? "accent" : "soft", "md", fromHost ? "" : "text-ink")}>
                 <Icon name="list" className="h-4 w-4" />
-                {t.viewBookings}
+                {fromHost ? t.backToDashboard : t.viewBookings}
               </Link>
             </div>
           )}
