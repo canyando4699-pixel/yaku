@@ -5,9 +5,12 @@ function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-export function isBookableDay(date: Date, now = new Date()) {
-  const day = date.getDay();
-  if (day === 0 || day === 6) return false;
+export function isBookableDay(
+  date: Date,
+  host: HostProfile,
+  now = new Date(),
+) {
+  if (!host.weekdays.includes(date.getDay())) return false;
   return startOfDay(date).getTime() >= startOfDay(now).getTime();
 }
 
@@ -15,16 +18,19 @@ export function getAvailableSlots(
   host: HostProfile,
   date: Date,
   now = new Date(),
+  excludeBookingId?: string,
+  options?: { skipTakenCheck?: boolean },
 ): string[] {
-  if (!isBookableDay(date, now)) return [];
+  if (!isBookableDay(date, host, now)) return [];
 
   const slots: string[] = [];
-  const startHour = 9;
-  const endHour = 17;
+  const startMinutes = host.windowStartMinutes;
+  const endMinutes = host.windowEndMinutes;
+  const skipTakenCheck = options?.skipTakenCheck ?? false;
 
   for (
-    let minutes = startHour * 60;
-    minutes + host.durationMinutes <= endHour * 60;
+    let minutes = startMinutes;
+    minutes + host.durationMinutes <= endMinutes;
     minutes += host.durationMinutes
   ) {
     const startsAt = new Date(
@@ -40,7 +46,9 @@ export function getAvailableSlots(
     if (startsAt.getTime() <= now.getTime()) continue;
 
     const iso = startsAt.toISOString();
-    if (isSlotTaken(host.slug, iso)) continue;
+    if (!skipTakenCheck && isSlotTaken(host.slug, iso, excludeBookingId)) {
+      continue;
+    }
     slots.push(iso);
   }
 
@@ -49,4 +57,10 @@ export function getAvailableSlots(
 
 export function addMinutes(iso: string, minutes: number) {
   return new Date(new Date(iso).getTime() + minutes * 60_000).toISOString();
+}
+
+export function formatMinutesAsTime(totalMinutes: number) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }

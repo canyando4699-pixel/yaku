@@ -16,7 +16,10 @@ import { NightStars } from "@/components/NightStars";
 import { Icon } from "@/components/ui/Icon";
 import { islandClass } from "@/components/ui/Island";
 import { LocaleProvider, useLocale } from "@/i18n/LocaleProvider";
+import { defaultHostProfile } from "@/lib/booking/demo";
+import { loadHostProfile } from "@/lib/booking/hostProfile";
 import { isBookableDay } from "@/lib/booking/slots";
+import type { HostProfile } from "@/lib/booking/types";
 
 function clamp01(value: number) {
   return Math.min(1, Math.max(0, value));
@@ -68,8 +71,13 @@ function useSectionProgress(ref: RefObject<HTMLElement | null>) {
 function HomePageContent() {
   const { t } = useLocale();
   const [previewDate, setPreviewDate] = useState(() => new Date());
+  const [host, setHost] = useState<HostProfile>(defaultHostProfile);
   const buildRef = useRef<HTMLElement>(null);
   const progress = useSectionProgress(buildRef);
+
+  useEffect(() => {
+    setHost(loadHostProfile(defaultHostProfile.slug));
+  }, []);
 
   const eyebrowT = easeOutCubic(stage(progress, 0, 0.35));
   const titleT = easeOutCubic(stage(progress, 0.08, 0.48));
@@ -238,7 +246,7 @@ function HomePageContent() {
                 <BookingCalendar
                   selected={previewDate}
                   onSelect={setPreviewDate}
-                  isDayEnabled={isBookableDay}
+                  isDayEnabled={(date) => isBookableDay(date, host)}
                 />
               </div>
             </div>

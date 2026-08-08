@@ -1,3 +1,5 @@
+export type BookingStatus = "confirmed" | "cancelled";
+
 export type Booking = {
   id: string;
   slug: string;
@@ -7,6 +9,9 @@ export type Booking = {
   startsAt: string;
   endsAt: string;
   createdAt: string;
+  status: BookingStatus;
+  updatedAt?: string;
+  cancelledAt?: string;
 };
 
 export type HostProfile = {
@@ -15,4 +20,8 @@ export type HostProfile = {
   eventTitle: string;
   durationMinutes: number;
   timezone: string;
+  /** JS Date.getDay(): 0=Sun … 6=Sat */
+  weekdays: number[];
+  windowStartMinutes: number;
+  windowEndMinutes: number;
 };
