@@ -1,6 +1,10 @@
-# Yaku (約)
+<p align="center">
+  <img src="public/yaku-logo.png" alt="Yaku (約) logo" width="220" />
+</p>
 
-Open-source scheduling — a lightweight alternative to Calendly.
+<h1 align="center">Yaku (約)</h1>
+
+<p align="center">Open-source scheduling — a lightweight alternative to Calendly.</p>
 
 **約 (yaku)** means agreement / appointment / a promise kept.
 
