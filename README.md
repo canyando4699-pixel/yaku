@@ -18,10 +18,22 @@
 ![Yaku hero — Fuji night with 約 brand lockup](docs/screenshots/hero.png)
 
 ### Calendar section
-![Yaku calendar preview](docs/screenshots/calendar.png)
+![Yaku calendar preview on the landing page](docs/screenshots/calendar.png)
 
 ### Demo booking flow
-![Yaku demo booking — date and time](docs/screenshots/demo.png)
+![Yaku demo booking — event type, date, and time](docs/screenshots/demo.png)
+
+### Host office — schedule board
+![Yaku host schedule board with weekly bookings](docs/screenshots/host-schedule.png)
+
+### Host office — availability
+![Yaku host availability, buffers, and event types](docs/screenshots/host-availability.png)
+
+### Host office — share link
+![Yaku host share booking link](docs/screenshots/host-share.png)
+
+### Sign in
+![Yaku local sign-in screen](docs/screenshots/login.png)
 
 ## Tagline
 
@@ -31,13 +43,16 @@ Yaku turns open time into real appointments. Lightweight, open source, self-host
 
 ## Status
 
-Early MVP:
+Early MVP (UI default language: **English**; DE / JA also available):
 
-- Public demo booking link (`/b/demo`)
-- Weekday availability + configurable duration/hours (`/host` → Availability)
-- Booking with name / email (+ `.ics` download)
-- Manage page: cancel / reschedule (`/b/demo/m/[bookingId]`)
-- Host list with cancel / reschedule (`/host`, localStorage)
+- Landing hero + calendar preview
+- Public demo booking link (`/b/demo`) with event types, timezone, and optional weekly series
+- Local auth: sign in / sign up (`/login`, `/signup`) — demo account `demo@yaku.app` / `yaku123`
+- Host office (`/host`) with Japanese room backgrounds and drone-style room transitions
+- Schedule board (week view), booking list, availability settings, share link
+- Availability: weekdays, hours, buffers, minimum notice, max/day, event types, series
+- Guest manage page: cancel / reschedule + `.ics` download (`/b/demo/m/[bookingId]`)
+- Local-first storage in the browser (replaceable with Supabase later)
 
 ## Develop
 
