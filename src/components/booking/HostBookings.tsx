@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { HostAvailability } from "@/components/booking/HostAvailability";
@@ -94,8 +95,22 @@ export function HostBookings() {
   }
 
   return (
-    <div className="relative flex min-h-full flex-1 flex-col">
-      <header className="flex items-center justify-between px-6 py-5 md:px-10">
+    <div className="relative flex min-h-full flex-1 flex-col bg-[#f2f2f0]">
+      <Image
+        src="/images/blueprint.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="pointer-events-none object-cover object-center"
+        aria-hidden
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(242,242,240,0.72)_0%,rgba(242,242,240,0.42)_40%,rgba(242,242,240,0.68)_100%)]"
+      />
+
+      <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
         <Link href="/" className="font-display text-xl tracking-wide text-ink">
           <span className="mr-2 text-accent">約</span>
           Yaku
@@ -109,7 +124,7 @@ export function HostBookings() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 pb-16 md:px-10">
+      <main className="relative z-10 mx-auto w-full max-w-3xl flex-1 px-6 pb-16 md:px-10">
         <div className="flex flex-wrap gap-2">
           {(
             [

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -134,9 +135,24 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
         : `${durationMinutes}-min meeting`;
 
   return (
-    <div className="relative flex min-h-full flex-1 flex-col">
+    <div className="relative flex min-h-full flex-1 flex-col bg-[#0a0a0a]">
+      <Image
+        src="/images/sensoji-night.jpg"
+        alt=""
+        fill
+        priority
+        quality={92}
+        sizes="100vw"
+        className="pointer-events-none object-cover object-center"
+        aria-hidden
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,8,10,0.4)_0%,rgba(8,8,10,0.22)_40%,rgba(8,8,10,0.55)_100%)]"
+      />
+
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
-        <Link href="/" className="font-display text-xl tracking-wide text-ink">
+        <Link href="/" className="font-display text-xl tracking-wide text-white">
           <span className="mr-2 text-accent">約</span>
           Yaku
         </Link>
@@ -149,7 +165,7 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-16 md:px-10">
+      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-16 md:px-10">
         <div className="mb-8 text-center">
           <IslandPill className="mb-4">
             <Icon name="user" className="h-3.5 w-3.5 text-white/70" />
@@ -157,7 +173,7 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
               {t.bookingWith} {host.displayName}
             </span>
           </IslandPill>
-          <h1 className="mt-2 font-display text-3xl text-ink md:text-4xl">
+          <h1 className="mt-2 font-display text-3xl text-white md:text-4xl">
             {meetingTitle}
           </h1>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
@@ -190,7 +206,7 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
         {step === "schedule" ? (
           <div className="grid items-start gap-10 md:grid-cols-[360px_1fr]">
             <div className="mx-auto w-full max-w-[360px]">
-              <p className="mb-3 flex items-center justify-center gap-2 text-sm font-medium text-ink md:justify-start">
+              <p className="mb-3 flex items-center justify-center gap-2 text-sm font-medium text-white md:justify-start">
                 <Icon name="calendar" className="h-4 w-4 text-accent" />
                 {t.pickDate}
               </p>
@@ -205,7 +221,7 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
             </div>
 
             <div>
-              <p className="mb-3 flex items-center gap-2 text-sm font-medium text-ink">
+              <p className="mb-3 flex items-center gap-2 text-sm font-medium text-white">
                 <Icon name="clock" className="h-4 w-4 text-accent" />
                 {t.pickTime}
               </p>
@@ -213,7 +229,7 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
                 {dateFormatter.format(selectedDate)}
               </IslandPill>
               {slots.length === 0 ? (
-                <p className="text-muted">{t.noSlots}</p>
+                <p className="text-white/65">{t.noSlots}</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                   {slots.map((slot) => {

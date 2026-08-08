@@ -25,6 +25,7 @@ Thumbs.db
 *.pem
 *.p12
 *.key
+.tools/
 
 # debug
 npm-debug.log*
