@@ -81,6 +81,16 @@ body {
   animation: yaku-wordmark-in 0.7s ease-out 3.9s forwards;
 }
 
+.yaku-calendar-stage {
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+}
+
+.yaku-calendar-stage > * {
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .yaku-star {
     animation: none;
@@ -94,5 +104,10 @@ body {
   .yaku-wordmark {
     animation: none;
     opacity: 1;
+  }
+
+  .yaku-calendar-stage > * {
+    transform: none !important;
+    opacity: 1 !important;
   }
 }

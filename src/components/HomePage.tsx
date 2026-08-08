@@ -2,22 +2,97 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from "react";
 import { BrushKanji } from "@/components/BrushKanji";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NightStars } from "@/components/NightStars";
 import { Icon } from "@/components/ui/Icon";
-import { IslandPill, islandClass } from "@/components/ui/Island";
+import { islandClass } from "@/components/ui/Island";
 import { LocaleProvider, useLocale } from "@/i18n/LocaleProvider";
 import { isBookableDay } from "@/lib/booking/slots";
+
+function clamp01(value: number) {
+  return Math.min(1, Math.max(0, value));
+}
+
+function stage(progress: number, from: number, to: number) {
+  return clamp01((progress - from) / (to - from));
+}
+
+function easeOutCubic(t: number) {
+  return 1 - (1 - t) ** 3;
+}
+
+function useSectionProgress(ref: RefObject<HTMLElement | null>) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setProgress(1);
+      return;
+    }
+
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const travel = Math.max(vh * 0.35, el.offsetHeight - vh);
+      // Begin while section is still entering; finish mid sticky-scroll.
+      const startTop = vh * 0.72;
+      const next = clamp01((startTop - rect.top) / (startTop + travel * 0.7));
+      setProgress((prev) => (Math.abs(prev - next) < 0.002 ? prev : next));
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [ref]);
+
+  return progress;
+}
 
 function HomePageContent() {
   const { t } = useLocale();
   const [previewDate, setPreviewDate] = useState(() => new Date());
+  const buildRef = useRef<HTMLElement>(null);
+  const progress = useSectionProgress(buildRef);
+
+  const eyebrowT = easeOutCubic(stage(progress, 0, 0.35));
+  const titleT = easeOutCubic(stage(progress, 0.08, 0.48));
+  const calendarT = easeOutCubic(stage(progress, 0.18, 0.88));
+
+  const eyebrowStyle: CSSProperties = {
+    opacity: eyebrowT,
+    transform: `translate3d(0, ${(1 - eyebrowT) * 18}px, 0)`,
+  };
+
+  const titleStyle: CSSProperties = {
+    opacity: titleT,
+    transform: `translate3d(0, ${(1 - titleT) * 26}px, 0)`,
+  };
+
+  const tilt = (1 - calendarT) * 42;
+  const calendarStyle: CSSProperties = {
+    opacity: 0.2 + calendarT * 0.8,
+    transform: `perspective(1100px) translate3d(0, ${(1 - calendarT) * 64}px, ${(1 - calendarT) * -120}px) rotateX(${tilt}deg) scale(${0.9 + calendarT * 0.1})`,
+  };
 
   return (
-    <div className="relative flex min-h-full flex-1 flex-col">
+    <div className="relative flex min-h-full flex-1 flex-col bg-[#0f0d0c]">
       <section className="relative flex min-h-dvh flex-col overflow-hidden">
         <Image
           src="/images/fuji-hero.jpg"
@@ -29,21 +104,23 @@ function HomePageContent() {
         />
         <div
           aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,8,10,0.4)_0%,rgba(8,8,10,0.22)_38%,rgba(8,8,10,0.58)_100%)]"
+          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,8,10,0.4)_0%,rgba(8,8,10,0.22)_38%,rgba(8,8,10,0.58)_78%,rgba(15,13,12,1)_100%)]"
         />
         <NightStars />
 
         <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
           <div className="flex items-center gap-3">
-            <Image
-              src="/yaku-logo.png"
-              alt="Yaku"
-              width={40}
-              height={52}
-              className="h-10 w-auto drop-shadow-[0_4px_16px_rgba(0,0,0,0.45)]"
-              priority
-            />
-            <p className="font-display text-xl tracking-wide text-white">
+            <div className="overflow-hidden rounded-[1.15rem] shadow-[0_10px_30px_rgba(0,0,0,0.28)] ring-1 ring-white/20">
+              <Image
+                src="/yaku-logo.png"
+                alt="Yaku"
+                width={40}
+                height={52}
+                className="h-10 w-auto"
+                priority
+              />
+            </div>
+            <p className="font-display text-xl font-normal tracking-[0.06em] text-white/90">
               Yaku
             </p>
           </div>
@@ -58,10 +135,17 @@ function HomePageContent() {
               <Icon name="list" className="h-3.5 w-3.5 text-white/70" />
               <span>{t.viewBookings}</span>
             </Link>
-            <IslandPill className="hidden bg-black/55 md:inline-flex">
-              <span className="h-2 w-2 rounded-full bg-[#30d158]" />
-              <span>{t.openSource}</span>
-            </IslandPill>
+            <a
+              href="https://github.com/canyando4699-pixel/yaku"
+              target="_blank"
+              rel="noreferrer"
+              className={[
+                islandClass("islandMuted", "sm"),
+                "inline-flex",
+              ].join(" ")}
+            >
+              <span>GitHub</span>
+            </a>
             <LanguageSwitcher />
           </div>
         </header>
@@ -113,21 +197,52 @@ function HomePageContent() {
         </main>
       </section>
 
-      <section className="relative bg-[#0f0d0c] px-6 py-20 md:px-10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-10">
-          <div className="text-center">
-            <p className="text-sm tracking-[0.2em] text-[#ff6b5e] uppercase">
-              {t.pickDate}
-            </p>
-            <h2 className="mt-3 font-display text-3xl text-white md:text-4xl">
-              {t.badgeFeatures}
-            </h2>
-          </div>
-          <BookingCalendar
-            selected={previewDate}
-            onSelect={setPreviewDate}
-            isDayEnabled={isBookableDay}
+      <section
+        ref={buildRef}
+        className="relative min-h-[145vh] bg-[#0f0d0c]"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[linear-gradient(180deg,rgba(15,13,12,0)_0%,rgba(15,13,12,1)_100%)]"
+        />
+        <div className="sticky top-0 flex min-h-dvh items-center justify-center px-6 py-16 md:px-10">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-70"
+            style={{
+              background: `radial-gradient(ellipse at 50% ${28 + calendarT * 18}%, rgba(225,6,0,${0.08 + calendarT * 0.12}), transparent 58%)`,
+            }}
           />
+
+          <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-10">
+            <div className="text-center will-change-transform">
+              <p
+                className="text-sm tracking-[0.2em] text-[#ff6b5e] uppercase"
+                style={eyebrowStyle}
+              >
+                {t.pickDate}
+              </p>
+              <h2
+                className="mt-3 font-display text-3xl text-white md:text-4xl"
+                style={titleStyle}
+              >
+                {t.badgeFeatures}
+              </h2>
+            </div>
+
+            <div className="yaku-calendar-stage w-full max-w-[360px]">
+              <div
+                className="will-change-transform [transform-style:preserve-3d]"
+                style={calendarStyle}
+              >
+                <BookingCalendar
+                  selected={previewDate}
+                  onSelect={setPreviewDate}
+                  isDayEnabled={isBookableDay}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>

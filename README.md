@@ -6,7 +6,22 @@
 
 <p align="center">Open-source scheduling — a lightweight alternative to Calendly.</p>
 
+<p align="center">
+  <a href="https://github.com/canyando4699-pixel/yaku">GitHub</a>
+</p>
+
 **約 (yaku)** means agreement / appointment / a promise kept.
+
+## Preview
+
+### Hero
+![Yaku hero — Fuji night with 約 brand lockup](docs/screenshots/hero.png)
+
+### Calendar section
+![Yaku calendar preview](docs/screenshots/calendar.png)
+
+### Demo booking flow
+![Yaku demo booking — date and time](docs/screenshots/demo.png)
 
 ## Tagline
 
@@ -16,12 +31,12 @@ Yaku turns open time into real appointments. Lightweight, open source, self-host
 
 ## Status
 
-Early MVP. Planned:
+Early MVP:
 
-- Public booking link
-- Availability (weekdays, duration)
-- Booking with name / email
-- Simple dashboard
+- Public demo booking link (`/b/demo`)
+- Weekday availability + 30-min slots
+- Booking with name / email (+ `.ics` download)
+- Simple host list (`/host`, localStorage)
 
 ## Develop
 
