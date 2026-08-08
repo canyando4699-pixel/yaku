@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { BookingCalendar } from "@/components/BookingCalendar";
 
 export default function Home() {
   return (
@@ -48,14 +49,7 @@ export default function Home() {
         </div>
 
         <div className="shrink-0">
-          <Image
-            src="/yaku-logo.png"
-            alt="Yaku logo — origami crane, rising sun, and the kanji 約"
-            width={420}
-            height={540}
-            className="h-auto w-[260px] drop-shadow-sm md:w-[340px]"
-            priority
-          />
+          <BookingCalendar />
         </div>
       </main>
     </div>
