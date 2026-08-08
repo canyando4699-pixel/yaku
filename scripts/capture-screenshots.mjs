@@ -34,7 +34,7 @@ try {
   // Wait for wordmark fade-in (~3.9s) + paint
   await page.waitForSelector(".yaku-wordmark", { timeout: 15_000 });
   await new Promise((r) => setTimeout(r, 4500));
-  await shot(page, "hero.png");
+  await shot(page, "hero-2026-08.png");
 
   // Bring calendar section into view and force the reveal styles for a clean shot
   await page.evaluate(() => {
@@ -50,7 +50,7 @@ try {
     });
   });
   await new Promise((r) => setTimeout(r, 400));
-  await shot(page, "calendar.png");
+  await shot(page, "calendar-2026-08.png");
 
   await page.goto(BASE + "/b/demo", {
     waitUntil: "networkidle0",
@@ -62,7 +62,7 @@ try {
   await page.reload({ waitUntil: "networkidle0", timeout: 60_000 });
   await page.waitForSelector("h1", { timeout: 15_000 });
   await new Promise((r) => setTimeout(r, 1200));
-  await shot(page, "demo.png");
+  await shot(page, "demo-2026-08.png");
 } finally {
   await browser.close();
 }
