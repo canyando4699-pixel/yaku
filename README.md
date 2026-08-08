@@ -15,13 +15,13 @@
 ## Preview
 
 ### Hero
-![Yaku hero — Fuji night with 約 brand lockup](docs/screenshots/hero-2026-08.png)
+![Yaku hero — Fuji night with 約 brand lockup](docs/screenshots/hero-en.png)
 
 ### Calendar section
-![Yaku calendar preview on the landing page](docs/screenshots/calendar-2026-08.png)
+![Yaku calendar preview on the landing page](docs/screenshots/calendar-en.png)
 
 ### Demo booking flow
-![Yaku demo booking — event type, date, and time](docs/screenshots/demo-2026-08.png)
+![Yaku demo booking — event type, date, and time](docs/screenshots/demo-en.png)
 
 ### Host office — schedule board
 ![Yaku host schedule board with weekly bookings](docs/screenshots/host-schedule.png)
