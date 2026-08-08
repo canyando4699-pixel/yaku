@@ -62,7 +62,7 @@ export const messages: Record<Locale, Messages> = {
   de: {
     openSource: "Open Source",
     language: "Sprache",
-    eyebrow: "約 — ein Versprechen",
+    eyebrow: "ein Versprechen",
     headlineLine1: "Ein Termin.",
     headlineLine2: "Ohne Ballast.",
     subcopy:
@@ -100,7 +100,7 @@ export const messages: Record<Locale, Messages> = {
   en: {
     openSource: "Open Source",
     language: "Language",
-    eyebrow: "約 — a promise",
+    eyebrow: "a promise",
     headlineLine1: "One appointment.",
     headlineLine2: "No bloat.",
     subcopy:
@@ -138,7 +138,7 @@ export const messages: Record<Locale, Messages> = {
   ja: {
     openSource: "オープンソース",
     language: "言語",
-    eyebrow: "約 — やくそく",
+    eyebrow: "やくそく",
     headlineLine1: "ひとつの約束。",
     headlineLine2: "余分なものはなし。",
     subcopy:
