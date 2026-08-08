@@ -217,7 +217,7 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
         {step === "schedule" ? (
           <div className="grid items-start gap-10 md:grid-cols-[360px_1fr]">
             <div className="mx-auto w-full max-w-[360px]">
-              <p className="mb-3 flex items-center justify-center gap-2 text-sm font-medium text-white md:justify-start">
+              <p className="mb-3 flex items-center justify-center gap-2 px-5 text-sm font-medium text-white md:justify-start">
                 <Icon name="calendar" className="h-4 w-4 text-accent" />
                 {t.pickDate}
               </p>
