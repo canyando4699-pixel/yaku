@@ -19,12 +19,14 @@ export function getAvailableSlots(
   date: Date,
   now = new Date(),
   excludeBookingId?: string,
+  options?: { skipTakenCheck?: boolean },
 ): string[] {
   if (!isBookableDay(date, host, now)) return [];
 
   const slots: string[] = [];
   const startMinutes = host.windowStartMinutes;
   const endMinutes = host.windowEndMinutes;
+  const skipTakenCheck = options?.skipTakenCheck ?? false;
 
   for (
     let minutes = startMinutes;
@@ -44,7 +46,9 @@ export function getAvailableSlots(
     if (startsAt.getTime() <= now.getTime()) continue;
 
     const iso = startsAt.toISOString();
-    if (isSlotTaken(host.slug, iso, excludeBookingId)) continue;
+    if (!skipTakenCheck && isSlotTaken(host.slug, iso, excludeBookingId)) {
+      continue;
+    }
     slots.push(iso);
   }
 

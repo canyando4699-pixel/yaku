@@ -56,8 +56,10 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setHydrated(true);
     const loaded = loadHostProfile(initialHost.slug);
     setHost(loaded);
     setDurationMinutes(
@@ -76,10 +78,19 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
     [host, durationMinutes],
   );
 
-  const slots = useMemo(
-    () => getAvailableSlots(activeHost, selectedDate),
-    [activeHost, selectedDate],
-  );
+  const slots = useMemo(() => {
+    if (!hydrated) {
+      const dayStart = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+      );
+      return getAvailableSlots(activeHost, selectedDate, dayStart, undefined, {
+        skipTakenCheck: true,
+      });
+    }
+    return getAvailableSlots(activeHost, selectedDate);
+  }, [activeHost, selectedDate, hydrated]);
 
   const dateFormatter = useMemo(
     () =>
@@ -141,7 +152,7 @@ export function BookingFlow({ host: initialHost }: { host: HostProfile }) {
         alt=""
         fill
         priority
-        quality={92}
+        quality={75}
         sizes="100vw"
         className="pointer-events-none object-cover object-center"
         aria-hidden
