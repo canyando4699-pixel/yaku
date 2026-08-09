@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { OfficeChaseRing } from "@/components/booking/OfficeChaseRing";
 import { Icon } from "@/components/ui/Icon";
 import { IslandButton, IslandPill, islandClass } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
@@ -207,7 +208,10 @@ export function BookingFlow({
   }, [guestTimezone, host.timezone]);
 
   return (
-    <div className="relative flex min-h-full flex-1 flex-col bg-[#0a0a0a]">
+    <div
+      className="office-shell relative flex min-h-full flex-1 flex-col"
+      data-theme="dark"
+    >
       <Image
         src="/images/sensoji-night.jpg"
         alt=""
@@ -220,150 +224,161 @@ export function BookingFlow({
       />
       <div
         aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,8,10,0.4)_0%,rgba(8,8,10,0.22)_40%,rgba(8,8,10,0.55)_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,8,10,0.72)_0%,rgba(8,8,10,0.62)_45%,rgba(8,8,10,0.78)_100%)]"
       />
 
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
         <Link
           href={fromHost ? "/host" : "/"}
-          className="font-display text-xl tracking-wide text-white"
+          className="font-display text-xl tracking-wide text-[color:var(--office-text)]"
         >
           <span className="mr-2 text-accent">約</span>
           Yaku
         </Link>
         <div className="flex items-center gap-2.5">
           {fromHost ? (
-            <Link href="/host" className={islandClass("islandMuted", "sm")}>
-              <Icon name="chevronLeft" className="h-3.5 w-3.5 text-white/70" />
+            <Link
+              href="/host"
+              className={`${islandClass("islandMuted", "sm")} office-glass-btn`}
+            >
+              <Icon name="chevronLeft" className="h-3.5 w-3.5 opacity-70" />
               {t.backToDashboard}
             </Link>
           ) : (
-            <IslandPill className="hidden sm:inline-flex">
+            <IslandPill className="office-liquid-glass hidden sm:inline-flex">
               <span className="h-2 w-2 rounded-full bg-[#ff9f0a]" />
               <span>{t.demoOnly}</span>
             </IslandPill>
           )}
-          <LanguageSwitcher />
+          <LanguageSwitcher className="office-glass-btn" />
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 pb-16 md:px-10">
-        <div className="mb-8 text-center">
-          <IslandPill className="mb-4">
-            <Icon name="user" className="h-3.5 w-3.5 text-white/70" />
-            <span>
-              {t.bookingWith} {host.displayName}
-            </span>
-          </IslandPill>
-          <h1 className="mt-2 font-display text-3xl text-white md:text-4xl">
-            {eventType.title}
-          </h1>
-
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-            {host.eventTypes.map((et) => {
-              const active = et.id === eventType.id;
-              return (
-                <button
-                  key={et.id}
-                  type="button"
-                  onClick={() => {
-                    setEventType(et);
-                    setSelectedSlot(null);
-                    setError(null);
-                  }}
-                  className={[
-                    "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition active:scale-[0.98]",
-                    active
-                      ? "bg-accent text-white shadow-[0_10px_28px_rgba(225,6,0,0.35)]"
-                      : "bg-[#111111] text-white/85 shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:bg-black",
-                  ].join(" ")}
-                >
-                  <Icon name="clock" className="h-4 w-4" />
-                  {et.title} · {et.durationMinutes} min
-                </button>
-              );
-            })}
-          </div>
-
-          <label className="mt-5 inline-flex flex-col items-center gap-1 text-sm text-white/70">
-            <span>{t.guestTimezoneLabel}</span>
-            <select
-              value={guestTimezone}
-              onChange={(e) => setGuestTimezone(e.target.value)}
-              className="rounded-full border-0 bg-[#111111] px-4 py-2 text-white outline-none ring-1 ring-white/15"
-            >
-              {tzOptions.map((tz) => (
-                <option key={tz} value={tz} className="bg-[#111111]">
-                  {tz}
-                  {tz === host.timezone ? ` (${t.hostTimezoneShort})` : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center px-5 pb-12 md:px-8">
         {step === "schedule" ? (
-          <div className="grid items-start gap-10 md:grid-cols-[360px_1fr]">
-            <div className="mx-auto w-full max-w-[360px]">
-              <p className="mb-3 flex items-center justify-start gap-2 pl-8 text-sm font-medium text-white">
-                <Icon name="calendar" className="h-4 w-4 text-accent" />
-                {t.pickDate}
-              </p>
-              <BookingCalendar
-                selected={selectedDate}
-                onSelect={(date) => {
-                  setSelectedDate(date);
-                  setSelectedSlot(null);
-                }}
-                isDayEnabled={(date) => isBookableDay(date, activeHost)}
-              />
-            </div>
+          <div className="flex w-full flex-col items-stretch gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+            <aside
+              className="hidden w-full max-w-[240px] shrink-0 lg:block"
+              aria-hidden
+            />
+            <div className="office-panel office-ringed booking-card w-full max-w-3xl overflow-hidden rounded-[1.5rem] p-0 lg:ml-auto">
+            <OfficeChaseRing />
+            <div className="relative z-[1]">
+              <div className="border-b border-[color:var(--office-border)] px-4 py-3.5 md:px-5 md:py-4">
+                <IslandPill className="office-liquid-glass !px-2.5 !py-1 text-xs">
+                  <Icon name="user" className="h-3 w-3 opacity-70" />
+                  <span>
+                    {t.bookingWith} {host.displayName}
+                  </span>
+                </IslandPill>
+                <h1 className="mt-2 font-display text-xl text-[color:var(--office-text)] md:text-2xl">
+                  {eventType.title}
+                </h1>
 
-            <div>
-              <p className="mb-3 flex items-center justify-start gap-2 pl-5 text-sm font-medium text-white">
-                <Icon name="clock" className="h-4 w-4 text-accent" />
-                {t.pickTime}
-              </p>
-              <IslandPill className="mb-4 bg-[#1c1c1e]">
-                {dateFormatter.format(selectedDate)}
-              </IslandPill>
-              {slots.length === 0 ? (
-                <p className="text-white/65">{t.noSlots}</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-                  {slots.map((slot) => {
-                    const active = slot === selectedSlot;
+                <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                  {host.eventTypes.map((et) => {
+                    const active = et.id === eventType.id;
                     return (
                       <button
-                        key={slot}
+                        key={et.id}
                         type="button"
-                        onClick={() => setSelectedSlot(slot)}
+                        onClick={() => {
+                          setEventType(et);
+                          setSelectedSlot(null);
+                          setError(null);
+                        }}
                         className={[
-                          "rounded-full px-3 py-3 text-sm font-medium transition active:scale-[0.98]",
-                          active
-                            ? "bg-accent text-white shadow-[0_10px_28px_rgba(225,6,0,0.35)]"
-                            : "bg-[#111111] text-white shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:bg-black",
+                          "booking-slot inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition active:scale-[0.98]",
+                          active ? "booking-slot-active" : "",
                         ].join(" ")}
                       >
-                        {timeFormatter.format(new Date(slot))}
+                        <Icon name="clock" className="h-3.5 w-3.5" />
+                        {et.title} · {et.durationMinutes} min
                       </button>
                     );
                   })}
                 </div>
-              )}
 
-              <IslandButton
-                type="button"
-                variant="accent"
-                size="lg"
-                disabled={!selectedSlot}
-                onClick={() => setStep("details")}
-                className="mt-8 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Icon name="user" className="h-4 w-4" />
-                {t.yourDetails}
-                <Icon name="arrowRight" className="h-4 w-4" />
-              </IslandButton>
+                <label className="office-muted mt-3 flex flex-wrap items-center gap-2 text-xs">
+                  <span>{t.guestTimezoneLabel}</span>
+                  <select
+                    value={guestTimezone}
+                    onChange={(e) => setGuestTimezone(e.target.value)}
+                    className="office-input rounded-full border-0 px-3 py-1.5 text-xs outline-none"
+                  >
+                    {tzOptions.map((tz) => (
+                      <option key={tz} value={tz} className="office-option">
+                        {tz}
+                        {tz === host.timezone
+                          ? ` (${t.hostTimezoneShort})`
+                          : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div className="grid items-start gap-5 px-4 py-4 md:grid-cols-[260px_1fr] md:gap-6 md:px-5 md:py-5">
+                <div className="w-full">
+                  <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
+                    <Icon name="calendar" className="h-3.5 w-3.5 text-accent" />
+                    {t.pickDate}
+                  </p>
+                  <BookingCalendar
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      setSelectedDate(date);
+                      setSelectedSlot(null);
+                    }}
+                    isDayEnabled={(date) => isBookableDay(date, activeHost)}
+                    variant="embedded"
+                  />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
+                    <Icon name="clock" className="h-3.5 w-3.5 text-accent" />
+                    {t.pickTime}
+                  </p>
+                  <IslandPill className="office-liquid-glass mb-3 !px-2.5 !py-1 text-xs">
+                    {dateFormatter.format(selectedDate)}
+                  </IslandPill>
+                  {slots.length === 0 ? (
+                    <p className="office-muted text-xs">{t.noSlots}</p>
+                  ) : (
+                    <div className="grid max-h-[280px] grid-cols-3 gap-1.5 overflow-y-auto pr-0.5 sm:grid-cols-4">
+                      {slots.map((slot) => {
+                        const active = slot === selectedSlot;
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => setSelectedSlot(slot)}
+                            className={[
+                              "booking-slot rounded-full px-2 py-2 text-xs font-medium transition active:scale-[0.98]",
+                              active ? "booking-slot-active" : "",
+                            ].join(" ")}
+                          >
+                            {timeFormatter.format(new Date(slot))}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={!selectedSlot}
+                    onClick={() => setStep("details")}
+                    className="office-glass-cta mt-5 !h-9 !w-auto !px-4 !text-xs disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Icon name="user" className="h-3.5 w-3.5" />
+                    {t.yourDetails}
+                    <Icon name="arrowRight" className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
             </div>
           </div>
         ) : null}
@@ -371,91 +386,103 @@ export function BookingFlow({
         {step === "details" && selectedSlot ? (
           <form
             onSubmit={submitBooking}
-            className="mx-auto w-full max-w-md rounded-[2rem] bg-[#111111] p-6 text-white shadow-[0_24px_80px_rgba(0,0,0,0.25)]"
+            className="office-form office-ringed booking-card relative ml-auto w-full max-w-sm overflow-hidden p-5 md:p-6"
           >
-            <IslandPill className="bg-[#1c1c1e]">
-              <Icon name="calendar" className="h-3.5 w-3.5 text-white/70" />
-              <span>
-                {dateFormatter.format(new Date(selectedSlot))} ·{" "}
-                {timeFormatter.format(new Date(selectedSlot))}
-              </span>
-            </IslandPill>
-            <h2 className="mt-4 font-display text-2xl text-white">
-              {t.yourDetails}
-            </h2>
-
-            <label className="mt-6 block text-sm text-white/80">
-              <span className="mb-1 inline-flex items-center gap-2">
-                <Icon name="user" className="h-3.5 w-3.5" />
-                {t.name}
-              </span>
-              <input
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 placeholder:text-white/35 focus:ring-accent"
-              />
-            </label>
-
-            <label className="mt-4 block text-sm text-white/80">
-              <span className="mb-1 inline-flex items-center gap-2">
-                <Icon name="mail" className="h-3.5 w-3.5" />
-                {t.email}
-              </span>
-              <input
-                required
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 placeholder:text-white/35 focus:ring-accent"
-              />
-            </label>
-
-            <label className="mt-4 block text-sm text-white/80">
-              {t.note}{" "}
-              <span className="text-white/40">({t.noteOptional})</span>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                rows={3}
-                className="mt-1 w-full resize-none rounded-[1.25rem] border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 placeholder:text-white/35 focus:ring-accent"
-              />
-            </label>
-
-            {host.allowSeries ? (
-              <label className="mt-4 block text-sm text-white/80">
-                {t.seriesCountLabel}
-                <select
-                  value={seriesCount}
-                  onChange={(e) => setSeriesCount(Number(e.target.value))}
-                  className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
-                >
-                  {seriesOptions(host.maxSeriesCount).map((n) => (
-                    <option key={n} value={n} className="bg-[#111111]">
-                      {n === 1 ? t.seriesOnce : t.seriesWeekly.replace("{n}", String(n))}
-                    </option>
-                  ))}
-                </select>
-                <span className="mt-1 block text-xs text-white/45">
-                  {t.seriesHint}
+            <OfficeChaseRing />
+            <div className="relative z-[1]">
+              <IslandPill className="office-liquid-glass !px-2.5 !py-1 text-xs">
+                <Icon name="calendar" className="h-3 w-3 opacity-70" />
+                <span>
+                  {dateFormatter.format(new Date(selectedSlot))} ·{" "}
+                  {timeFormatter.format(new Date(selectedSlot))}
                 </span>
+              </IslandPill>
+              <h2 className="mt-3 font-display text-xl text-[color:var(--office-text)]">
+                {t.yourDetails}
+              </h2>
+
+              <label className="office-field mt-4 block text-xs">
+                <span className="mb-1 inline-flex items-center gap-1.5">
+                  <Icon name="user" className="h-3 w-3" />
+                  {t.name}
+                </span>
+                <input
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
+                />
               </label>
-            ) : null}
 
-            {error ? <p className="mt-3 text-sm text-[#ff453a]">{error}</p> : null}
+              <label className="office-field mt-3 block text-xs">
+                <span className="mb-1 inline-flex items-center gap-1.5">
+                  <Icon name="mail" className="h-3 w-3" />
+                  {t.email}
+                </span>
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
+                />
+              </label>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <IslandButton
-                type="button"
-                variant="islandMuted"
-                onClick={() => setStep("schedule")}
-              >
-                {t.back}
-              </IslandButton>
-              <IslandButton type="submit" variant="accent">
-                <Icon name="check" className="h-4 w-4" />
-                {t.confirmBooking}
-              </IslandButton>
+              <label className="office-field mt-3 block text-xs">
+                {t.note}{" "}
+                <span className="office-muted">({t.noteOptional})</span>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={3}
+                  className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
+                />
+              </label>
+
+              {host.allowSeries ? (
+                <label className="office-field mt-4 block text-sm">
+                  {t.seriesCountLabel}
+                  <select
+                    value={seriesCount}
+                    onChange={(e) => setSeriesCount(Number(e.target.value))}
+                    className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none focus:ring-accent"
+                  >
+                    {seriesOptions(host.maxSeriesCount).map((n) => (
+                      <option key={n} value={n} className="office-option">
+                        {n === 1
+                          ? t.seriesOnce
+                          : t.seriesWeekly.replace("{n}", String(n))}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="office-muted mt-1 block text-xs">
+                    {t.seriesHint}
+                  </span>
+                </label>
+              ) : null}
+
+              {error ? (
+                <p className="mt-3 text-sm text-[#ff453a]">{error}</p>
+              ) : null}
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <IslandButton
+                  type="button"
+                  variant="island"
+                  className="office-glass-btn"
+                  onClick={() => setStep("schedule")}
+                >
+                  {t.back}
+                </IslandButton>
+                <IslandButton
+                  type="submit"
+                  variant="island"
+                  className="office-glass-btn"
+                >
+                  <Icon name="check" className="h-4 w-4" />
+                  {t.confirmBooking}
+                </IslandButton>
+              </div>
             </div>
           </form>
         ) : null}

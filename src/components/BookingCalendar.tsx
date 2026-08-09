@@ -38,12 +38,14 @@ type BookingCalendarProps = {
   selected: Date;
   onSelect: (date: Date) => void;
   isDayEnabled?: (date: Date) => boolean;
+  variant?: "hero" | "embedded";
 };
 
 export function BookingCalendar({
   selected,
   onSelect,
   isDayEnabled,
+  variant = "hero",
 }: BookingCalendarProps) {
   const { locale, t } = useLocale();
   const [visibleMonth, setVisibleMonth] = useState(() =>
@@ -59,6 +61,73 @@ export function BookingCalendar({
       }).format(visibleMonth),
     [locale, visibleMonth],
   );
+
+  if (variant === "embedded") {
+    return (
+      <div className="relative w-full max-w-[260px] overflow-hidden rounded-[1rem] border border-[color:var(--office-border)] bg-[color:var(--office-surface-soft)] px-3 pb-3 pt-2.5">
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            type="button"
+            aria-label={t.prevMonth}
+            onClick={() => setVisibleMonth((m) => addMonths(m, -1))}
+            className="office-icon-btn flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-[color:var(--office-nav-hover)]"
+          >
+            <Icon name="chevronLeft" className="h-3.5 w-3.5" />
+          </button>
+          <p className="text-sm font-semibold tracking-wide text-[color:var(--office-text)]">
+            {monthLabel}
+          </p>
+          <button
+            type="button"
+            aria-label={t.nextMonth}
+            onClick={() => setVisibleMonth((m) => addMonths(m, 1))}
+            className="office-icon-btn flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-[color:var(--office-nav-hover)]"
+          >
+            <Icon name="chevronRight" className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <div className="office-muted mb-1.5 grid grid-cols-7 gap-y-1 text-center text-[10px] font-medium tracking-[0.12em]">
+          {t.weekdays.map((day) => (
+            <span key={day}>{day}</span>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-y-0.5">
+          {days.map((day) => {
+            const inMonth = day.getMonth() === visibleMonth.getMonth();
+            const isSelected = sameDay(day, selected);
+            const enabled = isDayEnabled ? isDayEnabled(day) : true;
+
+            return (
+              <button
+                key={day.toISOString()}
+                type="button"
+                disabled={!enabled}
+                onClick={() => {
+                  onSelect(day);
+                  if (!inMonth) setVisibleMonth(startOfMonth(day));
+                }}
+                className={[
+                  "mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs transition",
+                  !enabled
+                    ? "cursor-not-allowed opacity-20"
+                    : inMonth
+                      ? "text-[color:var(--office-text)] hover:bg-[color:var(--office-nav-hover)]"
+                      : "office-muted hover:bg-[color:var(--office-nav-hover)]",
+                  isSelected && enabled
+                    ? "office-chip-active font-semibold"
+                    : "",
+                ].join(" ")}
+              >
+                {day.getDate()}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full max-w-[360px]">

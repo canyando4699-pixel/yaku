@@ -100,6 +100,7 @@ export function ReschedulePicker({
               setError(null);
             }}
             isDayEnabled={(date) => isBookableDay(date, host)}
+            variant="embedded"
           />
         </div>
         <div>

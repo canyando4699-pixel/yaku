@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { OfficeChaseRing } from "@/components/booking/OfficeChaseRing";
 import { IslandButton } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { defaultHostProfile } from "@/lib/booking/demo";
@@ -121,10 +122,12 @@ export function HostAvailability({
   return (
     <form
       onSubmit={handleSave}
-      className="rounded-[2rem] bg-[#111111] p-6 text-white shadow-[0_20px_60px_rgba(0,0,0,0.18)] md:p-7"
+      className="office-form office-ringed p-6 md:p-7"
     >
-      <h2 className="font-display text-2xl text-white">{t.availabilityTitle}</h2>
-      <p className="mt-2 text-sm text-white/55">{t.availabilityHint}</p>
+      <OfficeChaseRing />
+      <div className="relative z-[1]">
+      <h2 className="font-display text-2xl">{t.availabilityTitle}</h2>
+      <p className="office-muted mt-2 text-sm">{t.availabilityHint}</p>
 
       {message ? (
         <p className="mt-4 rounded-full bg-[#1f8f4e]/20 px-4 py-2 text-sm text-[#7ddea8]">
@@ -133,7 +136,7 @@ export function HostAvailability({
       ) : null}
       {error ? <p className="mt-4 text-sm text-[#ff453a]">{error}</p> : null}
 
-      <label className="mt-6 block text-sm text-white/80">
+      <label className="mt-6 office-field block text-sm">
         {t.displayNameLabel}
         <input
           value={draft.displayName}
@@ -141,11 +144,11 @@ export function HostAvailability({
             setDraft((p) => ({ ...p, displayName: e.target.value }));
             setMessage(null);
           }}
-          className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+          className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
         />
       </label>
 
-      <label className="mt-4 block text-sm text-white/80">
+      <label className="mt-4 office-field block text-sm">
         {t.hostTimezoneLabel}
         <select
           value={draft.timezone}
@@ -153,12 +156,12 @@ export function HostAvailability({
             setDraft((p) => ({ ...p, timezone: e.target.value }));
             setMessage(null);
           }}
-          className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+          className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
         >
           {[draft.timezone, ...COMMON_TIMEZONES]
             .filter((tz, i, arr) => arr.indexOf(tz) === i)
             .map((tz) => (
-              <option key={tz} value={tz} className="bg-[#111111]">
+              <option key={tz} value={tz} className="office-option">
                 {tz}
               </option>
             ))}
@@ -166,7 +169,7 @@ export function HostAvailability({
       </label>
 
       <fieldset className="mt-6">
-        <legend className="text-sm text-white/80">{t.weekdaysLabel}</legend>
+        <legend className="office-field text-sm">{t.weekdaysLabel}</legend>
         <div className="mt-3 flex flex-wrap gap-2">
           {WEEKDAY_ORDER.map((day) => {
             const active = draft.weekdays.includes(day);
@@ -177,9 +180,7 @@ export function HostAvailability({
                 onClick={() => toggleWeekday(day)}
                 className={[
                   "rounded-full px-3.5 py-2 text-sm font-medium transition",
-                  active
-                    ? "bg-accent text-white"
-                    : "bg-white/10 text-white/70 ring-1 ring-white/10 hover:bg-white/15",
+                  active ? "office-liquid-glass" : "office-chip-idle",
                 ].join(" ")}
               >
                 {t.weekdayNames[day]}
@@ -190,7 +191,7 @@ export function HostAvailability({
       </fieldset>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <label className="block text-sm text-white/80">
+        <label className="office-field block text-sm">
           {t.windowStartLabel}
           <select
             value={draft.windowStartMinutes}
@@ -201,19 +202,19 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
           >
             {times
               .filter((m) => m < 24 * 60)
               .map((m) => (
-                <option key={m} value={m} className="bg-[#111111]">
+                <option key={m} value={m} className="office-option">
                   {formatMinutesAsTime(m)}
                 </option>
               ))}
           </select>
         </label>
 
-        <label className="block text-sm text-white/80">
+        <label className="office-field block text-sm">
           {t.windowEndLabel}
           <select
             value={draft.windowEndMinutes}
@@ -224,12 +225,12 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
           >
             {times
               .filter((m) => m > 0)
               .map((m) => (
-                <option key={m} value={m} className="bg-[#111111]">
+                <option key={m} value={m} className="office-option">
                   {formatMinutesAsTime(m)}
                 </option>
               ))}
@@ -238,7 +239,7 @@ export function HostAvailability({
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <label className="block text-sm text-white/80">
+        <label className="office-field block text-sm">
           {t.bufferBeforeLabel}
           <select
             value={draft.bufferBeforeMinutes}
@@ -249,16 +250,16 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
           >
             {BUFFER_OPTIONS.map((m) => (
-              <option key={m} value={m} className="bg-[#111111]">
+              <option key={m} value={m} className="office-option">
                 {m} min
               </option>
             ))}
           </select>
         </label>
-        <label className="block text-sm text-white/80">
+        <label className="office-field block text-sm">
           {t.bufferAfterLabel}
           <select
             value={draft.bufferAfterMinutes}
@@ -269,16 +270,16 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
           >
             {BUFFER_OPTIONS.map((m) => (
-              <option key={m} value={m} className="bg-[#111111]">
+              <option key={m} value={m} className="office-option">
                 {m} min
               </option>
             ))}
           </select>
         </label>
-        <label className="block text-sm text-white/80">
+        <label className="office-field block text-sm">
           {t.minNoticeLabel}
           <select
             value={draft.minNoticeHours}
@@ -289,16 +290,16 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
           >
             {NOTICE_OPTIONS.map((h) => (
-              <option key={h} value={h} className="bg-[#111111]">
+              <option key={h} value={h} className="office-option">
                 {h === 0 ? t.noticeNone : `${h} h`}
               </option>
             ))}
           </select>
         </label>
-        <label className="block text-sm text-white/80">
+        <label className="office-field block text-sm">
           {t.maxPerDayLabel}
           <select
             value={draft.maxBookingsPerDay}
@@ -309,10 +310,10 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
           >
             {DAILY_MAX_OPTIONS.map((n) => (
-              <option key={n} value={n} className="bg-[#111111]">
+              <option key={n} value={n} className="office-option">
                 {n === 0 ? t.unlimited : String(n)}
               </option>
             ))}
@@ -326,22 +327,22 @@ export function HostAvailability({
           <button
             type="button"
             onClick={addEventType}
-            className="rounded-full bg-white/10 px-3.5 py-2 text-sm text-white/85 ring-1 ring-white/10 hover:bg-white/15"
+            className="office-chip-idle rounded-full px-3.5 py-2 text-sm"
           >
             {t.addEventType}
           </button>
         </div>
-        <p className="mt-1 text-sm text-white/50">{t.eventTypesHint}</p>
+        <p className="office-muted mt-1 text-sm">{t.eventTypesHint}</p>
         <ul className="mt-4 space-y-3">
           {draft.eventTypes.map((et) => (
             <li
               key={et.id}
-              className="grid gap-3 rounded-2xl bg-white/5 p-3 ring-1 ring-white/10 sm:grid-cols-[1fr_120px_auto]"
+              className="office-subcard grid gap-3 rounded-2xl p-3 sm:grid-cols-[1fr_120px_auto]"
             >
               <input
                 value={et.title}
                 onChange={(e) => updateEventType(et.id, { title: e.target.value })}
-                className="rounded-full border-0 bg-white/10 px-4 py-2.5 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+                className="office-input rounded-full border-0 px-4 py-2.5 outline-none ring-1 focus:ring-accent"
                 aria-label={t.eventTitleLabel}
               />
               <select
@@ -351,10 +352,10 @@ export function HostAvailability({
                     durationMinutes: Number(e.target.value),
                   })
                 }
-                className="rounded-full border-0 bg-white/10 px-3 py-2.5 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+                className="office-input rounded-full border-0 px-3 py-2.5 outline-none ring-1 focus:ring-accent"
               >
                 {DURATION_OPTIONS.map((d) => (
-                  <option key={d} value={d} className="bg-[#111111]">
+                  <option key={d} value={d} className="office-option">
                     {d} min
                   </option>
                 ))}
@@ -363,7 +364,7 @@ export function HostAvailability({
                 type="button"
                 onClick={() => removeEventType(et.id)}
                 disabled={draft.eventTypes.length <= 1}
-                className="rounded-full px-3 py-2 text-sm text-white/60 hover:bg-white/10 disabled:opacity-30"
+                className="office-muted rounded-full px-3 py-2 text-sm hover:bg-[color:var(--office-nav-hover)] disabled:opacity-30"
               >
                 {t.removeEventType}
               </button>
@@ -373,7 +374,7 @@ export function HostAvailability({
       </div>
 
       <div className="mt-8 border-t border-white/10 pt-6">
-        <label className="flex items-center gap-3 text-sm text-white/80">
+        <label className="flex items-center gap-3 office-field text-sm">
           <input
             type="checkbox"
             checked={draft.allowSeries}
@@ -386,7 +387,7 @@ export function HostAvailability({
           {t.allowSeriesLabel}
         </label>
         {draft.allowSeries ? (
-          <label className="mt-4 block max-w-xs text-sm text-white/80">
+          <label className="mt-4 block max-w-xs office-field text-sm">
             {t.maxSeriesLabel}
             <select
               value={draft.maxSeriesCount}
@@ -397,10 +398,10 @@ export function HostAvailability({
                 }));
                 setMessage(null);
               }}
-              className="mt-1 w-full rounded-full border-0 bg-white/10 px-4 py-3 text-white outline-none ring-1 ring-white/10 focus:ring-accent"
+              className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
             >
               {SERIES_MAX_OPTIONS.map((n) => (
-                <option key={n} value={n} className="bg-[#111111]">
+                <option key={n} value={n} className="office-option">
                   {n}
                 </option>
               ))}
@@ -409,9 +410,15 @@ export function HostAvailability({
         ) : null}
       </div>
 
-      <IslandButton type="submit" variant="accent" size="lg" className="mt-8">
+      <IslandButton
+        type="submit"
+        variant="island"
+        size="lg"
+        className="office-glass-btn mt-8"
+      >
         {t.saveAvailability}
       </IslandButton>
+      </div>
     </form>
   );
 }

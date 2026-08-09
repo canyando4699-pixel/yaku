@@ -107,14 +107,33 @@ export type Messages = {
   dashList: string;
   dashAvailability: string;
   dashShareLink: string;
+  dashIntegrations: string;
   dashMyActivity: string;
   dashSelectBooking: string;
+  integrationsTitle: string;
+  integrationsHint: string;
+  connectGoogleCalendar: string;
+  connectAppleCalendar: string;
   copyLink: string;
   linkCopied: string;
   prevWeek: string;
   nextWeek: string;
   thisWeek: string;
+  today: string;
+  viewDay: string;
   viewWeek: string;
+  viewMonth: string;
+  viewYear: string;
+  themeLight: string;
+  themeDark: string;
+  agendaToday: string;
+  agendaTomorrow: string;
+  listSearch: string;
+  listActiveBookings: string;
+  listShowing: string;
+  listSortNewest: string;
+  listSortOldest: string;
+  listStatus: string;
   dashWeekCount: string;
   openBookingLink: string;
   backToDashboard: string;
@@ -241,14 +260,34 @@ export const messages: Record<Locale, Messages> = {
     dashList: "Liste",
     dashAvailability: "Verfügbarkeit",
     dashShareLink: "Link teilen",
+    dashIntegrations: "Integrationen",
     dashMyActivity: "Meine Termine",
     dashSelectBooking: "Wähle einen Termin in der Woche.",
+    integrationsTitle: "Kalender verbinden",
+    integrationsHint:
+      "Google- und Apple-Kalender kommen als Nächstes. Noch lokal, ohne Cloud-Sync.",
+    connectGoogleCalendar: "Google Kalender",
+    connectAppleCalendar: "Apple Kalender",
     copyLink: "Link kopieren",
     linkCopied: "Link kopiert",
     prevWeek: "Vorherige Woche",
     nextWeek: "Nächste Woche",
     thisWeek: "Diese Woche",
+    today: "Heute",
+    viewDay: "Tag",
     viewWeek: "Woche",
+    viewMonth: "Monat",
+    viewYear: "Jahr",
+    themeLight: "Hell",
+    themeDark: "Dunkel",
+    agendaToday: "Heute",
+    agendaTomorrow: "Morgen",
+    listSearch: "Suchen",
+    listActiveBookings: "Bestätigte Termine",
+    listShowing: "{from}–{to} von {total}",
+    listSortNewest: "Neueste",
+    listSortOldest: "Älteste",
+    listStatus: "Status",
     dashWeekCount: "{n} Termine diese Woche",
     openBookingLink: "Buchungslink öffnen",
     backToDashboard: "Zurück zum Dashboard",
@@ -373,14 +412,34 @@ export const messages: Record<Locale, Messages> = {
     dashList: "List",
     dashAvailability: "Availability",
     dashShareLink: "Share link",
+    dashIntegrations: "Integrations",
     dashMyActivity: "My activity",
     dashSelectBooking: "Select a booking in the week view.",
+    integrationsTitle: "Connect calendars",
+    integrationsHint:
+      "Google and Apple Calendar come next. Still local — no cloud sync yet.",
+    connectGoogleCalendar: "Google Calendar",
+    connectAppleCalendar: "Apple Calendar",
     copyLink: "Copy link",
     linkCopied: "Link copied",
     prevWeek: "Previous week",
     nextWeek: "Next week",
     thisWeek: "This week",
+    today: "Today",
+    viewDay: "Day",
     viewWeek: "Week",
+    viewMonth: "Month",
+    viewYear: "Year",
+    themeLight: "Light",
+    themeDark: "Dark",
+    agendaToday: "Today",
+    agendaTomorrow: "Tomorrow",
+    listSearch: "Search",
+    listActiveBookings: "Confirmed bookings",
+    listShowing: "{from}–{to} of {total}",
+    listSortNewest: "Newest",
+    listSortOldest: "Oldest",
+    listStatus: "Status",
     dashWeekCount: "{n} bookings this week",
     openBookingLink: "Open booking link",
     backToDashboard: "Back to dashboard",
@@ -505,14 +564,34 @@ export const messages: Record<Locale, Messages> = {
     dashList: "リスト",
     dashAvailability: "空き時間",
     dashShareLink: "リンク共有",
+    dashIntegrations: "連携",
     dashMyActivity: "マイ予定",
     dashSelectBooking: "週の予定から選択してください。",
+    integrationsTitle: "カレンダー連携",
+    integrationsHint:
+      "Google と Apple カレンダーは次のステップです。まだローカルのみで、クラウド同期はありません。",
+    connectGoogleCalendar: "Google カレンダー",
+    connectAppleCalendar: "Apple カレンダー",
     copyLink: "リンクをコピー",
     linkCopied: "コピーしました",
     prevWeek: "前の週",
     nextWeek: "次の週",
     thisWeek: "今週",
+    today: "今日",
+    viewDay: "日",
     viewWeek: "週",
+    viewMonth: "月",
+    viewYear: "年",
+    themeLight: "ライト",
+    themeDark: "ダーク",
+    agendaToday: "今日",
+    agendaTomorrow: "明日",
+    listSearch: "検索",
+    listActiveBookings: "確定済みの予約",
+    listShowing: "{from}–{to} / {total}",
+    listSortNewest: "新しい順",
+    listSortOldest: "古い順",
+    listStatus: "ステータス",
     dashWeekCount: "今週の予約 {n} 件",
     openBookingLink: "予約リンクを開く",
     backToDashboard: "ダッシュボードに戻る",

@@ -6,7 +6,7 @@ import { IslandButton } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { localeLabels, locales, type Locale } from "@/i18n/messages";
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ className = "" }: { className?: string }) {
   const { locale, setLocale, t } = useLocale();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -41,17 +41,18 @@ export function LanguageSwitcher() {
         type="button"
         size="sm"
         variant="island"
+        className={className}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={t.language}
         onClick={() => setOpen((value) => !value)}
       >
-        <Icon name="globe" className="h-3.5 w-3.5 text-white/80" />
+        <Icon name="globe" className="h-3.5 w-3.5 opacity-80" />
         <span>{localeLabels[locale]}</span>
         <Icon
           name="chevronDown"
           className={[
-            "h-3.5 w-3.5 text-white/55 transition",
+            "h-3.5 w-3.5 opacity-55 transition",
             open ? "rotate-180" : "",
           ].join(" ")}
         />
@@ -61,10 +62,16 @@ export function LanguageSwitcher() {
         <ul
           role="listbox"
           aria-label={t.language}
-          className="absolute right-0 z-20 mt-2 min-w-[10.5rem] overflow-hidden rounded-[1.35rem] bg-[#111111] p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.28)]"
+          className={[
+            "absolute right-0 z-20 mt-2 min-w-[10.5rem] overflow-hidden rounded-[1.35rem] p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.28)]",
+            className.includes("office-glass")
+              ? "office-liquid-glass"
+              : "bg-[#111111]",
+          ].join(" ")}
         >
           {locales.map((code) => {
             const active = code === locale;
+            const glass = className.includes("office-glass");
             return (
               <li key={code} role="option" aria-selected={active}>
                 <button
@@ -73,8 +80,12 @@ export function LanguageSwitcher() {
                   className={[
                     "flex w-full items-center justify-between gap-6 rounded-full px-3.5 py-2.5 text-left text-sm transition",
                     active
-                      ? "bg-white text-ink"
-                      : "text-white/85 hover:bg-white/10",
+                      ? glass
+                        ? "office-liquid-glass"
+                        : "bg-white text-ink"
+                      : glass
+                        ? "opacity-80 hover:bg-white/10"
+                        : "text-white/85 hover:bg-white/10",
                   ].join(" ")}
                 >
                   <span>{localeLabels[code]}</span>

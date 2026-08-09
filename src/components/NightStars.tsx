@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 type Star = {
   left: string;
   top: string;
@@ -7,6 +9,17 @@ type Star = {
   delay: string;
   duration: string;
   opacity: number;
+};
+
+type ShootingStar = {
+  left: string;
+  top: string;
+  delay: string;
+  duration: string;
+  length: number;
+  angle: number;
+  dx: string;
+  dy: string;
 };
 
 /** Subtle star field in the upper sky */
@@ -26,6 +39,40 @@ const STARS: Star[] = [
   { left: "92%", top: "18%", size: 1.5, delay: "1.7s", duration: "3.8s", opacity: 0.55 },
   { left: "5%", top: "22%", size: 1.2, delay: "2.1s", duration: "4.8s", opacity: 0.35 },
   { left: "84%", top: "22%", size: 1.5, delay: "0.8s", duration: "3.9s", opacity: 0.5 },
+];
+
+/** Rare, fast streaks — long idle, ~0.9s visible flight off-frame */
+const SHOOTING: ShootingStar[] = [
+  {
+    left: "-8%",
+    top: "4%",
+    delay: "1.2s",
+    duration: "11s",
+    length: 120,
+    angle: 32,
+    dx: "108vw",
+    dy: "67vw",
+  },
+  {
+    left: "18%",
+    top: "0%",
+    delay: "5.5s",
+    duration: "14s",
+    length: 88,
+    angle: 38,
+    dx: "92vw",
+    dy: "72vw",
+  },
+  {
+    left: "-2%",
+    top: "12%",
+    delay: "9.8s",
+    duration: "13s",
+    length: 68,
+    angle: 28,
+    dx: "100vw",
+    dy: "53vw",
+  },
 ];
 
 export function NightStars() {
@@ -48,6 +95,24 @@ export function NightStars() {
             animationDelay: star.delay,
             animationDuration: star.duration,
           }}
+        />
+      ))}
+      {SHOOTING.map((shot, index) => (
+        <span
+          key={`s${index}`}
+          className="yaku-shooting-star absolute"
+          style={
+            {
+              left: shot.left,
+              top: shot.top,
+              width: shot.length,
+              "--shoot-angle": `${shot.angle}deg`,
+              "--shoot-dx": shot.dx,
+              "--shoot-dy": shot.dy,
+              animationDelay: shot.delay,
+              animationDuration: shot.duration,
+            } as CSSProperties
+          }
         />
       ))}
     </div>
