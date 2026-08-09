@@ -26,6 +26,7 @@ Thumbs.db
 *.p12
 *.key
 .tools/
+.tmp-chrome-ss/
 
 # debug
 npm-debug.log*

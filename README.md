@@ -26,6 +26,9 @@
 ### Host office — schedule board
 ![Yaku host schedule board with weekly bookings](docs/screenshots/host-schedule.png)
 
+### Host office — booking list
+![Yaku host booking list](docs/screenshots/host-list.png)
+
 ### Host office — availability
 ![Yaku host availability, buffers, and event types](docs/screenshots/host-availability.png)
 
