@@ -11,6 +11,181 @@
   --island: #111111;
   --island-elevated: #1c1c1e;
   --island-success: #1f8f4e;
+  --glass-border: rgba(255, 255, 255, 0.28);
+  --glass-text: rgba(255, 255, 255, 0.82);
+  --glass-text-strong: #fff;
+  --glass-bg: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0.08) 42%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  --glass-bg-active: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(255, 255, 255, 0.14) 48%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    0 8px 20px rgba(0, 0, 0, 0.18);
+  --glass-shadow-active:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 10px 24px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.yaku-glass,
+.office-nav-item,
+.office-glass-cta,
+.office-glass-btn,
+.office-theme-glass-btn,
+.office-icon-btn,
+.office-secondary-btn,
+.office-liquid-glass,
+.host-cal-btn,
+.host-cal-view,
+.host-list-search,
+.host-list-sort select,
+.office-count-pill,
+.host-list-page,
+.office-input {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--glass-text);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(18px) saturate(165%);
+  -webkit-backdrop-filter: blur(18px) saturate(165%);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    filter 160ms ease;
+}
+
+button.yaku-glass,
+button.office-nav-item,
+button.office-glass-cta,
+button.office-glass-btn,
+button.office-theme-glass-btn,
+button.office-icon-btn,
+button.office-secondary-btn,
+button.host-cal-btn,
+button.host-cal-view,
+button.host-list-page {
+  cursor: pointer;
+}
+
+button.yaku-glass:hover,
+button.office-nav-item:hover,
+button.office-glass-cta:hover,
+button.office-glass-btn:hover,
+button.office-theme-glass-btn:hover,
+button.office-icon-btn:hover,
+button.office-secondary-btn:hover,
+button.host-cal-btn:hover,
+button.host-cal-view:hover,
+button.host-list-page:hover {
+  transform: translateY(-1px);
+  color: var(--glass-text-strong);
+  border-color: rgba(255, 255, 255, 0.4);
+  filter: brightness(1.06);
+}
+
+button.yaku-glass:active,
+button.office-nav-item:active,
+button.office-glass-cta:active,
+button.office-glass-btn:active,
+button.office-theme-glass-btn:active,
+button.office-icon-btn:active,
+button.office-secondary-btn:active,
+button.host-cal-btn:active,
+button.host-cal-view:active,
+button.host-list-page:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.yaku-glass[data-active="true"],
+.office-nav-item-active,
+.office-theme-glass-btn[data-active="true"],
+.host-cal-view[data-active="true"],
+.host-list-page[data-active="true"] {
+  color: var(--glass-text-strong);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: var(--glass-bg-active);
+  box-shadow: var(--glass-shadow-active);
+}
+
+.yaku-glass-accent {
+  border-color: rgba(225, 6, 0, 0.45) !important;
+  background: linear-gradient(
+    155deg,
+    rgba(225, 6, 0, 0.55) 0%,
+    rgba(225, 6, 0, 0.28) 48%,
+    rgba(225, 6, 0, 0.18) 100%
+  ) !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 10px 28px rgba(225, 6, 0, 0.28) !important;
+}
+
+.yaku-glass-accent:hover {
+  filter: brightness(1.08);
+}
+
+.office-shell[data-theme="light"] .yaku-glass,
+.office-shell[data-theme="light"] .office-nav-item,
+.office-shell[data-theme="light"] .office-glass-cta,
+.office-shell[data-theme="light"] .office-glass-btn,
+.office-shell[data-theme="light"] .office-theme-glass-btn,
+.office-shell[data-theme="light"] .office-icon-btn,
+.office-shell[data-theme="light"] .office-secondary-btn,
+.office-shell[data-theme="light"] .office-liquid-glass,
+.office-shell[data-theme="light"] .host-cal-btn,
+.office-shell[data-theme="light"] .host-cal-view,
+.office-shell[data-theme="light"] .host-list-search,
+.office-shell[data-theme="light"] .host-list-sort select,
+.office-shell[data-theme="light"] .office-count-pill,
+.office-shell[data-theme="light"] .host-list-page,
+.office-shell[data-theme="light"] .office-input,
+.host-cal[data-theme="light"] .host-cal-btn,
+.host-cal[data-theme="light"] .host-cal-view {
+  border-color: rgba(22, 22, 77, 0.1);
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.55) 45%,
+    rgba(245, 247, 255, 0.4) 100%
+  );
+  color: rgba(28, 28, 40, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(16, 24, 40, 0.04),
+    0 8px 18px rgba(16, 24, 40, 0.08);
+}
+
+.office-shell[data-theme="light"] .yaku-glass[data-active="true"],
+.office-shell[data-theme="light"] .office-nav-item-active,
+.office-shell[data-theme="light"] .office-theme-glass-btn[data-active="true"],
+.office-shell[data-theme="light"] .host-cal-view[data-active="true"],
+.office-shell[data-theme="light"] .host-list-page[data-active="true"],
+.host-cal[data-theme="light"] .host-cal-view[data-active="true"] {
+  color: var(--office-text, #1c1c1e);
+  border-color: rgba(22, 22, 77, 0.14);
+  background: linear-gradient(
+    155deg,
+    #fff 0%,
+    rgba(255, 255, 255, 0.78) 50%,
+    rgba(245, 247, 255, 0.65) 100%
+  );
 }
 
 @theme inline {
@@ -426,52 +601,19 @@ body {
 }
 
 .office-nav-item {
-  color: var(--office-muted);
+  color: var(--glass-text);
 }
 
 .office-nav-item:hover {
-  background: var(--office-nav-hover);
-  color: var(--office-text);
+  color: var(--glass-text-strong);
 }
 
 .office-liquid-glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px) saturate(165%);
-  -webkit-backdrop-filter: blur(18px) saturate(165%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 8px 28px rgba(0, 0, 0, 0.16);
-  color: #fff;
-}
-
-.office-shell[data-theme="light"] .office-liquid-glass {
-  background: rgba(255, 255, 255, 0.62);
-  border-color: rgba(255, 255, 255, 0.75);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 8px 24px rgba(16, 24, 40, 0.08);
-  color: var(--office-text);
+  color: var(--glass-text-strong);
 }
 
 .office-nav-item-active {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px) saturate(165%);
-  -webkit-backdrop-filter: blur(18px) saturate(165%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 8px 28px rgba(0, 0, 0, 0.16);
-  color: #fff;
-}
-
-.office-shell[data-theme="light"] .office-nav-item-active {
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(22, 22, 77, 0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 6px 18px rgba(16, 24, 40, 0.06);
-  color: var(--office-text);
+  color: var(--glass-text-strong);
 }
 
 .office-shell[data-theme="dark"] .office-nav-item-active {
@@ -482,14 +624,209 @@ body {
   background: var(--office-surface-soft);
 }
 
+.office-theme-spline {
+  /* Tweak these to frame the Spline toggle inside the glass slot */
+  --spline-frame-w: 118%;
+  --spline-frame-h: 235%;
+  --spline-frame-scale: 1;
+  --spline-frame-x: 50%;
+  --spline-frame-y: 42%;
+
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 3rem;
+  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.office-theme-spline-ready {
+  opacity: 1;
+}
+
+.office-theme-spline-header {
+  width: 7.5rem;
+  height: 3rem;
+  flex-shrink: 0;
+}
+
+.office-theme-spline-canvas {
+  position: absolute !important;
+  left: var(--spline-frame-x) !important;
+  top: var(--spline-frame-y) !important;
+  width: var(--spline-frame-w) !important;
+  height: var(--spline-frame-h) !important;
+  max-width: none !important;
+  transform: translate(-50%, -50%) scale(var(--spline-frame-scale));
+  transform-origin: center center;
+  overflow: hidden !important;
+  pointer-events: auto;
+  background: transparent !important;
+}
+
+.office-theme-spline canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  background: transparent !important;
+}
+
+/* Hide "Built with Spline" badge — framing untouched */
+.office-theme-spline a,
+.office-theme-spline a * {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+.office-theme-spline-loading {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.1) 45%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+}
+
+.office-shell[data-theme="light"] .office-theme-spline {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.office-theme-switch {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.office-theme-switch-btn {
+  display: inline-flex;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid transparent;
+  border-radius: 0.8rem;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55);
+  background: transparent;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.office-theme-switch-btn:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.office-theme-switch-btn[data-active="true"] {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.28);
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+.office-theme-switch-icon {
+  display: inline-flex;
+  opacity: 0.9;
+}
+
+.office-shell[data-theme="light"] .office-theme-switch {
+  border-color: rgba(22, 22, 77, 0.1);
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 6px 16px rgba(16, 24, 40, 0.08);
+}
+
+.office-shell[data-theme="light"] .office-theme-switch-btn {
+  color: rgba(28, 28, 40, 0.5);
+}
+
+.office-shell[data-theme="light"] .office-theme-switch-btn:hover {
+  color: rgba(28, 28, 40, 0.85);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.office-shell[data-theme="light"] .office-theme-switch-btn[data-active="true"] {
+  color: #1c1c1e;
+  border-color: rgba(22, 22, 77, 0.12);
+  background: linear-gradient(155deg, #fff 0%, rgba(255, 255, 255, 0.75) 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 4px 12px rgba(16, 24, 40, 0.08);
+}
+
 .office-theme-toggle {
   display: inline-flex;
   width: 100%;
   align-items: center;
-  gap: 0.2rem;
-  border-radius: 999px;
-  background: var(--office-theme-track);
-  padding: 0.2rem;
+  gap: 0.45rem;
+  background: transparent;
+  padding: 0;
+}
+
+.office-theme-glass-btn {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 0.95rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.office-theme-glass-shine {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.05) 28%,
+    transparent 52%
+  );
 }
 
 .office-theme-btn {
@@ -499,24 +836,6 @@ body {
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--office-muted);
-}
-
-.office-theme-btn[data-active="true"] {
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  color: #fff;
-}
-
-.office-shell[data-theme="light"] .office-theme-btn[data-active="true"] {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(22, 22, 77, 0.08);
-  color: var(--office-text);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    0 2px 8px rgba(16, 24, 40, 0.06);
 }
 
 .office-chip {
@@ -542,23 +861,8 @@ body {
   color: #fff;
 }
 
-.office-count-pill {
-  background: var(--office-surface-soft);
-  box-shadow: 0 0 0 1px var(--office-border);
-}
-
-.office-icon-btn {
-  background: var(--office-surface-soft);
-  color: var(--office-muted);
-}
-
 .office-list-main {
   background: var(--office-list-page);
-}
-
-.office-secondary-btn {
-  background: var(--office-surface-soft);
-  color: var(--office-text);
 }
 
 .office-glass-cta {
@@ -566,67 +870,44 @@ body {
   height: 2.25rem;
   width: 100%;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.5rem;
-  border-radius: 999px;
-  padding: 0 0.75rem;
-  font-size: 0.75rem;
+  border-radius: 0.95rem;
+  padding: 0 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px) saturate(165%);
-  -webkit-backdrop-filter: blur(18px) saturate(165%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 8px 28px rgba(0, 0, 0, 0.16);
+  text-align: left;
   color: #fff;
-  transition: filter 150ms ease;
 }
 
-.office-glass-cta:hover {
-  filter: brightness(1.08);
+.office-side-btn {
+  display: inline-flex;
+  height: 2.25rem;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  border-radius: 0.95rem;
+  padding: 0 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: left;
+  color: #fff;
 }
 
-.office-shell[data-theme="light"] .office-glass-cta {
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(22, 22, 77, 0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 6px 18px rgba(16, 24, 40, 0.06);
-  color: var(--office-text);
+.office-side-btn > span,
+.office-glass-cta > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.office-glass-btn {
-  background: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(18px) saturate(165%);
-  -webkit-backdrop-filter: blur(18px) saturate(165%);
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 8px 24px rgba(0, 0, 0, 0.14) !important;
-  color: #fff !important;
-}
-
-.office-glass-btn svg {
+.office-glass-btn svg,
+.office-side-btn svg,
+.office-glass-cta svg {
   color: currentColor;
-}
-
-.office-glass-btn:hover {
-  background: rgba(255, 255, 255, 0.16) !important;
-  filter: none !important;
-}
-
-.office-shell[data-theme="light"] .office-glass-btn {
-  background: rgba(255, 255, 255, 0.72) !important;
-  border-color: rgba(22, 22, 77, 0.08) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    0 6px 18px rgba(16, 24, 40, 0.06) !important;
-  color: var(--office-text) !important;
-}
-
-.office-shell[data-theme="light"] .office-glass-btn:hover {
-  background: rgba(255, 255, 255, 0.9) !important;
+  flex-shrink: 0;
 }
 
 .office-form {
@@ -642,20 +923,31 @@ body {
 }
 
 .office-input {
-  background: var(--office-input-bg);
-  color: var(--office-text);
-  box-shadow: 0 0 0 1px var(--office-input-ring);
+  color: inherit;
+  box-shadow: var(--glass-shadow);
+}
+
+.office-input:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--glass-border));
+  box-shadow:
+    var(--glass-shadow),
+    0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 select.office-input {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-color: var(--office-input-bg);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%238e8e93' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.85rem center;
-  background-size: 0.7rem 0.7rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%238e8e93' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+    var(--glass-bg);
+  background-repeat: no-repeat, no-repeat;
+  background-position:
+    right 0.85rem center,
+    0 0;
+  background-size:
+    0.7rem 0.7rem,
+    auto;
   padding-right: 2.1rem;
 }
 
@@ -665,7 +957,18 @@ select.office-input::-ms-expand {
 
 .office-shell[data-theme="dark"] select.office-input,
 .booking-card select.office-input {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%23d1d1d6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%23d1d1d6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+    var(--glass-bg);
+}
+
+.office-shell[data-theme="light"] select.office-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%235c5c66' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+    linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.55) 45%,
+      rgba(245, 247, 255, 0.4) 100%
+    );
 }
 
 .office-input option,
@@ -906,13 +1209,10 @@ select.office-input::-ms-expand {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  border-radius: 0.55rem;
-  border: 1px solid var(--hc-btn-border);
-  background: var(--hc-btn);
+  border-radius: 0.75rem;
   padding: 0 0.75rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--hc-main-text);
 }
 
 .host-cal-btn-icon {
@@ -923,39 +1223,17 @@ select.office-input::-ms-expand {
 .host-cal-views {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  background: var(--hc-pill-bg);
-  padding: 0.15rem;
+  gap: 0.25rem;
+  border-radius: 0.95rem;
+  background: transparent;
+  padding: 0;
 }
 
 .host-cal-view {
-  border-radius: 999px;
+  border-radius: 0.75rem;
   padding: 0.35rem 0.85rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--hc-main-muted);
-}
-
-.host-cal-view[data-active="true"] {
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
-  color: var(--hc-main-text);
-}
-
-.host-cal[data-theme="light"] .host-cal-view[data-active="true"] {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(0, 0, 0, 0.06);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    0 2px 8px rgba(0, 0, 0, 0.05);
-  color: #1c1c1e;
-}
-
-.host-cal[data-theme="dark"] .host-cal-view[data-active="true"] {
-  color: #fff;
 }
 
 .host-cal-day-grid {
@@ -1416,8 +1694,7 @@ select.office-input::-ms-expand {
   min-width: 200px;
   align-items: center;
   gap: 0.5rem;
-  border-radius: 0.75rem;
-  background: #f9fbff;
+  border-radius: 0.95rem;
   padding: 0.65rem 0.9rem;
 }
 
@@ -1426,12 +1703,13 @@ select.office-input::-ms-expand {
   border: 0;
   background: transparent;
   font-size: 0.875rem;
-  color: #292d32;
+  color: inherit;
   outline: none;
 }
 
 .host-list-search input::placeholder {
-  color: #b5b7c0;
+  color: inherit;
+  opacity: 0.45;
 }
 
 .host-list-sort {
@@ -1442,12 +1720,9 @@ select.office-input::-ms-expand {
 
 .host-list-sort select {
   appearance: none;
-  border: 0;
-  border-radius: 0.75rem;
-  background: #f9fbff;
+  border-radius: 0.95rem;
   padding: 0.65rem 2rem 0.65rem 0.9rem;
   font-size: 0.8rem;
-  color: #7e7e7e;
   outline: none;
 }
 
@@ -1455,7 +1730,8 @@ select.office-input::-ms-expand {
   position: absolute;
   right: 0.7rem;
   pointer-events: none;
-  color: #7e7e7e;
+  color: inherit;
+  opacity: 0.55;
 }
 
 .host-list-empty {
@@ -1563,25 +1839,14 @@ select.office-input::-ms-expand {
   min-width: 1.65rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.35rem;
-  background: #f5f5f5;
+  border-radius: 0.55rem;
   padding: 0 0.35rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #404b52;
 }
 
 .host-list-page:disabled {
   opacity: 0.4;
-}
-
-.host-list-page[data-active="true"] {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  color: #1c1c1e;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 .host-list-ellipsis {
@@ -1602,14 +1867,8 @@ select.office-input::-ms-expand {
   color: #f5f5f7;
 }
 
-.office-shell[data-theme="dark"] .host-list-search,
-.office-shell[data-theme="dark"] .host-list-sort select {
-  background: #2a2a2e;
-  color: #f5f5f7;
-}
-
 .office-shell[data-theme="dark"] .host-list-search input {
-  color: #f5f5f7;
+  color: inherit;
 }
 
 .office-shell[data-theme="dark"] .host-list-table th {
@@ -1637,16 +1896,8 @@ select.office-input::-ms-expand {
   color: #8e8e93;
 }
 
-.office-shell[data-theme="dark"] .host-list-page {
-  background: #2a2a2e;
-  color: #f5f5f7;
-}
-
 .office-shell[data-theme="dark"] .host-list-page[data-active="true"] {
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 

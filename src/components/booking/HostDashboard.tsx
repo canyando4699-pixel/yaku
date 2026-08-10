@@ -11,10 +11,10 @@ import { OfficeTiltDiv } from "@/components/booking/OfficeTiltSurface";
 import { OfficeShell, type OfficeRoom } from "@/components/booking/OfficeShell";
 import { ReschedulePicker } from "@/components/booking/ReschedulePicker";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { OfficeThemeToggle } from "@/components/booking/OfficeThemeToggle";
 import { Icon } from "@/components/ui/Icon";
-import { IslandButton, IslandPill } from "@/components/ui/Island";
+import { IslandButton, IslandPill, islandClass } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { useTheme } from "@/i18n/ThemeProvider";
 import { localeDate } from "@/i18n/messages";
 import {
   getSession,
@@ -53,7 +53,6 @@ function durationMinutes(start: Date, end: Date) {
 
 export function HostDashboard() {
   const { locale, t } = useLocale();
-  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [session, setSession] = useState<AuthSession | null>(null);
   const [ready, setReady] = useState(false);
@@ -200,10 +199,10 @@ export function HostDashboard() {
               setNav("share");
               void copyBookingLink();
             }}
-            className="office-glass-cta mt-4"
+            className="yaku-glass office-glass-btn office-side-btn mt-4"
           >
             <Icon name="plus" className="h-3.5 w-3.5" />
-            {t.dashShareLink}
+            <span>{t.dashShareLink}</span>
           </button>
 
           <nav className="mt-5 space-y-1">
@@ -215,48 +214,33 @@ export function HostDashboard() {
                   type="button"
                   onClick={() => setNav(item.key)}
                   className={[
-                    "office-nav-item flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-[13px] transition",
+                    "yaku-glass office-glass-btn office-side-btn",
                     active ? "office-nav-item-active" : "",
                   ].join(" ")}
+                  data-active={active ? "true" : "false"}
                 >
                   <Icon name={item.icon} className="h-3.5 w-3.5" />
-                  {item.label}
+                  <span>{item.label}</span>
                 </button>
               );
             })}
           </nav>
 
           <div className="office-nav-footer mt-auto space-y-2 border-t pt-3">
-            <div className="office-theme-toggle">
-              <button
-                type="button"
-                className="office-theme-btn"
-                data-active={theme === "light"}
-                onClick={() => setTheme("light")}
-              >
-                {t.themeLight}
-              </button>
-              <button
-                type="button"
-                className="office-theme-btn"
-                data-active={theme === "dark"}
-                onClick={() => setTheme("dark")}
-              >
-                {t.themeDark}
-              </button>
+            <div className="yaku-glass office-glass-btn office-side-btn">
+              <div className="min-w-0 leading-tight">
+                <p className="truncate text-xs font-medium">{session.displayName}</p>
+                <p className="truncate text-[10px] text-white/70">{session.email}</p>
+              </div>
             </div>
-            <div className="office-user-card rounded-xl px-2.5 py-2">
-              <p className="truncate text-xs font-medium">{session.displayName}</p>
-              <p className="office-muted truncate text-[10px]">{session.email}</p>
-            </div>
-            <LanguageSwitcher className="office-glass-btn" />
+            <LanguageSwitcher className="office-side-btn" />
             <button
               type="button"
               onClick={handleLogout}
-              className="office-nav-item inline-flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-xs transition"
+              className="yaku-glass office-glass-btn office-side-btn"
             >
               <Icon name="logout" className="h-3.5 w-3.5" />
-              {t.logout}
+              <span>{t.logout}</span>
             </button>
           </div>
         </>
@@ -274,25 +258,8 @@ export function HostDashboard() {
             <span className="h-2 w-2 rounded-full bg-[#c4a35a]" />
             <span>{confirmed.length}</span>
           </IslandPill>
-          <div className="md:hidden">
-            <div className="office-theme-toggle">
-              <button
-                type="button"
-                className="office-theme-btn"
-                data-active={theme === "light"}
-                onClick={() => setTheme("light")}
-              >
-                {t.themeLight}
-              </button>
-              <button
-                type="button"
-                className="office-theme-btn"
-                data-active={theme === "dark"}
-                onClick={() => setTheme("dark")}
-              >
-                {t.themeDark}
-              </button>
-            </div>
+          <div className="office-theme-spline-header">
+            <OfficeThemeToggle />
           </div>
           <button
             type="button"
@@ -349,11 +316,11 @@ export function HostDashboard() {
                 <p className="office-muted mt-2 text-sm">
                   /b/{host.slug}
                 </p>
-                <div className="mt-6 flex flex-wrap gap-2">
+                <div className="mt-6 flex flex-wrap items-center gap-2">
                   <IslandButton
                     type="button"
                     variant="island"
-                    className="office-glass-btn"
+                    size="md"
                     onClick={() => void copyBookingLink()}
                   >
                     <Icon name="link" className="h-4 w-4" />
@@ -361,7 +328,7 @@ export function HostDashboard() {
                   </IslandButton>
                   <Link
                     href={`/b/${host.slug}?from=host`}
-                    className="office-glass-cta !w-auto px-5"
+                    className={islandClass("soft", "md")}
                   >
                     {t.openBookingLink}
                   </Link>

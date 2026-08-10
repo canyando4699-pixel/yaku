@@ -1,18 +1,15 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 export const islandBase =
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium transition active:scale-[0.98]";
+  "yaku-glass inline-flex items-center justify-center gap-2 rounded-[0.95rem] font-medium";
 
 export const islandVariants = {
-  island:
-    "bg-[#111111] text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:bg-black",
-  islandMuted:
-    "bg-[#1c1c1e] text-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.14)] hover:bg-[#2c2c2e]",
-  accent:
-    "bg-accent text-white shadow-[0_10px_28px_rgba(225,6,0,0.35)] hover:brightness-110",
-  soft: "bg-white/80 text-ink shadow-[0_8px_24px_rgba(0,0,0,0.06)] ring-1 ring-black/5 hover:bg-white",
+  island: "text-white",
+  islandMuted: "text-white/90",
+  accent: "yaku-glass-accent text-white",
+  soft: "text-white/90",
   success:
-    "bg-[#1f8f4e] text-white shadow-[0_10px_28px_rgba(31,143,78,0.35)]",
+    "border-emerald-400/40 bg-[linear-gradient(155deg,rgba(31,143,78,0.55),rgba(31,143,78,0.22))] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_28px_rgba(31,143,78,0.28)]",
 } as const;
 
 export const islandSizes = {
@@ -66,7 +63,7 @@ export function IslandPill({
   return (
     <div
       className={[
-        "inline-flex items-center gap-2 rounded-full bg-[#111111] px-3.5 py-2 text-sm text-white shadow-[0_10px_30px_rgba(0,0,0,0.16)]",
+        "yaku-glass inline-flex items-center gap-2 rounded-[0.95rem] px-3.5 py-2 text-sm text-white",
         className,
       ].join(" ")}
     >

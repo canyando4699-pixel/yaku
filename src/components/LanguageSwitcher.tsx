@@ -10,6 +10,8 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
   const { locale, setLocale, t } = useLocale();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const sideBtn = className.includes("office-side-btn");
+  const glass = className.includes("office-glass") || sideBtn;
 
   useEffect(() => {
     if (!open) return;
@@ -36,27 +38,48 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
   }
 
   return (
-    <div ref={rootRef} className="relative">
-      <IslandButton
-        type="button"
-        size="sm"
-        variant="island"
-        className={className}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-label={t.language}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <Icon name="globe" className="h-3.5 w-3.5 opacity-80" />
-        <span>{localeLabels[locale]}</span>
-        <Icon
-          name="chevronDown"
-          className={[
-            "h-3.5 w-3.5 opacity-55 transition",
-            open ? "rotate-180" : "",
-          ].join(" ")}
-        />
-      </IslandButton>
+    <div ref={rootRef} className={sideBtn ? "relative w-full" : "relative"}>
+      {sideBtn ? (
+        <button
+          type="button"
+          className={["yaku-glass office-glass-btn", className].join(" ")}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label={t.language}
+          onClick={() => setOpen((value) => !value)}
+        >
+          <Icon name="globe" className="h-3.5 w-3.5 opacity-80" />
+          <span className="flex-1">{localeLabels[locale]}</span>
+          <Icon
+            name="chevronDown"
+            className={[
+              "h-3.5 w-3.5 opacity-55 transition",
+              open ? "rotate-180" : "",
+            ].join(" ")}
+          />
+        </button>
+      ) : (
+        <IslandButton
+          type="button"
+          size="sm"
+          variant="island"
+          className={className}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label={t.language}
+          onClick={() => setOpen((value) => !value)}
+        >
+          <Icon name="globe" className="h-3.5 w-3.5 opacity-80" />
+          <span>{localeLabels[locale]}</span>
+          <Icon
+            name="chevronDown"
+            className={[
+              "h-3.5 w-3.5 opacity-55 transition",
+              open ? "rotate-180" : "",
+            ].join(" ")}
+          />
+        </IslandButton>
+      )}
 
       {open ? (
         <ul
@@ -64,14 +87,11 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
           aria-label={t.language}
           className={[
             "absolute right-0 z-20 mt-2 min-w-[10.5rem] overflow-hidden rounded-[1.35rem] p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.28)]",
-            className.includes("office-glass")
-              ? "office-liquid-glass"
-              : "bg-[#111111]",
+            glass ? "office-liquid-glass" : "bg-[#111111]",
           ].join(" ")}
         >
           {locales.map((code) => {
             const active = code === locale;
-            const glass = className.includes("office-glass");
             return (
               <li key={code} role="option" aria-selected={active}>
                 <button

@@ -2,102 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type RefObject,
-} from "react";
 import { BrushKanji } from "@/components/BrushKanji";
-import { BookingCalendar } from "@/components/BookingCalendar";
+import { FeatureScroll } from "@/components/FeatureScroll";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { NightStars } from "@/components/NightStars";
 import { Icon } from "@/components/ui/Icon";
 import { islandClass } from "@/components/ui/Island";
 import { LocaleProvider, useLocale } from "@/i18n/LocaleProvider";
-import { defaultHostProfile } from "@/lib/booking/demo";
-import { loadHostProfile } from "@/lib/booking/hostProfile";
-import { isBookableDay } from "@/lib/booking/slots";
-import type { HostProfile } from "@/lib/booking/types";
-
-function clamp01(value: number) {
-  return Math.min(1, Math.max(0, value));
-}
-
-function stage(progress: number, from: number, to: number) {
-  return clamp01((progress - from) / (to - from));
-}
-
-function easeOutCubic(t: number) {
-  return 1 - (1 - t) ** 3;
-}
-
-function useSectionProgress(ref: RefObject<HTMLElement | null>) {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setProgress(1);
-      return;
-    }
-
-    const update = () => {
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const travel = Math.max(vh * 0.35, el.offsetHeight - vh);
-      // Begin while section is still entering; finish mid sticky-scroll.
-      const startTop = vh * 0.72;
-      const next = clamp01((startTop - rect.top) / (startTop + travel * 0.7));
-      setProgress((prev) => (Math.abs(prev - next) < 0.002 ? prev : next));
-    };
-
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [ref]);
-
-  return progress;
-}
 
 function HomePageContent() {
   const { t } = useLocale();
-  const [previewDate, setPreviewDate] = useState(() => new Date());
-  const [host, setHost] = useState<HostProfile>(defaultHostProfile);
-  const buildRef = useRef<HTMLElement>(null);
-  const progress = useSectionProgress(buildRef);
-
-  useEffect(() => {
-    setHost(loadHostProfile(defaultHostProfile.slug));
-  }, []);
-
-  const eyebrowT = easeOutCubic(stage(progress, 0, 0.35));
-  const titleT = easeOutCubic(stage(progress, 0.08, 0.48));
-  const calendarT = easeOutCubic(stage(progress, 0.18, 0.88));
-
-  const eyebrowStyle: CSSProperties = {
-    opacity: eyebrowT,
-    transform: `translate3d(0, ${(1 - eyebrowT) * 18}px, 0)`,
-  };
-
-  const titleStyle: CSSProperties = {
-    opacity: titleT,
-    transform: `translate3d(0, ${(1 - titleT) * 26}px, 0)`,
-  };
-
-  const tilt = (1 - calendarT) * 42;
-  const calendarStyle: CSSProperties = {
-    opacity: 0.2 + calendarT * 0.8,
-    transform: `perspective(1100px) translate3d(0, ${(1 - calendarT) * 64}px, ${(1 - calendarT) * -120}px) rotateX(${tilt}deg) scale(${0.9 + calendarT * 0.1})`,
-  };
 
   return (
     <div className="relative flex min-h-full flex-1 flex-col bg-[#0f0d0c]">
@@ -118,7 +32,7 @@ function HomePageContent() {
         />
         <div
           aria-hidden
-          className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-[#0f0d0c] via-[#0f0d0c]/70 to-transparent"
+          className="absolute inset-x-0 bottom-0 h-[36%] bg-gradient-to-t from-[#0f0d0c] via-[#0f0d0c]/65 to-transparent"
         />
         <NightStars />
 
@@ -198,11 +112,7 @@ function HomePageContent() {
             </Link>
             <Link
               href="/host"
-              className={islandClass(
-                "soft",
-                "lg",
-                "bg-white/12 text-white ring-white/15 hover:bg-white/18",
-              )}
+              className={islandClass("soft", "lg")}
             >
               <Icon name="list" className="h-4 w-4" />
               {t.viewBookings}
@@ -211,54 +121,7 @@ function HomePageContent() {
         </main>
       </section>
 
-      <section
-        ref={buildRef}
-        className="relative min-h-[145vh] bg-[#0f0d0c]"
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[linear-gradient(180deg,rgba(15,13,12,0)_0%,rgba(15,13,12,1)_100%)]"
-        />
-        <div className="sticky top-0 flex min-h-dvh items-center justify-center px-6 py-16 md:px-10">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-70"
-            style={{
-              background: `radial-gradient(ellipse at 50% ${28 + calendarT * 18}%, rgba(225,6,0,${0.08 + calendarT * 0.12}), transparent 58%)`,
-            }}
-          />
-
-          <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-10">
-            <div className="text-center will-change-transform">
-              <p
-                className="text-sm tracking-[0.2em] text-[#ff6b5e] uppercase"
-                style={eyebrowStyle}
-              >
-                {t.pickDate}
-              </p>
-              <h2
-                className="mt-3 font-display text-3xl text-white md:text-4xl"
-                style={titleStyle}
-              >
-                {t.badgeFeatures}
-              </h2>
-            </div>
-
-            <div className="yaku-calendar-stage w-full max-w-[360px]">
-              <div
-                className="will-change-transform [transform-style:preserve-3d]"
-                style={calendarStyle}
-              >
-                <BookingCalendar
-                  selected={previewDate}
-                  onSelect={setPreviewDate}
-                  isDayEnabled={(date) => isBookableDay(date, host)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <FeatureScroll />
     </div>
   );
 }

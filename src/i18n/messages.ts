@@ -159,6 +159,19 @@ export type Messages = {
   seriesWeekly: string;
   seriesHint: string;
   seriesUnavailable: string;
+  tourEyebrow: string;
+  tourBookingTitle: string;
+  tourBookingBody: string;
+  tourAvailabilityTitle: string;
+  tourAvailabilityBody: string;
+  tourDashboardTitle: string;
+  tourDashboardBody: string;
+  tourShareTitle: string;
+  tourShareBody: string;
+  tourManageTitle: string;
+  tourManageBody: string;
+  tourSeriesTitle: string;
+  tourSeriesBody: string;
 };
 
 export const messages: Record<Locale, Messages> = {
@@ -313,6 +326,25 @@ export const messages: Record<Locale, Messages> = {
     seriesWeekly: "{n}× wöchentlich",
     seriesHint: "Gleicher Wochentag und Uhrzeit — nur wenn alle Slots frei sind.",
     seriesUnavailable: "Serie nicht möglich: ein Folgetermin ist belegt oder gesperrt.",
+    tourEyebrow: "Was Yaku kann",
+    tourBookingTitle: "Buchungslink",
+    tourBookingBody:
+      "Gäste wählen Datum und Uhrzeit auf deinem öffentlichen Link — ohne Account.",
+    tourAvailabilityTitle: "Verfügbarkeit",
+    tourAvailabilityBody:
+      "Fenster, Wochentage, Puffer und Event-Typen einmal setzen. Der Rest folgt.",
+    tourDashboardTitle: "Host-Dashboard",
+    tourDashboardBody:
+      "Woche, Liste und eingehende Termine — dein Office für den Alltag.",
+    tourShareTitle: "Link teilen",
+    tourShareBody:
+      "Einen Link kopieren, fertig. Kein Setup-Theater, kein Lock-in.",
+    tourManageTitle: "Termin verwalten",
+    tourManageBody:
+      "Absagen oder verschieben — Gast und Host behalten die Kontrolle.",
+    tourSeriesTitle: "Serien & Integrationen",
+    tourSeriesBody:
+      "Wöchentliche Serien heute. Google- und Apple-Kalender als Nächstes.",
   },
   en: {
     openSource: "Open Source",
@@ -465,6 +497,25 @@ export const messages: Record<Locale, Messages> = {
     seriesWeekly: "{n}× weekly",
     seriesHint: "Same weekday and time — only if every slot is free.",
     seriesUnavailable: "Series unavailable: a follow-up slot is taken or blocked.",
+    tourEyebrow: "What Yaku does",
+    tourBookingTitle: "Booking link",
+    tourBookingBody:
+      "Guests pick a date and time on your public link — no account needed.",
+    tourAvailabilityTitle: "Availability",
+    tourAvailabilityBody:
+      "Set windows, weekdays, buffers, and event types once. The rest follows.",
+    tourDashboardTitle: "Host dashboard",
+    tourDashboardBody:
+      "Week view, list, and incoming bookings — your office for the day-to-day.",
+    tourShareTitle: "Share link",
+    tourShareBody:
+      "Copy one link and you're done. No setup theater, no lock-in.",
+    tourManageTitle: "Manage booking",
+    tourManageBody:
+      "Cancel or reschedule — guest and host stay in control.",
+    tourSeriesTitle: "Series & integrations",
+    tourSeriesBody:
+      "Weekly series today. Google and Apple calendars next.",
   },
   ja: {
     openSource: "オープンソース",
@@ -617,5 +668,24 @@ export const messages: Record<Locale, Messages> = {
     seriesWeekly: "毎週 {n} 回",
     seriesHint: "同じ曜日・時間 — すべての枠が空いている場合のみ。",
     seriesUnavailable: "連続予約不可：次の枠が埋まっているか制限されています。",
+    tourEyebrow: "Yakuでできること",
+    tourBookingTitle: "予約リンク",
+    tourBookingBody:
+      "ゲストは公開リンクで日付と時間を選ぶだけ — アカウント不要。",
+    tourAvailabilityTitle: "空き時間",
+    tourAvailabilityBody:
+      "時間帯・曜日・バッファ・イベント種類を一度設定。あとはそれに従う。",
+    tourDashboardTitle: "ホスト画面",
+    tourDashboardBody:
+      "週表示・リスト・受信予約 — 日常のためのオフィス。",
+    tourShareTitle: "リンク共有",
+    tourShareBody:
+      "リンクをコピーして終わり。セットアップ芝居もロックインもない。",
+    tourManageTitle: "予約の管理",
+    tourManageBody:
+      "キャンセルも変更も — ゲストもホストも主導権を保てる。",
+    tourSeriesTitle: "連続予約と連携",
+    tourSeriesBody:
+      "毎週の連続予約は今日から。Google・Appleカレンダーは次のステップ。",
   },
 };
