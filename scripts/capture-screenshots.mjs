@@ -274,12 +274,62 @@ async function main() {
     await assertEnglish(cdp, "hero");
     await screenshot(cdp, "hero-en.png");
 
-    // Landing calendar
+    // Landing calendar (wait for Spline + Booking link slide)
     await evalExpr(
       cdp,
-      `window.scrollTo(0, Math.min(document.body.scrollHeight * 0.45, 1200))`,
+      `(() => {
+        const section = document.querySelector('section[aria-label]');
+        if (section) section.scrollIntoView({ block: "center" });
+        else window.scrollTo(0, Math.min(document.body.scrollHeight * 0.45, 1200));
+        const iframe = section?.querySelector("iframe");
+        if (iframe) iframe.loading = "eager";
+        return !!iframe;
+      })()`,
     );
-    await sleep(1200);
+    await sleep(2500);
+    let splineReady = false;
+    for (let i = 0; i < 40; i += 1) {
+      const result = await evalExpr(
+        cdp,
+        `(() => {
+          const iframe = document.querySelector('section[aria-label] iframe');
+          if (!iframe) return { ok: false, reason: "no-iframe" };
+          const rect = iframe.getBoundingClientRect();
+          return {
+            ok: rect.width > 200 && rect.height > 200,
+            opacity: getComputedStyle(iframe).opacity,
+            src: iframe.src || "",
+          };
+        })()`,
+      );
+      const v = result?.result?.value;
+      console.log("spline-wait", i, JSON.stringify(v));
+      if (v?.ok && Number(v.opacity) > 0.5) {
+        splineReady = true;
+        break;
+      }
+      await sleep(500);
+    }
+    if (!splineReady) console.log("spline-timeout — capturing anyway");
+    // Extra time for Spline WebGL characters to finish
+    await sleep(8000);
+    for (let i = 0; i < 60; i += 1) {
+      const result = await evalExpr(
+        cdp,
+        `(() => {
+          const h2 = document.querySelector('section[aria-label] h2');
+          const title = (h2?.textContent || "").trim();
+          return { title, booking: title === "Booking link" };
+        })()`,
+      );
+      const v = result?.result?.value;
+      if (v?.booking) {
+        console.log("calendar-slide", JSON.stringify(v));
+        break;
+      }
+      await sleep(250);
+    }
+    await assertEnglish(cdp, "calendar");
     await screenshot(cdp, "calendar-en.png");
 
     // Booking

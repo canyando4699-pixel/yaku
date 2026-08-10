@@ -366,7 +366,7 @@ export function FeatureScroll() {
           <iframe
             src="https://my.spline.design/100followers-PkU5UZJQoYCU6oJ0j4y2OgzW/"
             title=""
-            loading="lazy"
+            loading="eager"
             className="absolute left-1/2 top-1/2 h-[120%] w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 border-0"
             style={{ opacity: 0.35 + enterT * 0.65 }}
             allow="autoplay"

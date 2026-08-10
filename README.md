@@ -35,9 +35,9 @@ Atmospheric Fuji hero with the 約 brand and a clear path into the demo.
 
 ![Yaku hero — Fuji night with 約 brand lockup](docs/screenshots/hero-en.png)
 
-Calendar preview on the landing page:
+Feature carousel on the landing page (Spline scene + UI cards):
 
-![Yaku calendar preview on the landing page](docs/screenshots/calendar-en.png)
+![Yaku feature carousel — Series and integrations](docs/screenshots/calendar-en.png)
 
 ### Guest booking
 
