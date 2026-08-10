@@ -114,12 +114,12 @@ function useAutoRotation(
           const card = cards[i] as HTMLElement;
           const cardAngle = i * step;
           const facing = Math.cos(((cardAngle + angle) * Math.PI) / 180);
-          const lit = clamp01((facing + 0.2) / 1.2);
-          const visible = facing > 0.08;
-          card.style.opacity = visible ? String(0.35 + lit * 0.65) : "0";
+          const lit = clamp01((facing - 0.35) / 0.65);
+          const visible = facing > 0.55;
+          card.style.opacity = visible ? String(0.45 + lit * 0.55) : "0";
           card.style.visibility = visible ? "visible" : "hidden";
-          card.style.filter = `brightness(${0.6 + lit * 0.5})`;
-          card.style.pointerEvents = facing > 0.75 ? "auto" : "none";
+          card.style.filter = facing > 0.92 ? "none" : `brightness(${0.55 + lit * 0.35}) blur(${(1 - lit) * 1.2}px)`;
+          card.style.pointerEvents = facing > 0.85 ? "auto" : "none";
           card.style.zIndex = String(Math.round(facing * 100));
         }
       }
@@ -158,7 +158,7 @@ function PanelShell({
 }) {
   return (
     <div
-      className="flex h-full w-full flex-col overflow-hidden rounded-[1.35rem] border border-white/14 bg-[#14110f]/92 shadow-[0_28px_70px_rgba(0,0,0,0.55)] backdrop-blur-sm"
+      className="flex h-full w-full flex-col overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-[#121214] shadow-[0_28px_70px_rgba(0,0,0,0.55)]"
       style={{ width: CARD_W, height: CARD_H }}
     >
       <div className="flex items-center gap-2 border-b border-white/8 px-4 py-3">
