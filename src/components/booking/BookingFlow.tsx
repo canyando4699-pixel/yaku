@@ -47,6 +47,57 @@ function seriesOptions(max: number) {
   return opts;
 }
 
+function StepIndicator({
+  active,
+  scheduleLabel,
+  detailsLabel,
+}: {
+  active: Step;
+  scheduleLabel: string;
+  detailsLabel: string;
+}) {
+  return (
+    <nav
+      aria-label="steps"
+      className="mb-3 flex flex-wrap items-center gap-2 text-[11px] font-medium tracking-wide"
+    >
+      <span
+        className={[
+          "inline-flex items-center gap-1.5",
+          active === "schedule"
+            ? "text-[color:var(--office-text)]"
+            : "office-muted",
+        ].join(" ")}
+      >
+        <span
+          className={[
+            "h-1.5 w-1.5 rounded-full",
+            active === "schedule" ? "bg-accent" : "bg-white/25",
+          ].join(" ")}
+        />
+        1 {scheduleLabel}
+      </span>
+      <Icon name="arrowRight" className="h-3 w-3 opacity-40" />
+      <span
+        className={[
+          "inline-flex items-center gap-1.5",
+          active === "details"
+            ? "text-[color:var(--office-text)]"
+            : "office-muted",
+        ].join(" ")}
+      >
+        <span
+          className={[
+            "h-1.5 w-1.5 rounded-full",
+            active === "details" ? "bg-accent" : "bg-white/25",
+          ].join(" ")}
+        />
+        2 {detailsLabel}
+      </span>
+    </nav>
+  );
+}
+
 export function BookingFlow({
   host: initialHost,
   fromHost = false,
@@ -207,6 +258,8 @@ export function BookingFlow({
     return list.filter((tz, i, arr) => arr.indexOf(tz) === i);
   }, [guestTimezone, host.timezone]);
 
+  const hostInitial = host.displayName.trim().charAt(0).toUpperCase() || "?";
+
   return (
     <div
       className="office-shell relative flex min-h-full flex-1 flex-col"
@@ -254,123 +307,183 @@ export function BookingFlow({
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center px-5 pb-12 md:px-8">
-        {step === "schedule" ? (
-          <div className="flex w-full flex-col items-stretch gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-            <aside
-              className="hidden w-full max-w-[240px] shrink-0 lg:block"
-              aria-hidden
-            />
-            <div className="office-panel office-ringed booking-card w-full max-w-3xl overflow-hidden rounded-[1.5rem] p-0 lg:ml-auto">
+      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 pb-12 md:px-8">
+        <div className="grid w-full gap-5 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:gap-6">
+          <aside className="booking-card office-ringed relative w-full overflow-hidden rounded-[1.5rem] p-4 lg:sticky lg:top-6 lg:p-5">
             <OfficeChaseRing />
             <div className="relative z-[1]">
-              <div className="border-b border-[color:var(--office-border)] px-4 py-3.5 md:px-5 md:py-4">
-                <IslandPill className="office-liquid-glass !px-2.5 !py-1 text-xs">
-                  <Icon name="user" className="h-3 w-3 opacity-70" />
-                  <span>
-                    {t.bookingWith} {host.displayName}
-                  </span>
-                </IslandPill>
-                <h1 className="mt-2 font-display text-xl text-[color:var(--office-text)] md:text-2xl">
-                  {eventType.title}
-                </h1>
-
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  {host.eventTypes.map((et) => {
-                    const active = et.id === eventType.id;
-                    return (
-                      <button
-                        key={et.id}
-                        type="button"
-                        onClick={() => {
-                          setEventType(et);
-                          setSelectedSlot(null);
-                          setError(null);
-                        }}
-                        className={[
-                          "booking-slot inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition active:scale-[0.98]",
-                          active ? "booking-slot-active" : "",
-                        ].join(" ")}
-                      >
-                        <Icon name="clock" className="h-3.5 w-3.5" />
-                        {et.title} · {et.durationMinutes} min
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <label className="office-muted mt-3 flex flex-wrap items-center gap-2 text-xs">
-                  <span>{t.guestTimezoneLabel}</span>
-                  <select
-                    value={guestTimezone}
-                    onChange={(e) => setGuestTimezone(e.target.value)}
-                    className="office-input rounded-full border-0 px-3 py-1.5 text-xs outline-none"
-                  >
-                    {tzOptions.map((tz) => (
-                      <option key={tz} value={tz} className="office-option">
-                        {tz}
-                        {tz === host.timezone
-                          ? ` (${t.hostTimezoneShort})`
-                          : ""}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <div className="grid items-start gap-5 px-4 py-4 md:grid-cols-[260px_1fr] md:gap-6 md:px-5 md:py-5">
-                <div className="w-full">
-                  <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
-                    <Icon name="calendar" className="h-3.5 w-3.5 text-accent" />
-                    {t.pickDate}
-                  </p>
-                  <BookingCalendar
-                    selected={selectedDate}
-                    onSelect={(date) => {
-                      setSelectedDate(date);
-                      setSelectedSlot(null);
-                    }}
-                    isDayEnabled={(date) => isBookableDay(date, activeHost)}
-                    variant="embedded"
-                  />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
-                    <Icon name="clock" className="h-3.5 w-3.5 text-accent" />
-                    {t.pickTime}
-                  </p>
-                  <IslandPill className="office-liquid-glass mb-3 !px-2.5 !py-1 text-xs">
-                    {dateFormatter.format(selectedDate)}
-                  </IslandPill>
-                  {slots.length === 0 ? (
-                    <p className="office-muted text-xs">{t.noSlots}</p>
+              <p className="office-muted text-[10px] font-medium uppercase tracking-[0.14em]">
+                {t.bookingWith}
+              </p>
+              <div className="mt-3 flex items-center gap-3 lg:flex-col lg:items-start lg:gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 text-lg font-medium text-[color:var(--office-text)] ring-1 ring-white/15 lg:h-20 lg:w-20 lg:text-2xl">
+                  {host.avatarDataUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={host.avatarDataUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
-                    <div className="grid max-h-[280px] grid-cols-3 gap-1.5 overflow-y-auto pr-0.5 sm:grid-cols-4">
-                      {slots.map((slot) => {
-                        const active = slot === selectedSlot;
-                        return (
-                          <button
-                            key={slot}
-                            type="button"
-                            onClick={() => setSelectedSlot(slot)}
-                            className={[
-                              "booking-slot rounded-full px-2 py-2 text-xs font-medium transition active:scale-[0.98]",
-                              active ? "booking-slot-active" : "",
-                            ].join(" ")}
-                          >
-                            {timeFormatter.format(new Date(slot))}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <span aria-hidden>{hostInitial}</span>
                   )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-display text-base text-[color:var(--office-text)] lg:text-lg">
+                    {host.displayName}
+                  </p>
+                  <p className="office-muted mt-1 inline-flex items-center gap-1.5 text-xs">
+                    <Icon name="globe" className="h-3 w-3 opacity-70" />
+                    {host.timezone}
+                  </p>
+                </div>
+              </div>
+              {host.bio ? (
+                <p className="office-muted mt-4 border-t border-white/10 pt-3 text-xs leading-relaxed lg:text-sm">
+                  {host.bio}
+                </p>
+              ) : null}
+            </div>
+          </aside>
 
+          {step === "schedule" ? (
+            <div className="booking-card office-ringed relative w-full overflow-hidden rounded-[1.5rem] p-0">
+              <OfficeChaseRing />
+              <div className="relative z-[1]">
+                <div className="border-b border-white/10 px-5 py-4">
+                  <StepIndicator
+                    active="schedule"
+                    scheduleLabel={t.stepSchedule}
+                    detailsLabel={t.yourDetails}
+                  />
+                  <h1 className="font-display text-2xl text-[color:var(--office-text)]">
+                    {eventType.title}
+                  </h1>
+                  <p className="office-muted mt-1 text-xs">
+                    {eventType.durationMinutes} min
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    {host.eventTypes.map((et) => {
+                      const active = et.id === eventType.id;
+                      return (
+                        <button
+                          key={et.id}
+                          type="button"
+                          onClick={() => {
+                            setEventType(et);
+                            setSelectedSlot(null);
+                            setError(null);
+                          }}
+                          className={[
+                            "booking-slot inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition active:scale-[0.98]",
+                            active ? "booking-slot-active" : "",
+                          ].join(" ")}
+                        >
+                          <Icon name="clock" className="h-3.5 w-3.5" />
+                          {et.title} · {et.durationMinutes} min
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="grid items-start gap-5 px-5 py-4 md:grid-cols-[260px_minmax(0,1fr)] md:gap-6">
+                  <div className="w-full">
+                    <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
+                      <Icon
+                        name="calendar"
+                        className="h-3.5 w-3.5 text-accent"
+                      />
+                      {t.pickDate}
+                    </p>
+                    <BookingCalendar
+                      selected={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        setSelectedSlot(null);
+                      }}
+                      isDayEnabled={(date) => isBookableDay(date, activeHost)}
+                      variant="embedded"
+                    />
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                      <p className="flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
+                        <Icon
+                          name="clock"
+                          className="h-3.5 w-3.5 text-accent"
+                        />
+                        {t.pickTime}
+                      </p>
+                      <label className="office-muted flex flex-wrap items-center gap-1.5 text-[11px]">
+                        <span>{t.guestTimezoneLabel}</span>
+                        <select
+                          value={guestTimezone}
+                          onChange={(e) => setGuestTimezone(e.target.value)}
+                          className="office-input rounded-full border-0 px-2.5 py-1 text-[11px] outline-none"
+                        >
+                          {tzOptions.map((tz) => (
+                            <option
+                              key={tz}
+                              value={tz}
+                              className="office-option"
+                            >
+                              {tz}
+                              {tz === host.timezone
+                                ? ` (${t.hostTimezoneShort})`
+                                : ""}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                    <IslandPill className="office-liquid-glass mb-3 !px-2.5 !py-1 text-xs">
+                      {dateFormatter.format(selectedDate)}
+                    </IslandPill>
+                    {slots.length === 0 ? (
+                      <p className="office-muted text-xs">{t.noSlots}</p>
+                    ) : (
+                      <div className="grid max-h-[280px] grid-cols-3 gap-1.5 overflow-y-auto pr-0.5 sm:grid-cols-4">
+                        {slots.map((slot) => {
+                          const active = slot === selectedSlot;
+                          return (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => setSelectedSlot(slot)}
+                              className={[
+                                "booking-slot rounded-full px-2 py-2 text-xs font-medium transition active:scale-[0.98]",
+                                active ? "booking-slot-active" : "",
+                              ].join(" ")}
+                            >
+                              {timeFormatter.format(new Date(slot))}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-4">
+                  <p className="min-w-0 text-xs text-[color:var(--office-text)]">
+                    {selectedSlot ? (
+                      <>
+                        {eventType.title} ·{" "}
+                        {dateFormatter.format(new Date(selectedSlot))} ·{" "}
+                        {timeFormatter.format(new Date(selectedSlot))} ·{" "}
+                        {eventType.durationMinutes} min
+                      </>
+                    ) : (
+                      <span className="office-muted">{t.pickTime}</span>
+                    )}
+                  </p>
                   <button
                     type="button"
                     disabled={!selectedSlot}
                     onClick={() => setStep("details")}
-                    className="office-glass-cta mt-5 !h-9 !w-auto !px-4 !text-xs disabled:cursor-not-allowed disabled:opacity-40"
+                    className="office-glass-cta !h-9 !w-auto shrink-0 !px-4 !text-xs disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Icon name="user" className="h-3.5 w-3.5" />
                     {t.yourDetails}
@@ -379,113 +492,130 @@ export function BookingFlow({
                 </div>
               </div>
             </div>
-            </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        {step === "details" && selectedSlot ? (
-          <form
-            onSubmit={submitBooking}
-            className="office-form office-ringed booking-card relative ml-auto w-full max-w-sm overflow-hidden p-5 md:p-6"
-          >
-            <OfficeChaseRing />
-            <div className="relative z-[1]">
-              <IslandPill className="office-liquid-glass !px-2.5 !py-1 text-xs">
-                <Icon name="calendar" className="h-3 w-3 opacity-70" />
-                <span>
-                  {dateFormatter.format(new Date(selectedSlot))} ·{" "}
-                  {timeFormatter.format(new Date(selectedSlot))}
-                </span>
-              </IslandPill>
-              <h2 className="mt-3 font-display text-xl text-[color:var(--office-text)]">
-                {t.yourDetails}
-              </h2>
+          {step === "details" && selectedSlot ? (
+            <form
+              onSubmit={submitBooking}
+              className="booking-card office-ringed relative w-full overflow-hidden rounded-[1.5rem] p-0"
+            >
+              <OfficeChaseRing />
+              <div className="relative z-[1]">
+                <div className="border-b border-white/10 px-5 py-4">
+                  <StepIndicator
+                    active="details"
+                    scheduleLabel={t.stepSchedule}
+                    detailsLabel={t.yourDetails}
+                  />
+                  <h2 className="font-display text-2xl text-[color:var(--office-text)]">
+                    {t.yourDetails}
+                  </h2>
+                  <IslandPill className="office-liquid-glass mt-3 !px-2.5 !py-1 text-xs">
+                    <Icon name="calendar" className="h-3 w-3 opacity-70" />
+                    <span>
+                      {eventType.title} ·{" "}
+                      {dateFormatter.format(new Date(selectedSlot))} ·{" "}
+                      {timeFormatter.format(new Date(selectedSlot))}
+                    </span>
+                  </IslandPill>
+                </div>
 
-              <label className="office-field mt-4 block text-xs">
-                <span className="mb-1 inline-flex items-center gap-1.5">
-                  <Icon name="user" className="h-3 w-3" />
-                  {t.name}
-                </span>
-                <input
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
-                />
-              </label>
+                <div className="px-5 py-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="office-field block text-xs">
+                      <span className="mb-1 inline-flex items-center gap-1.5">
+                        <Icon name="user" className="h-3 w-3" />
+                        {t.name}
+                      </span>
+                      <input
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
+                      />
+                    </label>
 
-              <label className="office-field mt-3 block text-xs">
-                <span className="mb-1 inline-flex items-center gap-1.5">
-                  <Icon name="mail" className="h-3 w-3" />
-                  {t.email}
-                </span>
-                <input
-                  required
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
-                />
-              </label>
+                    <label className="office-field block text-xs">
+                      <span className="mb-1 inline-flex items-center gap-1.5">
+                        <Icon name="mail" className="h-3 w-3" />
+                        {t.email}
+                      </span>
+                      <input
+                        required
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
+                      />
+                    </label>
+                  </div>
 
-              <label className="office-field mt-3 block text-xs">
-                {t.note}{" "}
-                <span className="office-muted">({t.noteOptional})</span>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  rows={3}
-                  className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
-                />
-              </label>
+                  <label className="office-field mt-3 block text-xs">
+                    {t.note}{" "}
+                    <span className="office-muted">({t.noteOptional})</span>
+                    <textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      rows={3}
+                      className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
+                    />
+                  </label>
 
-              {host.allowSeries ? (
-                <label className="office-field mt-4 block text-sm">
-                  {t.seriesCountLabel}
-                  <select
-                    value={seriesCount}
-                    onChange={(e) => setSeriesCount(Number(e.target.value))}
-                    className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none focus:ring-accent"
+                  {host.allowSeries ? (
+                    <label className="office-field mt-4 block text-sm">
+                      {t.seriesCountLabel}
+                      <select
+                        value={seriesCount}
+                        onChange={(e) =>
+                          setSeriesCount(Number(e.target.value))
+                        }
+                        className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none focus:ring-accent"
+                      >
+                        {seriesOptions(host.maxSeriesCount).map((n) => (
+                          <option
+                            key={n}
+                            value={n}
+                            className="office-option"
+                          >
+                            {n === 1
+                              ? t.seriesOnce
+                              : t.seriesWeekly.replace("{n}", String(n))}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="office-muted mt-1 block text-xs">
+                        {t.seriesHint}
+                      </span>
+                    </label>
+                  ) : null}
+
+                  {error ? (
+                    <p className="mt-3 text-sm text-[#ff453a]">{error}</p>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-4">
+                  <IslandButton
+                    type="button"
+                    variant="island"
+                    className="office-glass-btn"
+                    onClick={() => setStep("schedule")}
                   >
-                    {seriesOptions(host.maxSeriesCount).map((n) => (
-                      <option key={n} value={n} className="office-option">
-                        {n === 1
-                          ? t.seriesOnce
-                          : t.seriesWeekly.replace("{n}", String(n))}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="office-muted mt-1 block text-xs">
-                    {t.seriesHint}
-                  </span>
-                </label>
-              ) : null}
-
-              {error ? (
-                <p className="mt-3 text-sm text-[#ff453a]">{error}</p>
-              ) : null}
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <IslandButton
-                  type="button"
-                  variant="island"
-                  className="office-glass-btn"
-                  onClick={() => setStep("schedule")}
-                >
-                  {t.back}
-                </IslandButton>
-                <IslandButton
-                  type="submit"
-                  variant="island"
-                  className="office-glass-btn"
-                >
-                  <Icon name="check" className="h-4 w-4" />
-                  {t.confirmBooking}
-                </IslandButton>
+                    {t.back}
+                  </IslandButton>
+                  <IslandButton
+                    type="submit"
+                    variant="island"
+                    className="office-glass-btn"
+                  >
+                    <Icon name="check" className="h-4 w-4" />
+                    {t.confirmBooking}
+                  </IslandButton>
+                </div>
               </div>
-            </div>
-          </form>
-        ) : null}
+            </form>
+          ) : null}
+        </div>
       </main>
     </div>
   );

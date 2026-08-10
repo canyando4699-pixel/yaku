@@ -86,9 +86,25 @@ function normalizeHost(raw: Partial<HostProfile> & { slug: string }): HostProfil
     ? durationMinutes
     : base.durationMinutes;
 
+  const avatarRaw =
+    typeof raw.avatarDataUrl === "string" ? raw.avatarDataUrl.trim() : null;
+  const avatarDataUrl =
+    avatarRaw === null
+      ? base.avatarDataUrl
+      : avatarRaw === "" || avatarRaw.startsWith("data:image/")
+        ? avatarRaw
+        : base.avatarDataUrl;
+
+  const bio =
+    typeof raw.bio === "string"
+      ? raw.bio.trim().slice(0, 400)
+      : base.bio;
+
   return {
     slug: raw.slug,
     displayName: raw.displayName?.trim() || base.displayName,
+    avatarDataUrl,
+    bio,
     eventTitle,
     durationMinutes: safeDuration,
     timezone: raw.timezone || base.timezone,

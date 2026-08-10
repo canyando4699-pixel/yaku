@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { OfficeChaseRing } from "@/components/booking/OfficeChaseRing";
 import { IslandButton } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
@@ -19,11 +19,43 @@ const DAILY_MAX_OPTIONS = [0, 2, 4, 6, 8, 12] as const;
 const SERIES_MAX_OPTIONS = [2, 4, 6, 8, 12] as const;
 /** Mon→Sun display order with JS getDay values */
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
+const AVATAR_MAX_PX = 256;
 
 function timeOptions() {
   const options: number[] = [];
   for (let m = 0; m <= 24 * 60; m += 30) options.push(m);
   return options;
+}
+
+function resizeImageToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read failed"));
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onerror = () => reject(new Error("image failed"));
+      img.onload = () => {
+        const scale = Math.min(
+          1,
+          AVATAR_MAX_PX / Math.max(img.width, img.height),
+        );
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("canvas failed"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 type HostAvailabilityProps = {
@@ -39,6 +71,7 @@ export function HostAvailability({
   const [draft, setDraft] = useState<HostProfile>(() => loadHostProfile(slug));
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setDraft(loadHostProfile(slug));
@@ -94,6 +127,18 @@ export function HostAvailability({
     setMessage(null);
   }
 
+  async function handleAvatarChange(file: File | undefined) {
+    if (!file || !file.type.startsWith("image/")) return;
+    try {
+      const dataUrl = await resizeImageToDataUrl(file);
+      setDraft((p) => ({ ...p, avatarDataUrl: dataUrl }));
+      setMessage(null);
+      setError(null);
+    } catch {
+      /* ignore unreadable images */
+    }
+  }
+
   function handleSave(event: React.FormEvent) {
     event.preventDefault();
     if (draft.weekdays.length === 0) {
@@ -118,6 +163,8 @@ export function HostAvailability({
     setMessage(t.availabilitySaved);
     onSaved?.(saved);
   }
+
+  const initial = draft.displayName.trim().charAt(0).toUpperCase() || "?";
 
   return (
     <form
@@ -147,6 +194,71 @@ export function HostAvailability({
           className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
         />
       </label>
+
+      <div className="mt-8 border-t border-white/10 pt-6">
+        <h3 className="font-display text-xl">{t.businessCardTitle}</h3>
+
+        <div className="mt-4 flex flex-wrap items-center gap-4">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[color:var(--office-nav-hover)] text-2xl font-medium text-[color:var(--office-text)] ring-1 ring-[color:var(--office-border)]">
+            {draft.avatarDataUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={draft.avatarDataUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span aria-hidden>{initial}</span>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              aria-label={t.avatarLabel}
+              onChange={(e) => {
+                void handleAvatarChange(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className="office-chip-idle rounded-full px-3.5 py-2 text-sm"
+            >
+              {t.uploadAvatar}
+            </button>
+            {draft.avatarDataUrl ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setDraft((p) => ({ ...p, avatarDataUrl: "" }));
+                  setMessage(null);
+                }}
+                className="office-muted rounded-full px-3 py-2 text-sm hover:bg-[color:var(--office-nav-hover)]"
+              >
+                {t.removeAvatar}
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        <label className="mt-4 office-field block text-sm">
+          {t.bioLabel}
+          <textarea
+            value={draft.bio}
+            maxLength={400}
+            rows={4}
+            onChange={(e) => {
+              setDraft((p) => ({ ...p, bio: e.target.value }));
+              setMessage(null);
+            }}
+            className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-4 py-3 text-sm outline-none ring-1 focus:ring-accent"
+          />
+        </label>
+      </div>
 
       <label className="mt-4 office-field block text-sm">
         {t.hostTimezoneLabel}

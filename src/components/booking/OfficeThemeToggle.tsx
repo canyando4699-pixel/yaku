@@ -1,27 +1,21 @@
 "use client";
 
-import Spline, { type SplineEvent } from "@splinetool/react-spline";
+import Spline from "@splinetool/react-spline";
 import type { Application } from "@splinetool/runtime";
 import {
   Component,
   useCallback,
+  useEffect,
   useRef,
   useState,
   type ErrorInfo,
   type ReactNode,
 } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
-import { useTheme } from "@/i18n/ThemeProvider";
+import { useTheme, type ThemeMode } from "@/i18n/ThemeProvider";
 
 const SCENE =
   "https://prod.spline.design/UoE14L13W2wrHidZ/scene.splinecode";
-
-function themeFromSplineEvent(e: SplineEvent): "light" | "dark" | "toggle" {
-  const name = (e.target?.name ?? "").toLowerCase();
-  if (/light|sun|day|hell|tag/.test(name)) return "light";
-  if (/dark|moon|night|dunkel|nacht/.test(name)) return "dark";
-  return "toggle";
-}
 
 function ThemeFallbackButtons() {
   const { t } = useLocale();
@@ -71,10 +65,66 @@ class SplineErrorBoundary extends Component<
   }
 }
 
+function flipSpline(app: Application) {
+  const preferred = ["Toggle BG", "toggle", "Toggle", "sun", "darkness"];
+  for (const name of preferred) {
+    if (app.findObjectByName(name)) {
+      app.emitEvent("mouseDown", name);
+      return true;
+    }
+  }
+
+  const match = app
+    .getAllObjects()
+    .find((o) => /toggle|sun|darkness/i.test(o.name ?? ""));
+  if (!match?.name) return false;
+  app.emitEvent("mouseDown", match.name);
+  return true;
+}
+
 function SplineThemeScene() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const { setTheme, toggleTheme } = useTheme();
+  const appRef = useRef<Application | null>(null);
+  const themeRef = useRef<ThemeMode>("dark");
+  const visualRef = useRef<ThemeMode>("dark");
+  const { theme, setTheme } = useTheme();
   const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    themeRef.current = theme;
+  }, [theme]);
+
+  useEffect(() => {
+    if (!ready) return;
+    const app = appRef.current;
+    if (!app) return;
+    if (visualRef.current === theme) return;
+    if (flipSpline(app)) visualRef.current = theme;
+  }, [ready, theme]);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const onPointerDown = (e: PointerEvent) => {
+      const rect = root.getBoundingClientRect();
+      const next: ThemeMode =
+        e.clientX < rect.left + rect.width / 2 ? "dark" : "light";
+
+      if (themeRef.current === next) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return;
+      }
+
+      themeRef.current = next;
+      visualRef.current = next;
+      setTheme(next);
+    };
+
+    root.addEventListener("pointerdown", onPointerDown, true);
+    return () => root.removeEventListener("pointerdown", onPointerDown, true);
+  }, [setTheme]);
 
   const hideSplineBadge = useCallback(() => {
     const root = rootRef.current;
@@ -104,7 +154,6 @@ function SplineThemeScene() {
   }, []);
 
   const disableSplineLogo = useCallback((app: Application) => {
-    // Logo is a WebGL overlay pass, not only a DOM node.
     const renderer = (
       app as Application & {
         _renderer?: {
@@ -122,18 +171,10 @@ function SplineThemeScene() {
     }
   }, []);
 
-  const onSplineMouseDown = useCallback(
-    (e: SplineEvent) => {
-      const next = themeFromSplineEvent(e);
-      if (next === "light") setTheme("light");
-      else if (next === "dark") setTheme("dark");
-      else toggleTheme();
-    },
-    [setTheme, toggleTheme],
-  );
-
   const onLoad = useCallback(
     (app: Application) => {
+      appRef.current = app;
+      visualRef.current = "dark";
       app.setBackgroundColor("transparent");
       app.setZoom(1);
       disableSplineLogo(app);
@@ -152,7 +193,10 @@ function SplineThemeScene() {
       window.setTimeout(hideSplineBadge, 1000);
       window.setTimeout(hideSplineBadge, 2500);
 
-      // Fade in after first paint so it doesn't pop in blank/half-loaded.
+      if (themeRef.current === "light" && flipSpline(app)) {
+        visualRef.current = "light";
+      }
+
       window.requestAnimationFrame(() => {
         window.setTimeout(() => setReady(true), 80);
       });
@@ -173,7 +217,6 @@ function SplineThemeScene() {
       <Spline
         scene={SCENE}
         onLoad={onLoad}
-        onSplineMouseDown={onSplineMouseDown}
         className="office-theme-spline-canvas"
         style={{ width: "100%", height: "100%" }}
       />

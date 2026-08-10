@@ -35,6 +35,7 @@ export type Messages = {
   nextMonth: string;
   weekdays: [string, string, string, string, string, string, string];
   bookingWith: string;
+  stepSchedule: string;
   pickDate: string;
   pickTime: string;
   yourDetails: string;
@@ -80,6 +81,11 @@ export type Messages = {
   saveAvailability: string;
   eventTitleLabel: string;
   displayNameLabel: string;
+  businessCardTitle: string;
+  avatarLabel: string;
+  uploadAvatar: string;
+  removeAvatar: string;
+  bioLabel: string;
   durationLabel: string;
   windowStartLabel: string;
   windowEndLabel: string;
@@ -191,6 +197,7 @@ export const messages: Record<Locale, Messages> = {
     nextMonth: "Nächster Monat",
     weekdays: ["MO", "DI", "MI", "DO", "FR", "SA", "SO"],
     bookingWith: "Termin mit",
+    stepSchedule: "Termin wählen",
     pickDate: "Datum wählen",
     pickTime: "Uhrzeit wählen",
     yourDetails: "Deine Daten",
@@ -237,6 +244,11 @@ export const messages: Record<Locale, Messages> = {
     saveAvailability: "Speichern",
     eventTitleLabel: "Termin-Titel",
     displayNameLabel: "Anzeigename",
+    businessCardTitle: "Visitenkarte",
+    avatarLabel: "Foto",
+    uploadAvatar: "Foto hochladen",
+    removeAvatar: "Foto entfernen",
+    bioLabel: "Beschreibung",
     durationLabel: "Dauer",
     windowStartLabel: "Von",
     windowEndLabel: "Bis",
@@ -362,6 +374,7 @@ export const messages: Record<Locale, Messages> = {
     nextMonth: "Next month",
     weekdays: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
     bookingWith: "Meeting with",
+    stepSchedule: "Pick a time",
     pickDate: "Pick a date",
     pickTime: "Pick a time",
     yourDetails: "Your details",
@@ -408,6 +421,11 @@ export const messages: Record<Locale, Messages> = {
     saveAvailability: "Save",
     eventTitleLabel: "Event title",
     displayNameLabel: "Display name",
+    businessCardTitle: "Business card",
+    avatarLabel: "Photo",
+    uploadAvatar: "Upload photo",
+    removeAvatar: "Remove photo",
+    bioLabel: "Bio",
     durationLabel: "Duration",
     windowStartLabel: "From",
     windowEndLabel: "Until",
@@ -533,6 +551,7 @@ export const messages: Record<Locale, Messages> = {
     nextMonth: "次の月",
     weekdays: ["月", "火", "水", "木", "金", "土", "日"],
     bookingWith: "ミーティング：",
+    stepSchedule: "日時を選ぶ",
     pickDate: "日付を選ぶ",
     pickTime: "時間を選ぶ",
     yourDetails: "あなたの情報",
@@ -579,6 +598,11 @@ export const messages: Record<Locale, Messages> = {
     saveAvailability: "保存",
     eventTitleLabel: "予定タイトル",
     displayNameLabel: "表示名",
+    businessCardTitle: "名刺",
+    avatarLabel: "写真",
+    uploadAvatar: "写真をアップロード",
+    removeAvatar: "写真を削除",
+    bioLabel: "自己紹介",
     durationLabel: "時間",
     windowStartLabel: "開始",
     windowEndLabel: "終了",

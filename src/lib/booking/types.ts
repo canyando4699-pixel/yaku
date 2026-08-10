@@ -29,6 +29,9 @@ export type Booking = {
 export type HostProfile = {
   slug: string;
   displayName: string;
+  /** Empty string = no photo */
+  avatarDataUrl: string;
+  bio: string;
   eventTitle: string;
   durationMinutes: number;
   timezone: string;
