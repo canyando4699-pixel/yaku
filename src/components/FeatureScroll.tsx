@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import Spline from "@splinetool/react-spline";
+import type { Application } from "@splinetool/runtime";
 import {
+  Component,
   useCallback,
   useEffect,
   useRef,
   useState,
+  type ErrorInfo,
   type ReactNode,
   type RefObject,
 } from "react";
@@ -33,6 +37,8 @@ type FeatureId = (typeof FEATURE_IDS)[number];
 const CARD_W = 260;
 const CARD_H = 320;
 const RADIUS = 340;
+const SPLINE_SCENE =
+  "https://my.spline.design/100followers-PkU5UZJQoYCU6oJ0j4y2OgzW/scene.splinecode";
 
 function clamp01(value: number) {
   return Math.min(1, Math.max(0, value));
@@ -40,6 +46,110 @@ function clamp01(value: number) {
 
 function easeOutCubic(t: number) {
   return 1 - (1 - t) ** 3;
+}
+
+class SplineBgBoundary extends Component<
+  { children: ReactNode; onError: () => void },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("FeatureScroll Spline failed", error, info);
+    this.props.onError();
+  }
+
+  render() {
+    if (this.state.failed) return null;
+    return this.props.children;
+  }
+}
+
+function FeatureSplineBg({ opacity }: { opacity: number }) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [boot, setBoot] = useState(0);
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setMounted(true);
+      },
+      { rootMargin: "200px 0px", threshold: 0.01 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || ready) return;
+    const timer = window.setTimeout(() => {
+      setReady(false);
+      setBoot((n) => n + 1);
+    }, 12000);
+    return () => window.clearTimeout(timer);
+  }, [mounted, ready, boot]);
+
+  const hideBadge = useCallback(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    root.querySelectorAll("a").forEach((el) => {
+      const href = el.getAttribute("href") ?? "";
+      const text = (el.textContent ?? "").replace(/\s+/g, " ").trim();
+      if (href.includes("spline") || /built\s*with\s*spline/i.test(text)) {
+        el.style.setProperty("display", "none", "important");
+        el.remove();
+      }
+    });
+  }, []);
+
+  const onLoad = useCallback(
+    (app: Application) => {
+      try {
+        app.setBackgroundColor("transparent");
+      } catch {
+        /* ignore */
+      }
+      hideBadge();
+      window.setTimeout(hideBadge, 300);
+      window.setTimeout(hideBadge, 1200);
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => setReady(true), 60);
+      });
+    },
+    [hideBadge],
+  );
+
+  const onError = useCallback(() => {
+    setReady(false);
+    window.setTimeout(() => setBoot((n) => n + 1), 800);
+  }, []);
+
+  return (
+    <div ref={rootRef} className="absolute inset-0 overflow-hidden" aria-hidden>
+      {mounted ? (
+        <div
+          className="absolute left-1/2 top-1/2 h-[120%] w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 transition-opacity duration-700"
+          style={{ opacity: ready ? opacity : 0 }}
+        >
+          <SplineBgBoundary key={boot} onError={onError}>
+            <Spline
+              scene={SPLINE_SCENE}
+              onLoad={onLoad}
+              style={{ width: "100%", height: "100%" }}
+            />
+          </SplineBgBoundary>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function useSectionEnter(ref: RefObject<HTMLElement | null>) {
@@ -114,11 +224,13 @@ function useAutoRotation(
           const card = cards[i] as HTMLElement;
           const cardAngle = i * step;
           const facing = Math.cos(((cardAngle + angle) * Math.PI) / 180);
-          const lit = clamp01((facing - 0.35) / 0.65);
-          const visible = facing > 0.55;
-          card.style.opacity = visible ? String(0.45 + lit * 0.55) : "0";
-          card.style.visibility = visible ? "visible" : "hidden";
-          card.style.filter = facing > 0.92 ? "none" : `brightness(${0.55 + lit * 0.35}) blur(${(1 - lit) * 1.2}px)`;
+          const lit = clamp01((facing + 1) / 2);
+          card.style.opacity = String(0.28 + lit * 0.72);
+          card.style.visibility = "visible";
+          card.style.filter =
+            facing > 0.85
+              ? "none"
+              : `brightness(${0.5 + lit * 0.5}) blur(${(1 - lit) * 0.8}px)`;
           card.style.pointerEvents = facing > 0.85 ? "auto" : "none";
           card.style.zIndex = String(Math.round(facing * 100));
         }
@@ -333,7 +445,7 @@ export function FeatureScroll() {
   const enterT = easeOutCubic(enter);
   const handleIndex = useCallback((i: number) => setActiveIndex(i), []);
 
-  useAutoRotation(enterT > 0.55, ringRef, handleIndex);
+  useAutoRotation(true, ringRef, handleIndex);
 
   useEffect(() => {
     setHost(loadHostProfile(defaultHostProfile.slug));
@@ -363,14 +475,7 @@ export function FeatureScroll() {
     >
       <div className="sticky top-0 flex min-h-dvh flex-col">
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-          <iframe
-            src="https://my.spline.design/100followers-PkU5UZJQoYCU6oJ0j4y2OgzW/"
-            title=""
-            loading="eager"
-            className="absolute left-1/2 top-1/2 h-[120%] w-[120%] max-w-none -translate-x-1/2 -translate-y-1/2 border-0"
-            style={{ opacity: 0.35 + enterT * 0.65 }}
-            allow="autoplay"
-          />
+          <FeatureSplineBg opacity={0.35 + enterT * 0.65} />
           <div
             className="absolute inset-0"
             style={{
@@ -389,11 +494,7 @@ export function FeatureScroll() {
         />
 
         <div
-          className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-8 pt-12 will-change-[opacity,transform] md:px-10"
-          style={{
-            opacity: enterT,
-            transform: `translate3d(0, ${(1 - enterT) * 28}px, 0)`,
-          }}
+          className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-8 pt-12 md:px-10"
         >
           <div className="relative z-20 flex h-[9.5rem] w-full max-w-lg shrink-0 flex-col items-center px-2 pb-4 text-center md:h-[10.5rem]">
             <p className="text-sm tracking-[0.2em] text-[#ff6b5e] uppercase">
@@ -430,6 +531,8 @@ export function FeatureScroll() {
               >
                 {FEATURE_IDS.map((id, i) => {
                   const angle = i * step;
+                  const facing = Math.cos((angle * Math.PI) / 180);
+                  const lit = clamp01((facing + 1) / 2);
                   return (
                     <div
                       key={id}
@@ -439,6 +542,7 @@ export function FeatureScroll() {
                         height: CARD_H,
                         transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
                         transformStyle: "preserve-3d",
+                        opacity: 0.28 + lit * 0.72,
                       }}
                       aria-hidden={i !== activeIndex}
                     >
