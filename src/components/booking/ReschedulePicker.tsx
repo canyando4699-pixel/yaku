@@ -25,6 +25,7 @@ function nextBookableDay(host: HostProfile, from = new Date()) {
 type ReschedulePickerProps = {
   host: HostProfile;
   excludeBookingId: string;
+  durationMinutes: number;
   initialStartsAt?: string;
   onConfirm: (startsAt: string, endsAt: string) => void;
   onCancel: () => void;
@@ -33,6 +34,7 @@ type ReschedulePickerProps = {
 export function ReschedulePicker({
   host,
   excludeBookingId,
+  durationMinutes,
   initialStartsAt,
   onConfirm,
   onCancel,
@@ -49,9 +51,9 @@ export function ReschedulePicker({
   const slots = useMemo(
     () =>
       getAvailableSlots(host, selectedDate, new Date(), excludeBookingId, {
-        durationMinutes: host.durationMinutes,
+        durationMinutes,
       }),
-    [host, selectedDate, excludeBookingId],
+    [host, selectedDate, excludeBookingId, durationMinutes],
   );
 
   const dateFormatter = useMemo(
@@ -76,7 +78,7 @@ export function ReschedulePicker({
 
   function submit() {
     if (!selectedSlot) return;
-    const endsAt = addMinutes(selectedSlot, host.durationMinutes);
+    const endsAt = addMinutes(selectedSlot, durationMinutes);
     try {
       onConfirm(selectedSlot, endsAt);
     } catch {

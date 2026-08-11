@@ -24,6 +24,7 @@ import {
 import { defaultHostProfile } from "@/lib/booking/demo";
 import { loadHostProfile } from "@/lib/booking/hostProfile";
 import { downloadIcs } from "@/lib/booking/ics";
+import { bookingDurationMinutes } from "@/lib/booking/bookingDuration";
 import {
   cancelBooking,
   listBookings,
@@ -478,6 +479,7 @@ export function HostDashboard() {
                     <ReschedulePicker
                       host={host}
                       excludeBookingId={selected.id}
+                      durationMinutes={bookingDurationMinutes(selected, host)}
                       initialStartsAt={selected.startsAt}
                       onConfirm={(startsAt, endsAt) =>
                         handleReschedule(selected.id, startsAt, endsAt)

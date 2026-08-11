@@ -78,10 +78,18 @@ export function rescheduleBooking(
 ): Booking | null {
   const current = getBooking(id);
   if (!current || current.status !== "confirmed") return null;
-  if (isRangeTaken(current.slug, startsAt, endsAt, id)) return null;
+
+  const durationMs =
+    new Date(current.endsAt).getTime() - new Date(current.startsAt).getTime();
+  const nextEndsAt =
+    durationMs > 0
+      ? new Date(new Date(startsAt).getTime() + durationMs).toISOString()
+      : endsAt;
+
+  if (isRangeTaken(current.slug, startsAt, nextEndsAt, id)) return null;
   return updateBooking(id, {
     startsAt,
-    endsAt,
+    endsAt: nextEndsAt,
     status: "confirmed",
     cancelledAt: undefined,
   });

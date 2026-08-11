@@ -10,6 +10,7 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import { localeDate } from "@/i18n/messages";
 import { downloadIcs } from "@/lib/booking/ics";
 import { loadHostProfile } from "@/lib/booking/hostProfile";
+import { bookingDurationMinutes } from "@/lib/booking/bookingDuration";
 import {
   cancelBooking,
   getBooking,
@@ -213,6 +214,7 @@ export function ManageBooking({
               <ReschedulePicker
                 host={host}
                 excludeBookingId={booking.id}
+                durationMinutes={bookingDurationMinutes(booking, host)}
                 initialStartsAt={booking.startsAt}
                 onConfirm={handleReschedule}
                 onCancel={() => setMode("view")}
