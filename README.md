@@ -31,13 +31,13 @@ Lightweight, open source, self-hostable. Local-first for the demo; backend can m
 
 ### Landing
 
-Atmospheric Fuji hero with the 約 brand and a clear path into the demo.
+Cinematic scroll story — intro brand lockup, mid product sights, and a CTA chapter into the demo.
 
-![Yaku hero — Fuji night with 約 brand lockup](docs/screenshots/hero-en.png)
+![Yaku cinematic intro — brand lockup](docs/screenshots/hero-en.png)
 
-Feature carousel on the landing page (Spline scene + UI cards):
+Mid chapter with product story and feature sights:
 
-![Yaku feature carousel — Series and integrations](docs/screenshots/calendar-en.png)
+![Yaku cinematic mid — product sights](docs/screenshots/calendar-en.png)
 
 ### Guest booking
 
@@ -69,7 +69,7 @@ Local auth for the demo host account:
 
 Early MVP — default UI language **English** (DE / JA via switcher):
 
-- **Landing** — hero + calendar preview
+- **Landing** — cinematic scroll chapters (intro / mid / CTA)
 - **Guest booking** (`/b/demo`) — event types, guest timezone, weekly series option
 - **Guest manage** (`/b/demo/m/[bookingId]`) — cancel / reschedule + `.ics` download
 - **Local auth** (`/login`, `/signup`) — demo: `demo@yaku.app` / `yaku123`
