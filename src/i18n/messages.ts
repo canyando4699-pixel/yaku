@@ -178,6 +178,9 @@ export type Messages = {
   tourManageBody: string;
   tourSeriesTitle: string;
   tourSeriesBody: string;
+  cinematicLoading: string;
+  cinematicScrollHint: string;
+  cinematicPlay: string;
 };
 
 export const messages: Record<Locale, Messages> = {
@@ -357,6 +360,9 @@ export const messages: Record<Locale, Messages> = {
     tourSeriesTitle: "Serien & Integrationen",
     tourSeriesBody:
       "Wöchentliche Serien heute. Google- und Apple-Kalender als Nächstes.",
+    cinematicLoading: "Lädt…",
+    cinematicScrollHint: "Scrollen",
+    cinematicPlay: "Abspielen",
   },
   en: {
     openSource: "Open Source",
@@ -534,6 +540,9 @@ export const messages: Record<Locale, Messages> = {
     tourSeriesTitle: "Series & integrations",
     tourSeriesBody:
       "Weekly series today. Google and Apple calendars next.",
+    cinematicLoading: "Loading…",
+    cinematicScrollHint: "Scroll",
+    cinematicPlay: "Play",
   },
   ja: {
     openSource: "オープンソース",
@@ -711,5 +720,8 @@ export const messages: Record<Locale, Messages> = {
     tourSeriesTitle: "連続予約と連携",
     tourSeriesBody:
       "毎週の連続予約は今日から。Google・Appleカレンダーは次のステップ。",
+    cinematicLoading: "読み込み中…",
+    cinematicScrollHint: "スクロール",
+    cinematicPlay: "再生",
   },
 };
