@@ -27,10 +27,10 @@ export const CHAPTERS: readonly ChapterDef[] = [
     enter: 0,
     exit: 0.36,
     motion: {
-      scaleFrom: 1.08,
+      scaleFrom: 1.02,
       scaleTo: 1,
       blurFrom: 0,
-      blurTo: 2,
+      blurTo: 0,
     },
   },
   {
@@ -40,9 +40,9 @@ export const CHAPTERS: readonly ChapterDef[] = [
     enter: 0.28,
     exit: 0.72,
     motion: {
-      scaleFrom: 1.04,
+      scaleFrom: 1.02,
       scaleTo: 1,
-      blurFrom: 1,
+      blurFrom: 0,
       blurTo: 0,
     },
   },
@@ -53,9 +53,9 @@ export const CHAPTERS: readonly ChapterDef[] = [
     enter: 0.64,
     exit: 1,
     motion: {
-      scaleFrom: 1.06,
+      scaleFrom: 1.02,
       scaleTo: 1,
-      blurFrom: 1.5,
+      blurFrom: 0,
       blurTo: 0,
     },
   },
