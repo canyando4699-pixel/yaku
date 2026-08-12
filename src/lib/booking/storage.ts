@@ -1,3 +1,4 @@
+import { loadHostProfile } from "@/lib/booking/hostProfile";
 import type { Booking, BookingStatus } from "@/lib/booking/types";
 
 const STORAGE_KEY = "yaku-bookings";
@@ -78,7 +79,19 @@ export function rescheduleBooking(
 ): Booking | null {
   const current = getBooking(id);
   if (!current || current.status !== "confirmed") return null;
-  if (isRangeTaken(current.slug, startsAt, endsAt, id)) return null;
+  const host = loadHostProfile(current.slug);
+  if (
+    isRangeTaken(
+      current.slug,
+      startsAt,
+      endsAt,
+      id,
+      host.bufferBeforeMinutes,
+      host.bufferAfterMinutes,
+    )
+  ) {
+    return null;
+  }
   return updateBooking(id, {
     startsAt,
     endsAt,
@@ -123,8 +136,9 @@ export function isRangeTaken(
 
   return listBookings(slug).some((b) => {
     if (b.status !== "confirmed" || b.id === excludeId) return false;
-    const bStart = new Date(b.startsAt).getTime();
-    const bEnd = new Date(b.endsAt).getTime();
+    const bStart =
+      new Date(b.startsAt).getTime() - bufferBeforeMinutes * 60_000;
+    const bEnd = new Date(b.endsAt).getTime() + bufferAfterMinutes * 60_000;
     return rangesOverlap(start, end, bStart, bEnd);
   });
 }
