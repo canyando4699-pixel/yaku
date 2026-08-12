@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { OfficeChaseRing } from "@/components/booking/OfficeChaseRing";
 import { Icon } from "@/components/ui/Icon";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { useTheme } from "@/i18n/ThemeProvider";
@@ -405,8 +404,7 @@ export function HostScheduleCalendar({
   ];
 
   return (
-    <div className="host-cal office-ringed" data-theme={theme}>
-      <OfficeChaseRing />
+    <div className="host-cal" data-theme={theme}>
       <aside className="host-cal-sidebar relative z-[1]">
         <div className="host-cal-mini-nav">
           <p className="text-sm font-semibold tracking-tight">

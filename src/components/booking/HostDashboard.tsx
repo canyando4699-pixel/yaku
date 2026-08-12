@@ -6,14 +6,11 @@ import { useEffect, useMemo, useState } from "react";
 import { HostAvailability } from "@/components/booking/HostAvailability";
 import { HostBookingList } from "@/components/booking/HostBookingList";
 import { HostScheduleCalendar } from "@/components/booking/HostScheduleCalendar";
-import { OfficeChaseRing } from "@/components/booking/OfficeChaseRing";
-import { OfficeTiltDiv } from "@/components/booking/OfficeTiltSurface";
 import { OfficeShell, type OfficeRoom } from "@/components/booking/OfficeShell";
 import { ReschedulePicker } from "@/components/booking/ReschedulePicker";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { OfficeThemeToggle } from "@/components/booking/OfficeThemeToggle";
 import { Icon } from "@/components/ui/Icon";
-import { IslandButton, IslandPill, islandClass } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { localeDate } from "@/i18n/messages";
 import {
@@ -163,7 +160,7 @@ export function HostDashboard() {
 
   if (!ready || !session) {
     return (
-      <div className="flex min-h-full flex-1 items-center justify-center bg-[#0c0c0e] text-white/50">
+      <div className="flex min-h-full flex-1 items-center justify-center bg-[#12110f] text-white/50">
         …
       </div>
     );
@@ -186,7 +183,7 @@ export function HostDashboard() {
       sidebar={
         <>
           <Link href="/" className="font-display text-base tracking-wide">
-            <span className="mr-1.5 text-accent">約</span>
+            <span className="office-brand-mark mr-1.5">約</span>
             Yaku
           </Link>
           <p className="office-eyebrow mt-1 text-[10px] tracking-[0.2em] uppercase">
@@ -199,48 +196,47 @@ export function HostDashboard() {
               setNav("share");
               void copyBookingLink();
             }}
-            className="yaku-glass office-glass-btn office-side-btn mt-4"
+            className="office-dc-btn-gold mt-4 w-full justify-start"
           >
             <Icon name="plus" className="h-3.5 w-3.5" />
             <span>{t.dashShareLink}</span>
           </button>
 
-          <nav className="mt-5 space-y-1">
-            {navItems.map((item) => {
+          <nav className="mt-5 flex flex-col">
+            {navItems.map((item, index) => {
               const active = nav === item.key;
               return (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => setNav(item.key)}
-                  className={[
-                    "yaku-glass office-glass-btn office-side-btn",
-                    active ? "office-nav-item-active" : "",
-                  ].join(" ")}
-                  data-active={active ? "true" : "false"}
-                >
-                  <Icon name={item.icon} className="h-3.5 w-3.5" />
-                  <span>{item.label}</span>
-                </button>
+                <div key={item.key}>
+                  {index > 0 ? <div className="office-dc-nav-divider" /> : null}
+                  <button
+                    type="button"
+                    onClick={() => setNav(item.key)}
+                    className="office-dc-nav-row"
+                    data-active={active ? "true" : "false"}
+                  >
+                    <span>{item.label}</span>
+                    <Icon name={item.icon} className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               );
             })}
           </nav>
 
-          <div className="office-nav-footer mt-auto space-y-2 border-t pt-3">
-            <div className="yaku-glass office-glass-btn office-side-btn">
+          <div className="office-nav-footer mt-auto space-y-2 border-t border-[color:var(--office-border)] pt-3">
+            <div className="office-dc-nav-row pointer-events-none">
               <div className="min-w-0 leading-tight">
                 <p className="truncate text-xs font-medium">{session.displayName}</p>
-                <p className="truncate text-[10px] text-white/70">{session.email}</p>
+                <p className="office-muted truncate text-[10px]">{session.email}</p>
               </div>
             </div>
-            <LanguageSwitcher className="office-side-btn" />
+            <LanguageSwitcher className="office-dc-nav-row" />
             <button
               type="button"
               onClick={handleLogout}
-              className="yaku-glass office-glass-btn office-side-btn"
+              className="office-dc-nav-row"
             >
-              <Icon name="logout" className="h-3.5 w-3.5" />
               <span>{t.logout}</span>
+              <Icon name="logout" className="h-3.5 w-3.5" />
             </button>
           </div>
         </>
@@ -254,21 +250,13 @@ export function HostDashboard() {
           <p className="office-muted mt-0.5 text-xs">{t.hostBookingsHint}</p>
         </div>
         <div className="flex items-center gap-2">
-          <IslandPill className="office-count-pill">
-            <span className="h-2 w-2 rounded-full bg-[#c4a35a]" />
+          <div className="office-dc-count">
+            <span className="office-status-dot h-2 w-2 rounded-full" />
             <span>{confirmed.length}</span>
-          </IslandPill>
+          </div>
           <div className="office-theme-spline-header">
             <OfficeThemeToggle />
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="office-icon-btn inline-flex h-9 w-9 items-center justify-center rounded-full md:hidden"
-            aria-label={t.logout}
-          >
-            <Icon name="logout" className="h-4 w-4" />
-          </button>
         </div>
       </header>
 
@@ -278,10 +266,8 @@ export function HostDashboard() {
             key={item.key}
             type="button"
             onClick={() => setNav(item.key)}
-            className={[
-              "office-chip shrink-0 rounded-full px-3 py-1.5 text-sm font-medium",
-              nav === item.key ? "office-chip-active" : "",
-            ].join(" ")}
+            className="office-dc-chip shrink-0"
+            data-active={nav === item.key ? "true" : "false"}
           >
             {item.label}
           </button>
@@ -309,42 +295,35 @@ export function HostDashboard() {
             ) : null}
 
             {nav === "share" ? (
-              <OfficeTiltDiv className="office-panel office-ringed mx-auto max-w-lg p-6">
-                <OfficeChaseRing />
-                <div className="relative z-[1]">
+              <div className="office-dc-card mx-auto max-w-lg p-6">
                 <h2 className="font-display text-2xl">{t.dashShareLink}</h2>
                 <p className="office-muted mt-2 text-sm">
                   /b/{host.slug}
                 </p>
                 <div className="mt-6 flex flex-wrap items-center gap-2">
-                  <IslandButton
+                  <button
                     type="button"
-                    variant="island"
-                    size="md"
+                    className="office-dc-btn-gold"
                     onClick={() => void copyBookingLink()}
                   >
                     <Icon name="link" className="h-4 w-4" />
                     {copied ? t.linkCopied : t.copyLink}
-                  </IslandButton>
+                  </button>
                   <Link
                     href={`/b/${host.slug}?from=host`}
-                    className={islandClass("soft", "md")}
+                    className="office-dc-btn-dark"
                   >
                     {t.openBookingLink}
                   </Link>
                 </div>
-                </div>
-              </OfficeTiltDiv>
+              </div>
             ) : null}
 
             {nav === "integrations" ? (
-              <OfficeTiltDiv className="office-panel office-ringed mx-auto max-w-lg p-6">
-                <OfficeChaseRing />
-                <div className="relative z-[1]">
+              <div className="office-dc-card mx-auto max-w-lg p-6">
                 <h2 className="font-display text-2xl">{t.integrationsTitle}</h2>
                 <p className="office-muted mt-2 text-sm">{t.integrationsHint}</p>
-                </div>
-              </OfficeTiltDiv>
+              </div>
             ) : null}
 
             {nav === "list" ? (
@@ -388,17 +367,15 @@ export function HostDashboard() {
                 role="dialog"
                 aria-modal="true"
                 aria-label={selected.guestName}
-                className="office-modal office-ringed max-h-[min(90dvh,720px)] w-full max-w-[420px] overflow-auto rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
+                className="office-dc-modal max-h-[min(90dvh,720px)] w-full max-w-[420px] overflow-auto"
                 onClick={(e) => e.stopPropagation()}
               >
-                <OfficeChaseRing />
-                <div className="relative z-[1]">
                 <div
-                  className="office-modal-hero relative border-b px-5 pb-4 pt-5"
+                  className="office-dc-modal-hero relative px-5 pb-4 pt-5"
                   style={{ backgroundColor: selectedPastel.bg }}
                 >
                   <div
-                    className="absolute inset-y-0 left-0 w-1.5 rounded-l-2xl"
+                    className="absolute inset-y-0 left-0 w-1.5 rounded-l-[10px]"
                     style={{ backgroundColor: selectedPastel.border }}
                   />
                   <div className="flex items-start justify-between gap-3 pl-2">
@@ -427,7 +404,7 @@ export function HostDashboard() {
                         setRescheduleId(null);
                         setConfirmCancelId(null);
                       }}
-                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/5 text-[#111]/55 hover:bg-black/10 hover:text-[#111]"
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-black/5 text-[#111]/55 hover:bg-black/10 hover:text-[#111]"
                       aria-label={t.back}
                     >
                       <Icon name="x" className="h-4 w-4" />
@@ -435,7 +412,7 @@ export function HostDashboard() {
                   </div>
                 </div>
 
-                <div className="office-modal-body space-y-3 px-5 py-4">
+                <div className="office-dc-modal-body space-y-3 px-5 py-4">
                   <div className="flex items-start gap-3 text-sm">
                     <Icon
                       name="mail"
@@ -471,7 +448,7 @@ export function HostDashboard() {
                 </div>
 
                 {rescheduleId === selected.id ? (
-                  <div className="office-modal-footer border-t px-5 py-4">
+                  <div className="office-dc-modal-footer px-5 py-4">
                     <h3 className="mb-3 text-base font-semibold">
                       {t.rescheduleTitle}
                     </h3>
@@ -486,20 +463,20 @@ export function HostDashboard() {
                     />
                   </div>
                 ) : (
-                  <div className="office-modal-footer border-t px-4 py-3">
+                  <div className="office-dc-modal-footer px-4 py-3">
                     {confirmCancelId === selected.id ? (
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => handleCancel(selected.id)}
-                          className="flex-1 rounded-xl bg-[#ff3b30] px-3 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+                          className="flex-1 rounded-[8px] bg-[#ff3b30] px-3 py-2.5 text-sm font-semibold text-white hover:brightness-110"
                         >
                           {t.cancelBooking}
                         </button>
                         <button
                           type="button"
                           onClick={() => setConfirmCancelId(null)}
-                          className="office-soft-btn flex-1 rounded-xl px-3 py-2.5 text-sm font-medium"
+                          className="office-dc-btn-dark flex-1"
                         >
                           {t.back}
                         </button>
@@ -513,7 +490,7 @@ export function HostDashboard() {
                               setRescheduleId(selected.id);
                               setConfirmCancelId(null);
                             }}
-                            className="office-soft-btn flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5"
+                            className="office-soft-btn flex flex-col items-center gap-1.5 rounded-[8px] px-2 py-2.5"
                           >
                             <Icon name="calendar" className="h-4 w-4" />
                             <span className="text-[11px] font-medium">
@@ -523,7 +500,7 @@ export function HostDashboard() {
                           <button
                             type="button"
                             onClick={() => downloadIcs(selected, host)}
-                            className="office-soft-btn flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5"
+                            className="office-soft-btn flex flex-col items-center gap-1.5 rounded-[8px] px-2 py-2.5"
                           >
                             <Icon name="download" className="h-4 w-4" />
                             <span className="text-[11px] font-medium">.ics</span>
@@ -531,7 +508,7 @@ export function HostDashboard() {
                           <button
                             type="button"
                             onClick={() => setConfirmCancelId(selected.id)}
-                            className="flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-[#ff3b30] hover:bg-[#ff3b30]/10"
+                            className="flex flex-col items-center gap-1.5 rounded-[8px] px-2 py-2.5 text-[#ff3b30] hover:bg-[#ff3b30]/10"
                           >
                             <Icon name="x" className="h-4 w-4" />
                             <span className="text-[11px] font-medium">
@@ -541,7 +518,7 @@ export function HostDashboard() {
                         </div>
                         <Link
                           href={`/b/${host.slug}/m/${selected.id}`}
-                          className="office-muted mt-2 flex w-full items-center justify-center rounded-xl px-3 py-2 text-xs font-medium hover:bg-[color:var(--office-nav-hover)]"
+                          className="office-muted mt-2 flex w-full items-center justify-center rounded-[8px] px-3 py-2 text-xs font-medium hover:bg-[color:var(--office-nav-hover)]"
                         >
                           {t.manageTitle}
                         </Link>
@@ -549,7 +526,6 @@ export function HostDashboard() {
                     )}
                   </div>
                 )}
-                </div>
               </div>
             </div>
           ) : null}

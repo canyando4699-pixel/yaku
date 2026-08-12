@@ -72,7 +72,9 @@ function StepIndicator({
         <span
           className={[
             "h-1.5 w-1.5 rounded-full",
-            active === "schedule" ? "bg-accent" : "bg-white/25",
+            active === "schedule"
+              ? "bg-[color:var(--dc-blue)]"
+              : "bg-white/25",
           ].join(" ")}
         />
         1 {scheduleLabel}
@@ -89,7 +91,9 @@ function StepIndicator({
         <span
           className={[
             "h-1.5 w-1.5 rounded-full",
-            active === "details" ? "bg-accent" : "bg-white/25",
+            active === "details"
+              ? "bg-[color:var(--dc-blue)]"
+              : "bg-white/25",
           ].join(" ")}
         />
         2 {detailsLabel}
@@ -277,7 +281,7 @@ export function BookingFlow({
       />
       <div
         aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,8,10,0.72)_0%,rgba(8,8,10,0.62)_45%,rgba(8,8,10,0.78)_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,17,15,0.78)_0%,rgba(18,17,15,0.68)_45%,rgba(18,17,15,0.82)_100%)]"
       />
 
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
@@ -285,7 +289,7 @@ export function BookingFlow({
           href={fromHost ? "/host" : "/"}
           className="font-display text-xl tracking-wide text-[color:var(--office-text)]"
         >
-          <span className="mr-2 text-accent">約</span>
+          <span className="office-brand-mark mr-2">約</span>
           Yaku
         </Link>
         <div className="flex items-center gap-2.5">
@@ -299,7 +303,7 @@ export function BookingFlow({
             </Link>
           ) : (
             <IslandPill className="office-liquid-glass hidden sm:inline-flex">
-              <span className="h-2 w-2 rounded-full bg-[#ff9f0a]" />
+              <span className="h-2 w-2 rounded-full bg-[color:var(--dc-blue)]" />
               <span>{t.demoOnly}</span>
             </IslandPill>
           )}
@@ -392,7 +396,7 @@ export function BookingFlow({
                     <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
                       <Icon
                         name="calendar"
-                        className="h-3.5 w-3.5 text-accent"
+                        className="h-3.5 w-3.5 text-[color:var(--dc-blue)]"
                       />
                       {t.pickDate}
                     </p>
@@ -412,7 +416,7 @@ export function BookingFlow({
                       <p className="flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
                         <Icon
                           name="clock"
-                          className="h-3.5 w-3.5 text-accent"
+                          className="h-3.5 w-3.5 text-[color:var(--dc-blue)]"
                         />
                         {t.pickTime}
                       </p>

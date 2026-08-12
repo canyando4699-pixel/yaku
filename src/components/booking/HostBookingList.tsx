@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { OfficeChaseRing } from "@/components/booking/OfficeChaseRing";
 import { Icon } from "@/components/ui/Icon";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { localeDate } from "@/i18n/messages";
@@ -76,9 +75,8 @@ export function HostBookingList({ bookings, onOpen }: HostBookingListProps) {
 
   return (
     <div className="host-list">
-      <div className="host-list-card office-ringed">
-        <OfficeChaseRing />
-        <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
+      <div className="host-list-card office-dc-card">
+        <div className="flex min-h-0 flex-1 flex-col">
         <div className="host-list-header">
           <div>
             <h2 className="host-list-title">{t.dashList}</h2>

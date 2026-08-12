@@ -40,22 +40,31 @@ export function StoryPanels({ activeChapter }: { activeChapter: ChapterId }) {
                 Yaku
               </h1>
             </div>
-            <CinematicHairline className="mt-3" />
+            <div className="mt-3 flex items-center justify-center" aria-hidden>
+              <span className="h-px w-16 bg-white/30 md:w-24" />
+            </div>
             <p className="mt-3 text-[11px] tracking-[0.28em] text-white/50 uppercase">
               {t.eyebrow}
             </p>
           </div>
-          <p className="mx-auto mt-4 max-w-md font-display text-xl leading-snug text-white/88 md:text-2xl">
-            {t.headlineLine1}
-            <span className="mx-2 text-white/30">·</span>
-            {t.headlineLine2}
-          </p>
-          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-white/55 md:text-base">
-            {t.subcopy}
-          </p>
-          <p className="cinematic-scroll-hint mt-8 text-[11px] tracking-[0.22em] text-white/40 uppercase">
-            {t.cinematicScrollHint}
-          </p>
+          <div className="cinematic-intro-quote mx-auto mt-6 max-w-md text-center">
+            <p
+              lang="ja"
+              className="font-display text-2xl leading-snug tracking-[0.06em] text-white/90 md:text-3xl"
+            >
+              {t.quoteKanji}
+            </p>
+            <p
+              lang="ja"
+              aria-hidden
+              className="mt-4 font-display text-lg leading-none text-white/35 md:text-xl"
+            >
+              約
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-white md:text-base">
+              {t.quoteGloss}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -100,9 +109,6 @@ export function StoryPanels({ activeChapter }: { activeChapter: ChapterId }) {
           <h2 className="mt-3 font-display text-3xl text-white md:text-5xl">
             {t.headlineLine1} {t.headlineLine2}
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/60 md:text-base">
-            {t.subcopy}
-          </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link href="/b/demo" className={islandClass("accent", "lg")}>
               <Icon name="calendar" className="h-4 w-4" />

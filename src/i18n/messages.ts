@@ -26,7 +26,8 @@ export type Messages = {
   eyebrow: string;
   headlineLine1: string;
   headlineLine2: string;
-  subcopy: string;
+  quoteKanji: string;
+  quoteGloss: string;
   badgeMvp: string;
   badgeFeatures: string;
   tryDemo: string;
@@ -179,8 +180,13 @@ export type Messages = {
   tourSeriesTitle: string;
   tourSeriesBody: string;
   cinematicLoading: string;
-  cinematicScrollHint: string;
   cinematicPlay: string;
+  footerPrivacy: string;
+  footerImprint: string;
+  privacyTitle: string;
+  privacyStub: string;
+  imprintTitle: string;
+  imprintStub: string;
 };
 
 export const messages: Record<Locale, Messages> = {
@@ -190,8 +196,8 @@ export const messages: Record<Locale, Messages> = {
     eyebrow: "ein Versprechen",
     headlineLine1: "Ein Termin.",
     headlineLine2: "Ohne Ballast.",
-    subcopy:
-      "Yaku macht aus freier Zeit echte Termine. Leichtgewichtig, open source, selbst hostbar — ein Buchungslink ohne Lock-in.",
+    quoteKanji: "約束は心の絆",
+    quoteGloss: "Ein Versprechen ist ein Band zwischen Herzen.",
     badgeMvp: "MVP in Arbeit",
     badgeFeatures: "Buchungslink · Verfügbarkeit · Dashboard",
     tryDemo: "Demo buchen",
@@ -361,8 +367,13 @@ export const messages: Record<Locale, Messages> = {
     tourSeriesBody:
       "Wöchentliche Serien heute. Google- und Apple-Kalender als Nächstes.",
     cinematicLoading: "Lädt…",
-    cinematicScrollHint: "Scrollen",
     cinematicPlay: "Abspielen",
+    footerPrivacy: "Datenschutz",
+    footerImprint: "Impressum",
+    privacyTitle: "Datenschutz",
+    privacyStub: "Vollständige Datenschutzerklärung folgt.",
+    imprintTitle: "Impressum",
+    imprintStub: "Angaben gemäß § 5 TMG folgen.",
   },
   en: {
     openSource: "Open Source",
@@ -370,8 +381,8 @@ export const messages: Record<Locale, Messages> = {
     eyebrow: "a promise",
     headlineLine1: "One appointment.",
     headlineLine2: "No bloat.",
-    subcopy:
-      "Yaku turns open time into real appointments. Lightweight, open source, self-hostable — a booking link without the lock-in.",
+    quoteKanji: "約束は心の絆",
+    quoteGloss: "A promise is a bond between hearts.",
     badgeMvp: "MVP in progress",
     badgeFeatures: "Booking link · Availability · Dashboard",
     tryDemo: "Try demo booking",
@@ -541,8 +552,13 @@ export const messages: Record<Locale, Messages> = {
     tourSeriesBody:
       "Weekly series today. Google and Apple calendars next.",
     cinematicLoading: "Loading…",
-    cinematicScrollHint: "Scroll",
     cinematicPlay: "Play",
+    footerPrivacy: "Privacy",
+    footerImprint: "Imprint",
+    privacyTitle: "Privacy",
+    privacyStub: "Full privacy policy coming soon.",
+    imprintTitle: "Imprint",
+    imprintStub: "Legal notice coming soon.",
   },
   ja: {
     openSource: "オープンソース",
@@ -550,8 +566,8 @@ export const messages: Record<Locale, Messages> = {
     eyebrow: "やくそく",
     headlineLine1: "ひとつの約束。",
     headlineLine2: "余分なものはなし。",
-    subcopy:
-      "Yakuは空き時間を、ほんとうの予定に変えます。軽くて、オープンソースで、自分でホストできる。しばられない予約リンク。",
+    quoteKanji: "約束は心の絆",
+    quoteGloss: "心と心をつなぐ、ひとつの約束。",
     badgeMvp: "MVP開発中",
     badgeFeatures: "予約リンク · 空き時間 · ダッシュボード",
     tryDemo: "デモを予約",
@@ -721,7 +737,12 @@ export const messages: Record<Locale, Messages> = {
     tourSeriesBody:
       "毎週の連続予約は今日から。Google・Appleカレンダーは次のステップ。",
     cinematicLoading: "読み込み中…",
-    cinematicScrollHint: "スクロール",
     cinematicPlay: "再生",
+    footerPrivacy: "プライバシー",
+    footerImprint: "事業者情報",
+    privacyTitle: "プライバシー",
+    privacyStub: "プライバシーポリシーは近日公開。",
+    imprintTitle: "事業者情報",
+    imprintStub: "事業者情報は近日公開。",
   },
 };

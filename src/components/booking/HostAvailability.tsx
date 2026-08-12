@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { OfficeChaseRing } from "@/components/booking/OfficeChaseRing";
-import { IslandButton } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { defaultHostProfile } from "@/lib/booking/demo";
 import {
@@ -169,15 +167,13 @@ export function HostAvailability({
   return (
     <form
       onSubmit={handleSave}
-      className="office-form office-ringed p-6 md:p-7"
+      className="office-dc-card p-6 md:p-7"
     >
-      <OfficeChaseRing />
-      <div className="relative z-[1]">
       <h2 className="font-display text-2xl">{t.availabilityTitle}</h2>
       <p className="office-muted mt-2 text-sm">{t.availabilityHint}</p>
 
       {message ? (
-        <p className="mt-4 rounded-full bg-[#1f8f4e]/20 px-4 py-2 text-sm text-[#7ddea8]">
+        <p className="mt-4 rounded-[8px] bg-[#1f8f4e]/20 px-4 py-2 text-sm text-[#7ddea8]">
           {message}
         </p>
       ) : null}
@@ -191,7 +187,7 @@ export function HostAvailability({
             setDraft((p) => ({ ...p, displayName: e.target.value }));
             setMessage(null);
           }}
-          className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
+          className="office-dc-input mt-1 w-full outline-none"
         />
       </label>
 
@@ -255,7 +251,7 @@ export function HostAvailability({
               setDraft((p) => ({ ...p, bio: e.target.value }));
               setMessage(null);
             }}
-            className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-4 py-3 text-sm outline-none ring-1 focus:ring-accent"
+            className="office-dc-input mt-1 w-full resize-none text-sm outline-none"
           />
         </label>
       </div>
@@ -268,7 +264,7 @@ export function HostAvailability({
             setDraft((p) => ({ ...p, timezone: e.target.value }));
             setMessage(null);
           }}
-          className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
+          className="office-dc-input mt-1 w-full outline-none"
         >
           {[draft.timezone, ...COMMON_TIMEZONES]
             .filter((tz, i, arr) => arr.indexOf(tz) === i)
@@ -314,7 +310,7 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
+            className="office-dc-input mt-1 w-full outline-none"
           >
             {times
               .filter((m) => m < 24 * 60)
@@ -337,7 +333,7 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
+            className="office-dc-input mt-1 w-full outline-none"
           >
             {times
               .filter((m) => m > 0)
@@ -362,7 +358,7 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
+            className="office-dc-input mt-1 w-full outline-none"
           >
             {BUFFER_OPTIONS.map((m) => (
               <option key={m} value={m} className="office-option">
@@ -382,7 +378,7 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
+            className="office-dc-input mt-1 w-full outline-none"
           >
             {BUFFER_OPTIONS.map((m) => (
               <option key={m} value={m} className="office-option">
@@ -402,7 +398,7 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
+            className="office-dc-input mt-1 w-full outline-none"
           >
             {NOTICE_OPTIONS.map((h) => (
               <option key={h} value={h} className="office-option">
@@ -422,7 +418,7 @@ export function HostAvailability({
               }));
               setMessage(null);
             }}
-            className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
+            className="office-dc-input mt-1 w-full outline-none"
           >
             {DAILY_MAX_OPTIONS.map((n) => (
               <option key={n} value={n} className="office-option">
@@ -454,7 +450,7 @@ export function HostAvailability({
               <input
                 value={et.title}
                 onChange={(e) => updateEventType(et.id, { title: e.target.value })}
-                className="office-input rounded-full border-0 px-4 py-2.5 outline-none ring-1 focus:ring-accent"
+                className="office-dc-input outline-none"
                 aria-label={t.eventTitleLabel}
               />
               <select
@@ -464,7 +460,7 @@ export function HostAvailability({
                     durationMinutes: Number(e.target.value),
                   })
                 }
-                className="office-input rounded-full border-0 px-3 py-2.5 outline-none ring-1 focus:ring-accent"
+                className="office-dc-input outline-none"
               >
                 {DURATION_OPTIONS.map((d) => (
                   <option key={d} value={d} className="office-option">
@@ -510,7 +506,7 @@ export function HostAvailability({
                 }));
                 setMessage(null);
               }}
-              className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none ring-1 focus:ring-accent"
+              className="office-dc-input mt-1 w-full outline-none"
             >
               {SERIES_MAX_OPTIONS.map((n) => (
                 <option key={n} value={n} className="office-option">
@@ -522,15 +518,12 @@ export function HostAvailability({
         ) : null}
       </div>
 
-      <IslandButton
+      <button
         type="submit"
-        variant="island"
-        size="lg"
-        className="office-glass-btn mt-8"
+        className="office-dc-btn-gold mt-8"
       >
         {t.saveAvailability}
-      </IslandButton>
-      </div>
+      </button>
     </form>
   );
 }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ChapterVideo } from "@/components/cinematic/ChapterVideo";
+import { CinematicFooter } from "@/components/cinematic/CinematicFooter";
 import { SceneStage } from "@/components/cinematic/SceneStage";
 import { SightsSlider } from "@/components/cinematic/SightsSlider";
 import { StoryPanels } from "@/components/cinematic/StoryPanels";
@@ -102,12 +103,22 @@ function ReducedMotionHome() {
                   {t.eyebrow}
                 </p>
                 <h1 className="mt-3 font-display text-4xl md:text-5xl">Yaku</h1>
-                <p className="mt-4 font-display text-xl text-white/88">
-                  {t.headlineLine1}
-                  <span className="mx-2 text-white/30">·</span>
-                  {t.headlineLine2}
+                <p
+                  lang="ja"
+                  className="mt-6 font-display text-2xl leading-snug tracking-[0.06em] text-white/90"
+                >
+                  {t.quoteKanji}
                 </p>
-                <p className="mt-3 text-sm text-white/55">{t.subcopy}</p>
+                <p
+                  lang="ja"
+                  aria-hidden
+                  className="mt-4 font-display text-lg leading-none text-white/35"
+                >
+                  約
+                </p>
+                <p className="mt-4 text-sm leading-relaxed text-white">
+                  {t.quoteGloss}
+                </p>
               </>
             ) : null}
             {ch.id === "mid" ? (
@@ -142,6 +153,7 @@ function ReducedMotionHome() {
           </div>
         </section>
       ))}
+      <CinematicFooter />
     </div>
   );
 }
@@ -205,6 +217,7 @@ function CinematicMotionHome() {
           </div>
         </div>
       </div>
+      <CinematicFooter />
     </div>
   );
 }

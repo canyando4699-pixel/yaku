@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { Icon } from "@/components/ui/Icon";
-import { IslandButton, IslandPill } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { localeDate } from "@/i18n/messages";
 import {
@@ -88,8 +87,8 @@ export function ReschedulePicker({
     <div className="w-full">
       <div className="grid items-start gap-8 md:grid-cols-[320px_1fr]">
         <div>
-          <p className="mb-3 flex items-center gap-2 text-sm font-medium text-white/85">
-            <Icon name="calendar" className="h-4 w-4 text-accent" />
+          <p className="office-muted mb-3 flex items-center gap-2 text-sm font-medium">
+            <Icon name="calendar" className="h-4 w-4 text-[color:var(--dc-blue)]" />
             {t.pickDate}
           </p>
           <BookingCalendar
@@ -104,15 +103,15 @@ export function ReschedulePicker({
           />
         </div>
         <div>
-          <p className="mb-3 flex items-center gap-2 text-sm font-medium text-white/85">
-            <Icon name="clock" className="h-4 w-4 text-accent" />
+          <p className="office-muted mb-3 flex items-center gap-2 text-sm font-medium">
+            <Icon name="clock" className="h-4 w-4 text-[color:var(--dc-blue)]" />
             {t.pickTime}
           </p>
-          <IslandPill className="mb-4 bg-[#1c1c1e]">
+          <div className="office-dc-count mb-4">
             {dateFormatter.format(selectedDate)}
-          </IslandPill>
+          </div>
           {slots.length === 0 ? (
-            <p className="text-white/55">{t.noSlots}</p>
+            <p className="office-muted">{t.noSlots}</p>
           ) : (
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
               {slots.map((slot) => {
@@ -126,10 +125,8 @@ export function ReschedulePicker({
                       setError(null);
                     }}
                     className={[
-                      "rounded-full px-3 py-3 text-sm font-medium transition active:scale-[0.98]",
-                      active
-                        ? "bg-accent text-white shadow-[0_10px_28px_rgba(225,6,0,0.35)]"
-                        : "bg-[#1c1c1e] text-white ring-1 ring-white/10 hover:bg-black",
+                      "rounded-[8px] px-3 py-3 text-sm font-medium transition active:scale-[0.98]",
+                      active ? "office-dc-slot-active" : "office-dc-btn-dark",
                     ].join(" ")}
                   >
                     {timeFormatter.format(new Date(slot))}
@@ -140,19 +137,18 @@ export function ReschedulePicker({
           )}
           {error ? <p className="mt-3 text-sm text-[#ff453a]">{error}</p> : null}
           <div className="mt-6 flex flex-wrap gap-3">
-            <IslandButton type="button" variant="islandMuted" onClick={onCancel}>
+            <button type="button" className="office-dc-btn-dark" onClick={onCancel}>
               {t.back}
-            </IslandButton>
-            <IslandButton
+            </button>
+            <button
               type="button"
-              variant="accent"
               disabled={!selectedSlot}
               onClick={submit}
-              className="disabled:cursor-not-allowed disabled:opacity-40"
+              className="office-dc-btn-gold disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Icon name="check" className="h-4 w-4" />
               {t.confirmReschedule}
-            </IslandButton>
+            </button>
           </div>
         </div>
       </div>
