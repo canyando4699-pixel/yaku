@@ -9,7 +9,10 @@ import { IslandButton, IslandPill, islandClass } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { localeDate } from "@/i18n/messages";
 import { downloadIcs } from "@/lib/booking/ics";
-import { loadHostProfile } from "@/lib/booking/hostProfile";
+import {
+  loadHostProfile,
+  resolveEventTypeOrFallback,
+} from "@/lib/booking/hostProfile";
 import {
   cancelBooking,
   getBooking,
@@ -116,6 +119,12 @@ export function ManageBooking({
   }
 
   const cancelled = booking.status === "cancelled";
+  const eventType = resolveEventTypeOrFallback(
+    host.eventTypes,
+    booking.eventTypeId,
+    booking.eventTitle || host.eventTitle,
+    host.durationMinutes,
+  );
 
   return (
     <div className="relative flex min-h-full flex-1 flex-col">
@@ -205,6 +214,26 @@ export function ManageBooking({
             <p className="mt-3 text-sm text-white/75">{booking.note}</p>
           ) : null}
 
+          {(booking.answers ?? []).length
+            ? (booking.answers ?? []).map((a) => (
+                <p key={a.questionId} className="mt-3 text-sm text-white/75">
+                  {a.label}:{" "}
+                  {Array.isArray(a.value) ? a.value.join(", ") : a.value}
+                </p>
+              ))
+            : null}
+
+          {eventType.cancellationPolicy.trim() ? (
+            <div className="mt-4">
+              <p className="text-sm text-white/90">
+                {t.eventTypeCancelPolicyLabel}
+              </p>
+              <p className="mt-1 text-sm text-white/75">
+                {eventType.cancellationPolicy}
+              </p>
+            </div>
+          ) : null}
+
           {mode === "reschedule" && !cancelled ? (
             <div className="mt-8 border-t border-white/10 pt-6">
               <h2 className="mb-4 font-display text-xl text-white">
@@ -212,6 +241,8 @@ export function ManageBooking({
               </h2>
               <ReschedulePicker
                 host={host}
+                eventType={eventType}
+                relaxHorizon={fromHost}
                 excludeBookingId={booking.id}
                 initialStartsAt={booking.startsAt}
                 onConfirm={handleReschedule}

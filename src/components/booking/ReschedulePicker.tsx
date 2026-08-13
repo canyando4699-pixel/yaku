@@ -10,12 +10,20 @@ import {
   getAvailableSlots,
   isBookableDay,
 } from "@/lib/booking/slots";
-import type { HostProfile } from "@/lib/booking/types";
+import type { EventType, HostProfile } from "@/lib/booking/types";
 
-function nextBookableDay(host: HostProfile, from = new Date()) {
+function nextBookableDay(
+  host: HostProfile,
+  eventType?: EventType,
+  from = new Date(),
+) {
   const day = new Date(from.getFullYear(), from.getMonth(), from.getDate());
-  for (let i = 0; i < 60; i += 1) {
-    if (isBookableDay(day, host)) return day;
+  const limit =
+    eventType && eventType.dateRangeDays > 0
+      ? eventType.dateRangeDays + 1
+      : 60;
+  for (let i = 0; i < limit; i += 1) {
+    if (isBookableDay(day, host, new Date(), eventType)) return day;
     day.setDate(day.getDate() + 1);
   }
   return from;
@@ -23,6 +31,8 @@ function nextBookableDay(host: HostProfile, from = new Date()) {
 
 type ReschedulePickerProps = {
   host: HostProfile;
+  eventType: EventType;
+  relaxHorizon?: boolean;
   excludeBookingId: string;
   initialStartsAt?: string;
   onConfirm: (startsAt: string, endsAt: string) => void;
@@ -31,14 +41,23 @@ type ReschedulePickerProps = {
 
 export function ReschedulePicker({
   host,
+  eventType,
+  relaxHorizon = false,
   excludeBookingId,
   initialStartsAt,
   onConfirm,
   onCancel,
 }: ReschedulePickerProps) {
+  const eventTypeForHorizon = useMemo(
+    () =>
+      relaxHorizon ? { ...eventType, dateRangeDays: 0 as const } : eventType,
+    [relaxHorizon, eventType],
+  );
   const { locale, t } = useLocale();
   const [selectedDate, setSelectedDate] = useState(() =>
-    initialStartsAt ? new Date(initialStartsAt) : nextBookableDay(host),
+    initialStartsAt
+      ? new Date(initialStartsAt)
+      : nextBookableDay(host, eventTypeForHorizon),
   );
   const [selectedSlot, setSelectedSlot] = useState<string | null>(
     initialStartsAt ?? null,
@@ -48,9 +67,10 @@ export function ReschedulePicker({
   const slots = useMemo(
     () =>
       getAvailableSlots(host, selectedDate, new Date(), excludeBookingId, {
-        durationMinutes: host.durationMinutes,
+        durationMinutes: eventType.durationMinutes,
+        eventType: eventTypeForHorizon,
       }),
-    [host, selectedDate, excludeBookingId],
+    [host, selectedDate, excludeBookingId, eventType, eventTypeForHorizon],
   );
 
   const dateFormatter = useMemo(
@@ -75,7 +95,7 @@ export function ReschedulePicker({
 
   function submit() {
     if (!selectedSlot) return;
-    const endsAt = addMinutes(selectedSlot, host.durationMinutes);
+    const endsAt = addMinutes(selectedSlot, eventType.durationMinutes);
     try {
       onConfirm(selectedSlot, endsAt);
     } catch {
@@ -98,7 +118,9 @@ export function ReschedulePicker({
               setSelectedSlot(null);
               setError(null);
             }}
-            isDayEnabled={(date) => isBookableDay(date, host)}
+            isDayEnabled={(date) =>
+              isBookableDay(date, host, new Date(), eventTypeForHorizon)
+            }
             variant="embedded"
           />
         </div>

@@ -22,19 +22,44 @@ import {
   isBookableDay,
 } from "@/lib/booking/slots";
 import {
+  requiredQuestionsAnswered,
+  snapshotAnswers,
+} from "@/lib/booking/questions";
+import {
   createBookingId,
   createSeriesId,
   isRangeTaken,
   saveBooking,
 } from "@/lib/booking/storage";
-import type { Booking, EventType, HostProfile } from "@/lib/booking/types";
+import {
+  pastelForEventType,
+  type Booking,
+  type EventType,
+  type HostProfile,
+} from "@/lib/booking/types";
 
-type Step = "schedule" | "details";
+type Step = "types" | "schedule" | "details";
 
-function nextBookableDay(host: HostProfile, from = new Date()) {
+function findEventType(
+  types: EventType[],
+  typeId?: string,
+): EventType | undefined {
+  if (!typeId) return undefined;
+  return types.find((et) => et.id === typeId);
+}
+
+function nextBookableDay(
+  host: HostProfile,
+  eventType?: EventType,
+  from = new Date(),
+) {
   const day = new Date(from.getFullYear(), from.getMonth(), from.getDate());
-  for (let i = 0; i < 60; i += 1) {
-    if (isBookableDay(day, host)) return day;
+  const limit =
+    eventType && eventType.dateRangeDays > 0
+      ? eventType.dateRangeDays + 1
+      : 60;
+  for (let i = 0; i < limit; i += 1) {
+    if (isBookableDay(day, host, new Date(), eventType)) return day;
     day.setDate(day.getDate() + 1);
   }
   return from;
@@ -53,7 +78,7 @@ function StepIndicator({
   scheduleLabel,
   detailsLabel,
 }: {
-  active: Step;
+  active: "schedule" | "details";
   scheduleLabel: string;
   detailsLabel: string;
 }) {
@@ -106,24 +131,31 @@ function StepIndicator({
 export function BookingFlow({
   host: initialHost,
   fromHost = false,
+  initialTypeId,
 }: {
   host: HostProfile;
   fromHost?: boolean;
+  initialTypeId?: string;
 }) {
   const router = useRouter();
   const { locale, t } = useLocale();
   const [host, setHost] = useState(initialHost);
-  const [eventType, setEventType] = useState<EventType>(
-    () => initialHost.eventTypes[0],
+  const typeLocked = Boolean(
+    initialTypeId && host.eventTypes.some((et) => et.id === initialTypeId),
   );
-  const [step, setStep] = useState<Step>("schedule");
+  const matched = findEventType(initialHost.eventTypes, initialTypeId);
+  const [eventType, setEventType] = useState<EventType | undefined>(() => matched);
+  const [step, setStep] = useState<Step>(() => (matched ? "schedule" : "types"));
   const [selectedDate, setSelectedDate] = useState(() =>
-    nextBookableDay(initialHost),
+    nextBookableDay(initialHost, matched),
   );
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
+  const [answersMap, setAnswersMap] = useState<
+    Record<string, string | string[]>
+  >({});
   const [seriesCount, setSeriesCount] = useState(1);
   const [guestTimezone, setGuestTimezone] = useState("UTC");
   const [error, setError] = useState<string | null>(null);
@@ -133,21 +165,37 @@ export function BookingFlow({
     setHydrated(true);
     const loaded = loadHostProfile(initialHost.slug);
     setHost(loaded);
-    const nextType = loaded.eventTypes[0];
-    setEventType(nextType);
-    setSelectedDate(nextBookableDay(loaded));
     setSelectedSlot(null);
     setSeriesCount(1);
     const detected = detectGuestTimezone();
     setGuestTimezone(detected);
-  }, [initialHost.slug]);
+
+    const urlMatch = findEventType(loaded.eventTypes, initialTypeId);
+    if (urlMatch) {
+      setEventType(urlMatch);
+      setStep("schedule");
+      setSelectedDate(nextBookableDay(loaded, urlMatch));
+    } else {
+      setEventType(undefined);
+      setStep("types");
+      setSelectedDate(nextBookableDay(loaded, undefined));
+    }
+  }, [initialHost.slug, initialTypeId]);
+
+  useEffect(() => {
+    setAnswersMap({});
+  }, [eventType?.id]);
 
   const activeHost = useMemo(
-    () => ({ ...host, durationMinutes: eventType.durationMinutes }),
+    () => ({
+      ...host,
+      durationMinutes: eventType?.durationMinutes ?? host.durationMinutes,
+    }),
     [host, eventType],
   );
 
   const slots = useMemo(() => {
+    if (!eventType) return [];
     if (!hydrated) {
       const dayStart = new Date(
         selectedDate.getFullYear(),
@@ -157,6 +205,7 @@ export function BookingFlow({
       return getAvailableSlots(activeHost, selectedDate, dayStart, undefined, {
         skipTakenCheck: true,
         durationMinutes: eventType.durationMinutes,
+        eventType,
       });
     }
     return getAvailableSlots(
@@ -164,9 +213,9 @@ export function BookingFlow({
       selectedDate,
       new Date(),
       undefined,
-      { durationMinutes: eventType.durationMinutes },
+      { durationMinutes: eventType.durationMinutes, eventType },
     );
-  }, [activeHost, selectedDate, hydrated, eventType.durationMinutes]);
+  }, [activeHost, selectedDate, hydrated, eventType]);
 
   const dateFormatter = useMemo(
     () =>
@@ -190,9 +239,26 @@ export function BookingFlow({
     [locale, guestTimezone],
   );
 
+  function isSeriesCountFree(count: number) {
+    if (!selectedSlot || !eventType) return true;
+    if (count <= 1) return true;
+    return (
+      buildSeriesStarts(
+        activeHost,
+        selectedSlot,
+        Math.min(count, host.maxSeriesCount),
+        eventType.durationMinutes,
+        eventType,
+        new Date(),
+      ) !== null
+    );
+  }
+
+  const seriesSlotsFree = isSeriesCountFree(seriesCount);
+
   function submitBooking(event: React.FormEvent) {
     event.preventDefault();
-    if (!selectedSlot) return;
+    if (!selectedSlot || !eventType) return;
 
     const endsAt = addMinutes(selectedSlot, eventType.durationMinutes);
     if (
@@ -221,10 +287,17 @@ export function BookingFlow({
       selectedSlot,
       count,
       eventType.durationMinutes,
+      eventType,
+      new Date(),
     );
 
     if (!starts) {
       setError(t.seriesUnavailable);
+      return;
+    }
+
+    if (!requiredQuestionsAnswered(eventType.questions, answersMap)) {
+      setError(t.requiredField);
       return;
     }
 
@@ -248,6 +321,7 @@ export function BookingFlow({
         seriesId,
         seriesIndex: count > 1 ? index + 1 : undefined,
         seriesTotal: count > 1 ? count : undefined,
+        answers: snapshotAnswers(eventType.questions, answersMap),
       };
       saveBooking(next);
       if (index === 0) firstId = next.id;
@@ -264,6 +338,7 @@ export function BookingFlow({
   }, [guestTimezone, host.timezone]);
 
   const hostInitial = host.displayName.trim().charAt(0).toUpperCase() || "?";
+  const publicTypes = host.eventTypes.filter((et) => et.secret !== true);
 
   return (
     <div
@@ -350,9 +425,425 @@ export function BookingFlow({
               ) : null}
             </aside>
 
-            {step === "schedule" || !selectedSlot ? (
+            {step === "types" || !eventType ? (
               <div className="flex min-w-0 flex-1 flex-col">
                 <div className="border-b border-white/10 px-5 py-4">
+                  <h1 className="font-display text-2xl text-[color:var(--office-text)]">
+                    {t.pickEventType}
+                  </h1>
+                </div>
+                <div className="flex-1 px-5 py-4">
+                  {publicTypes.length === 0 ? (
+                    <p className="office-muted text-xs">{t.noPublicEventTypes}</p>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {publicTypes.map((et) => {
+                        const pastel = pastelForEventType(et.color);
+                        return (
+                          <button
+                            key={et.id}
+                            type="button"
+                            className="booking-slot flex w-full items-start gap-3 rounded-2xl px-4 py-3 text-left transition active:scale-[0.98]"
+                            onClick={() => {
+                              setEventType(et);
+                              setStep("schedule");
+                              setSelectedSlot(null);
+                              setError(null);
+                              setSelectedDate(nextBookableDay(host, et));
+                            }}
+                          >
+                            <span
+                              className="mt-1 h-2 w-2 shrink-0 rounded-full"
+                              style={{
+                                backgroundColor: pastel.bg,
+                                borderColor: pastel.border,
+                                borderWidth: 1,
+                                borderStyle: "solid",
+                              }}
+                            />
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-medium text-[color:var(--office-text)]">
+                                {et.title}
+                              </span>
+                              <span className="office-muted mt-0.5 block text-xs">
+                                {et.durationMinutes} min
+                              </span>
+                              {et.description ? (
+                                <span className="office-muted mt-1 block text-xs leading-relaxed">
+                                  {et.description}
+                                </span>
+                              ) : null}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : step === "details" && selectedSlot ? (
+              <form
+                onSubmit={submitBooking}
+                className="flex min-w-0 flex-1 flex-col"
+              >
+                <div className="border-b border-white/10 px-5 py-4">
+                  <StepIndicator
+                    active="details"
+                    scheduleLabel={t.stepSchedule}
+                    detailsLabel={t.yourDetails}
+                  />
+                  <h2 className="font-display text-2xl text-[color:var(--office-text)]">
+                    {t.yourDetails}
+                  </h2>
+                  <IslandPill className="office-liquid-glass mt-3 !px-2.5 !py-1 text-xs">
+                    <Icon name="calendar" className="h-3 w-3 opacity-70" />
+                    <span>
+                      {eventType.title} ·{" "}
+                      {dateFormatter.format(new Date(selectedSlot))} ·{" "}
+                      {timeFormatter.format(new Date(selectedSlot))}
+                    </span>
+                  </IslandPill>
+                  {eventType.description ? (
+                    <p className="office-muted mt-2 text-xs leading-relaxed">
+                      {eventType.description}
+                    </p>
+                  ) : null}
+                  {eventType.cancellationPolicy.trim() ? (
+                    <div className="mt-2">
+                      <p className="text-xs text-[color:var(--office-text)]">
+                        {t.eventTypeCancelPolicyLabel}
+                      </p>
+                      <p className="office-muted mt-0.5 text-xs leading-relaxed">
+                        {eventType.cancellationPolicy}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="flex-1 px-5 py-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="office-field block text-xs">
+                      <span className="mb-1 inline-flex items-center gap-1.5">
+                        <Icon name="user" className="h-3 w-3" />
+                        {t.name}
+                      </span>
+                      <input
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
+                      />
+                    </label>
+
+                    <label className="office-field block text-xs">
+                      <span className="mb-1 inline-flex items-center gap-1.5">
+                        <Icon name="mail" className="h-3 w-3" />
+                        {t.email}
+                      </span>
+                      <input
+                        required
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="office-field mt-3 block text-xs">
+                    {t.note}{" "}
+                    <span className="office-muted">({t.noteOptional})</span>
+                    <textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      rows={3}
+                      className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-3.5 py-2.5 text-sm outline-none"
+                    />
+                  </label>
+
+                  {eventType.questions.map((q) => {
+                    if (!q.label.trim()) return null;
+                    if (
+                      (q.type === "radio" || q.type === "dropdown") &&
+                      q.options.filter((o) => o.trim()).length < 2
+                    ) {
+                      return null;
+                    }
+                    if (
+                      q.type === "checkbox" &&
+                      q.options.filter((o) => o.trim()).length < 1
+                    ) {
+                      return null;
+                    }
+
+                    const choiceOptions = q.options.filter((o) => o.trim());
+
+                    if (q.type === "text") {
+                      return (
+                        <label
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          <input
+                            required={q.required}
+                            value={
+                              typeof answersMap[q.id] === "string"
+                                ? answersMap[q.id]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setAnswersMap((m) => ({
+                                ...m,
+                                [q.id]: e.target.value,
+                              }))
+                            }
+                            className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
+                          />
+                        </label>
+                      );
+                    }
+
+                    if (q.type === "textarea") {
+                      return (
+                        <label
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          <textarea
+                            required={q.required}
+                            value={
+                              typeof answersMap[q.id] === "string"
+                                ? answersMap[q.id]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setAnswersMap((m) => ({
+                                ...m,
+                                [q.id]: e.target.value,
+                              }))
+                            }
+                            rows={3}
+                            className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-3.5 py-2.5 text-sm outline-none"
+                          />
+                        </label>
+                      );
+                    }
+
+                    if (q.type === "phone") {
+                      return (
+                        <label
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          <input
+                            type="tel"
+                            required={q.required}
+                            value={
+                              typeof answersMap[q.id] === "string"
+                                ? answersMap[q.id]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setAnswersMap((m) => ({
+                                ...m,
+                                [q.id]: e.target.value,
+                              }))
+                            }
+                            className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
+                          />
+                        </label>
+                      );
+                    }
+
+                    if (q.type === "radio") {
+                      return (
+                        <div
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          {choiceOptions.map((opt, i) => (
+                            <label
+                              key={`${q.id}-${i}`}
+                              className="mt-1 flex items-center gap-2"
+                            >
+                              <input
+                                type="radio"
+                                name={q.id}
+                                value={opt}
+                                required={q.required}
+                                checked={answersMap[q.id] === opt}
+                                onChange={() =>
+                                  setAnswersMap((m) => ({
+                                    ...m,
+                                    [q.id]: opt,
+                                  }))
+                                }
+                                className="h-4 w-4 accent-[var(--accent)]"
+                              />
+                              {opt}
+                            </label>
+                          ))}
+                        </div>
+                      );
+                    }
+
+                    if (q.type === "checkbox") {
+                      const current = answersMap[q.id];
+                      const selected = Array.isArray(current) ? current : [];
+                      return (
+                        <div
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          {choiceOptions.map((opt, i) => (
+                            <label
+                              key={`${q.id}-${i}`}
+                              className="mt-1 flex items-center gap-2"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selected.includes(opt)}
+                                onChange={() =>
+                                  setAnswersMap((m) => {
+                                    const existing = m[q.id];
+                                    const prev = Array.isArray(existing)
+                                      ? existing
+                                      : [];
+                                    const next = prev.includes(opt)
+                                      ? prev.filter((x) => x !== opt)
+                                      : [...prev, opt];
+                                    return { ...m, [q.id]: next };
+                                  })
+                                }
+                                className="h-4 w-4 accent-[var(--accent)]"
+                              />
+                              {opt}
+                            </label>
+                          ))}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <label
+                        key={q.id}
+                        className="office-field mt-3 block text-xs"
+                      >
+                        {q.label}
+                        <select
+                          required={q.required}
+                          value={
+                            typeof answersMap[q.id] === "string"
+                              ? answersMap[q.id]
+                              : ""
+                          }
+                          onChange={(e) =>
+                            setAnswersMap((m) => ({
+                              ...m,
+                              [q.id]: e.target.value,
+                            }))
+                          }
+                          className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
+                        >
+                          <option value="" className="office-option" />
+                          {choiceOptions.map((opt, i) => (
+                            <option
+                              key={`${q.id}-${i}`}
+                              value={opt}
+                              className="office-option"
+                            >
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    );
+                  })}
+
+                  {host.allowSeries ? (
+                    <label className="office-field mt-4 block text-sm">
+                      {t.seriesCountLabel}
+                      <select
+                        value={seriesCount}
+                        onChange={(e) => {
+                          const next = Number(e.target.value);
+                          setSeriesCount(next);
+                          if (
+                            error === t.seriesUnavailable &&
+                            isSeriesCountFree(next)
+                          ) {
+                            setError(null);
+                          }
+                        }}
+                        className={[
+                          "office-input series-count-select mt-1 w-full rounded-full border-0 px-4 py-3 outline-none",
+                          seriesCount >= 2
+                            ? seriesSlotsFree
+                              ? "series-count-select--ok"
+                              : "series-count-select--blocked"
+                            : "",
+                        ].join(" ")}
+                      >
+                        {seriesOptions(host.maxSeriesCount).map((n) => (
+                          <option
+                            key={n}
+                            value={n}
+                            className="office-option"
+                          >
+                            {n === 1
+                              ? t.seriesOnce
+                              : t.seriesWeekly.replace("{n}", String(n))}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="office-muted mt-1 block text-xs">
+                        {t.seriesHint}
+                      </span>
+                    </label>
+                  ) : null}
+
+                  {error ? (
+                    <p className="mt-3 text-sm text-[#ff453a]">{error}</p>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-4">
+                  <IslandButton
+                    type="button"
+                    variant="island"
+                    className="office-glass-btn"
+                    onClick={() => setStep("schedule")}
+                  >
+                    {t.back}
+                  </IslandButton>
+                  <IslandButton
+                    type="submit"
+                    variant="island"
+                    className="office-glass-btn"
+                  >
+                    <Icon name="check" className="h-4 w-4" />
+                    {t.confirmBooking}
+                  </IslandButton>
+                </div>
+              </form>
+            ) : (
+              <div className="flex min-w-0 flex-1 flex-col">
+                <div className="border-b border-white/10 px-5 py-4">
+                  {!typeLocked ? (
+                    <button
+                      type="button"
+                      onClick={() => setStep("types")}
+                      className="office-muted mb-2 inline-flex items-center gap-1 text-xs"
+                    >
+                      <Icon name="chevronLeft" className="h-3.5 w-3.5 opacity-70" />
+                      {t.backToEventTypes}
+                    </button>
+                  ) : null}
                   <StepIndicator
                     active="schedule"
                     scheduleLabel={t.stepSchedule}
@@ -364,29 +855,21 @@ export function BookingFlow({
                   <p className="office-muted mt-1 text-xs">
                     {eventType.durationMinutes} min
                   </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    {host.eventTypes.map((et) => {
-                      const active = et.id === eventType.id;
-                      return (
-                        <button
-                          key={et.id}
-                          type="button"
-                          onClick={() => {
-                            setEventType(et);
-                            setSelectedSlot(null);
-                            setError(null);
-                          }}
-                          className={[
-                            "booking-slot inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition active:scale-[0.98]",
-                            active ? "booking-slot-active" : "",
-                          ].join(" ")}
-                        >
-                          <Icon name="clock" className="h-3.5 w-3.5" />
-                          {et.title} · {et.durationMinutes} min
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {eventType.description ? (
+                    <p className="office-muted mt-2 text-xs leading-relaxed">
+                      {eventType.description}
+                    </p>
+                  ) : null}
+                  {eventType.cancellationPolicy.trim() ? (
+                    <div className="mt-2">
+                      <p className="text-xs text-[color:var(--office-text)]">
+                        {t.eventTypeCancelPolicyLabel}
+                      </p>
+                      <p className="office-muted mt-0.5 text-xs leading-relaxed">
+                        {eventType.cancellationPolicy}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="grid flex-1 items-start md:grid-cols-[280px_minmax(0,1fr)]">
@@ -404,7 +887,9 @@ export function BookingFlow({
                         setSelectedDate(date);
                         setSelectedSlot(null);
                       }}
-                      isDayEnabled={(date) => isBookableDay(date, activeHost)}
+                      isDayEnabled={(date) =>
+                        isBookableDay(date, activeHost, new Date(), eventType)
+                      }
                       variant="embedded"
                     />
                   </div>
@@ -493,123 +978,6 @@ export function BookingFlow({
                   </button>
                 </div>
               </div>
-            ) : (
-              <form
-                onSubmit={submitBooking}
-                className="flex min-w-0 flex-1 flex-col"
-              >
-                <div className="border-b border-white/10 px-5 py-4">
-                  <StepIndicator
-                    active="details"
-                    scheduleLabel={t.stepSchedule}
-                    detailsLabel={t.yourDetails}
-                  />
-                  <h2 className="font-display text-2xl text-[color:var(--office-text)]">
-                    {t.yourDetails}
-                  </h2>
-                  <IslandPill className="office-liquid-glass mt-3 !px-2.5 !py-1 text-xs">
-                    <Icon name="calendar" className="h-3 w-3 opacity-70" />
-                    <span>
-                      {eventType.title} ·{" "}
-                      {dateFormatter.format(new Date(selectedSlot))} ·{" "}
-                      {timeFormatter.format(new Date(selectedSlot))}
-                    </span>
-                  </IslandPill>
-                </div>
-
-                <div className="flex-1 px-5 py-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="office-field block text-xs">
-                      <span className="mb-1 inline-flex items-center gap-1.5">
-                        <Icon name="user" className="h-3 w-3" />
-                        {t.name}
-                      </span>
-                      <input
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
-                      />
-                    </label>
-
-                    <label className="office-field block text-xs">
-                      <span className="mb-1 inline-flex items-center gap-1.5">
-                        <Icon name="mail" className="h-3 w-3" />
-                        {t.email}
-                      </span>
-                      <input
-                        required
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
-                      />
-                    </label>
-                  </div>
-
-                  <label className="office-field mt-3 block text-xs">
-                    {t.note}{" "}
-                    <span className="office-muted">({t.noteOptional})</span>
-                    <textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      rows={3}
-                      className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-3.5 py-2.5 text-sm outline-none focus:ring-accent"
-                    />
-                  </label>
-
-                  {host.allowSeries ? (
-                    <label className="office-field mt-4 block text-sm">
-                      {t.seriesCountLabel}
-                      <select
-                        value={seriesCount}
-                        onChange={(e) =>
-                          setSeriesCount(Number(e.target.value))
-                        }
-                        className="office-input mt-1 w-full rounded-full border-0 px-4 py-3 outline-none focus:ring-accent"
-                      >
-                        {seriesOptions(host.maxSeriesCount).map((n) => (
-                          <option
-                            key={n}
-                            value={n}
-                            className="office-option"
-                          >
-                            {n === 1
-                              ? t.seriesOnce
-                              : t.seriesWeekly.replace("{n}", String(n))}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="office-muted mt-1 block text-xs">
-                        {t.seriesHint}
-                      </span>
-                    </label>
-                  ) : null}
-
-                  {error ? (
-                    <p className="mt-3 text-sm text-[#ff453a]">{error}</p>
-                  ) : null}
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-4">
-                  <IslandButton
-                    type="button"
-                    variant="island"
-                    className="office-glass-btn"
-                    onClick={() => setStep("schedule")}
-                  >
-                    {t.back}
-                  </IslandButton>
-                  <IslandButton
-                    type="submit"
-                    variant="island"
-                    className="office-glass-btn"
-                  >
-                    <Icon name="check" className="h-4 w-4" />
-                    {t.confirmBooking}
-                  </IslandButton>
-                </div>
-              </form>
             )}
           </div>
         </div>

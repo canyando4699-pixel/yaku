@@ -38,6 +38,9 @@ export type Messages = {
   weekdays: [string, string, string, string, string, string, string];
   bookingWith: string;
   stepSchedule: string;
+  pickEventType: string;
+  backToEventTypes: string;
+  noPublicEventTypes: string;
   pickDate: string;
   pickTime: string;
   yourDetails: string;
@@ -166,6 +169,40 @@ export type Messages = {
   addEventType: string;
   removeEventType: string;
   eventTypeDefaultTitle: string;
+  eventTypeDescriptionLabel: string;
+  eventTypeColorLabel: string;
+  eventTypeSecretLabel: string;
+  eventTypeSecretHint: string;
+  eventTypeDateRangeLabel: string;
+  dateRangeIndefinite: string;
+  dateRangeDays: string;
+  eventTypeSlotIncrementLabel: string;
+  eventTypeMaxPerDayLabel: string;
+  eventTypeMaxPerWeekLabel: string;
+  eventTypeMaxPerMonthLabel: string;
+  eventTypeCancelPolicyLabel: string;
+  eventTypeCancelPolicyHint: string;
+  inviteeQuestionsTitle: string;
+  addQuestion: string;
+  questionLabel: string;
+  questionType: string;
+  questionRequired: string;
+  questionOptions: string;
+  addOption: string;
+  questionTypeText: string;
+  questionTypeTextarea: string;
+  questionTypePhone: string;
+  questionTypeRadio: string;
+  questionTypeCheckbox: string;
+  questionTypeDropdown: string;
+  requiredField: string;
+  eventTypeCopyLink: string;
+  eventTypeLinkCopied: string;
+  colorBlue: string;
+  colorPurple: string;
+  colorGreen: string;
+  colorOrange: string;
+  colorRed: string;
   needOneEventType: string;
   allowSeriesLabel: string;
   maxSeriesLabel: string;
@@ -216,6 +253,9 @@ export const messages: Record<Locale, Messages> = {
     weekdays: ["MO", "DI", "MI", "DO", "FR", "SA", "SO"],
     bookingWith: "Termin mit",
     stepSchedule: "Termin wählen",
+    pickEventType: "Event-Typ wählen",
+    backToEventTypes: "Zu den Event-Typen",
+    noPublicEventTypes: "Keine öffentlichen Event-Typen.",
     pickDate: "Datum wählen",
     pickTime: "Uhrzeit wählen",
     yourDetails: "Deine Daten",
@@ -355,6 +395,42 @@ export const messages: Record<Locale, Messages> = {
     addEventType: "Typ hinzufügen",
     removeEventType: "Entfernen",
     eventTypeDefaultTitle: "Neuer Termin",
+    eventTypeDescriptionLabel: "Beschreibung",
+    eventTypeColorLabel: "Farbe",
+    eventTypeSecretLabel: "Geheimer Event-Typ",
+    eventTypeSecretHint:
+      "Auf der öffentlichen Seite ausgeblendet. Mit dem Link trotzdem buchbar.",
+    eventTypeDateRangeLabel: "Zeitraum",
+    dateRangeIndefinite: "Unbegrenzt",
+    dateRangeDays: "{n} Tage",
+    eventTypeSlotIncrementLabel: "Slot-Abstand",
+    eventTypeMaxPerDayLabel: "Max. Termine / Tag",
+    eventTypeMaxPerWeekLabel: "Max. Termine / Woche",
+    eventTypeMaxPerMonthLabel: "Max. Termine / Monat",
+    eventTypeCancelPolicyLabel: "Absage-Richtlinie",
+    eventTypeCancelPolicyHint:
+      "Wird Gästen angezeigt. Sperrt Absage oder Umbuchung nicht.",
+    inviteeQuestionsTitle: "Fragen an den Gast",
+    addQuestion: "Frage hinzufügen",
+    questionLabel: "Frage",
+    questionType: "Typ",
+    questionRequired: "Pflichtfeld",
+    questionOptions: "Optionen",
+    addOption: "Option hinzufügen",
+    questionTypeText: "Kurztext",
+    questionTypeTextarea: "Langer Text",
+    questionTypePhone: "Telefon",
+    questionTypeRadio: "Einfachauswahl",
+    questionTypeCheckbox: "Mehrfachauswahl",
+    questionTypeDropdown: "Dropdown",
+    requiredField: "Bitte alle Pflichtfelder ausfüllen.",
+    eventTypeCopyLink: "Buchungslink kopieren",
+    eventTypeLinkCopied: "Link kopiert",
+    colorBlue: "Blau",
+    colorPurple: "Lila",
+    colorGreen: "Grün",
+    colorOrange: "Orange",
+    colorRed: "Rot",
     needOneEventType: "Mindestens einen Event-Typ anlegen.",
     allowSeriesLabel: "Serienbuchung erlauben (wöchentlich)",
     maxSeriesLabel: "Max. Termine in einer Serie",
@@ -409,6 +485,9 @@ export const messages: Record<Locale, Messages> = {
     weekdays: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
     bookingWith: "Meeting with",
     stepSchedule: "Pick a time",
+    pickEventType: "Choose event type",
+    backToEventTypes: "Back to event types",
+    noPublicEventTypes: "No public event types.",
     pickDate: "Pick a date",
     pickTime: "Pick a time",
     yourDetails: "Your details",
@@ -548,6 +627,42 @@ export const messages: Record<Locale, Messages> = {
     addEventType: "Add type",
     removeEventType: "Remove",
     eventTypeDefaultTitle: "New meeting",
+    eventTypeDescriptionLabel: "Description",
+    eventTypeColorLabel: "Color",
+    eventTypeSecretLabel: "Secret event type",
+    eventTypeSecretHint:
+      "Hidden on the public page. Anyone with the link can still book it.",
+    eventTypeDateRangeLabel: "Date range",
+    dateRangeIndefinite: "Indefinite",
+    dateRangeDays: "{n} days",
+    eventTypeSlotIncrementLabel: "Time slot increments",
+    eventTypeMaxPerDayLabel: "Max bookings / day",
+    eventTypeMaxPerWeekLabel: "Max bookings / week",
+    eventTypeMaxPerMonthLabel: "Max bookings / month",
+    eventTypeCancelPolicyLabel: "Cancellation policy",
+    eventTypeCancelPolicyHint:
+      "Shown to guests. Does not block cancel or reschedule.",
+    inviteeQuestionsTitle: "Invitee questions",
+    addQuestion: "Add question",
+    questionLabel: "Question",
+    questionType: "Type",
+    questionRequired: "Required",
+    questionOptions: "Options",
+    addOption: "Add option",
+    questionTypeText: "Short text",
+    questionTypeTextarea: "Long text",
+    questionTypePhone: "Phone",
+    questionTypeRadio: "Single choice",
+    questionTypeCheckbox: "Multiple choice",
+    questionTypeDropdown: "Dropdown",
+    requiredField: "Please fill in all required fields.",
+    eventTypeCopyLink: "Copy booking link",
+    eventTypeLinkCopied: "Link copied",
+    colorBlue: "Blue",
+    colorPurple: "Purple",
+    colorGreen: "Green",
+    colorOrange: "Orange",
+    colorRed: "Red",
     needOneEventType: "Add at least one event type.",
     allowSeriesLabel: "Allow weekly series bookings",
     maxSeriesLabel: "Max sessions in a series",
@@ -602,6 +717,9 @@ export const messages: Record<Locale, Messages> = {
     weekdays: ["月", "火", "水", "木", "金", "土", "日"],
     bookingWith: "ミーティング：",
     stepSchedule: "日時を選ぶ",
+    pickEventType: "種類を選ぶ",
+    backToEventTypes: "種類一覧に戻る",
+    noPublicEventTypes: "公開されている種類はありません。",
     pickDate: "日付を選ぶ",
     pickTime: "時間を選ぶ",
     yourDetails: "あなたの情報",
@@ -741,6 +859,42 @@ export const messages: Record<Locale, Messages> = {
     addEventType: "種類を追加",
     removeEventType: "削除",
     eventTypeDefaultTitle: "新しい予定",
+    eventTypeDescriptionLabel: "説明",
+    eventTypeColorLabel: "色",
+    eventTypeSecretLabel: "非公開の種類",
+    eventTypeSecretHint:
+      "公開ページには出ません。リンクがあれば予約できます。",
+    eventTypeDateRangeLabel: "予約可能な期間",
+    dateRangeIndefinite: "無期限",
+    dateRangeDays: "{n}日",
+    eventTypeSlotIncrementLabel: "枠の間隔",
+    eventTypeMaxPerDayLabel: "1日の上限",
+    eventTypeMaxPerWeekLabel: "1週の上限",
+    eventTypeMaxPerMonthLabel: "1月の上限",
+    eventTypeCancelPolicyLabel: "キャンセルポリシー",
+    eventTypeCancelPolicyHint:
+      "ゲストに表示されます。キャンセルや日程変更は制限しません。",
+    inviteeQuestionsTitle: "ゲストへの質問",
+    addQuestion: "質問を追加",
+    questionLabel: "質問",
+    questionType: "種類",
+    questionRequired: "必須",
+    questionOptions: "選択肢",
+    addOption: "選択肢を追加",
+    questionTypeText: "短文",
+    questionTypeTextarea: "長文",
+    questionTypePhone: "電話",
+    questionTypeRadio: "単一選択",
+    questionTypeCheckbox: "複数選択",
+    questionTypeDropdown: "ドロップダウン",
+    requiredField: "必須項目を入力してください。",
+    eventTypeCopyLink: "予約リンクをコピー",
+    eventTypeLinkCopied: "コピーしました",
+    colorBlue: "青",
+    colorPurple: "紫",
+    colorGreen: "緑",
+    colorOrange: "オレンジ",
+    colorRed: "赤",
     needOneEventType: "イベント種類を1つ以上追加してください。",
     allowSeriesLabel: "毎週の連続予約を許可",
     maxSeriesLabel: "連続予約の最大回数",

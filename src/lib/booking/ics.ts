@@ -12,6 +12,8 @@ function escapeText(value: string) {
     .replace(/\\/g, "\\\\")
     .replace(/;/g, "\\;")
     .replace(/,/g, "\\,")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
     .replace(/\n/g, "\\n");
 }
 
@@ -36,9 +38,14 @@ export function buildIcs(booking: Booking, host: HostProfile) {
     `DTEND:${icsTime(booking.endsAt)}`,
     `SUMMARY:${escapeText(summary)}`,
     `DESCRIPTION:${escapeText(
-      `${host.displayName}\\nGuest: ${booking.guestName} (${booking.guestEmail})${
-        booking.note ? `\\n${booking.note}` : ""
-      }`,
+      `${host.displayName}\nGuest: ${booking.guestName} (${booking.guestEmail})${
+        booking.note ? `\n${booking.note}` : ""
+      }${(booking.answers ?? [])
+        .map(
+          (a) =>
+            `\n${a.label}: ${Array.isArray(a.value) ? a.value.join(", ") : a.value}`,
+        )
+        .join("")}`,
     )}`,
     "END:VEVENT",
     "END:VCALENDAR",

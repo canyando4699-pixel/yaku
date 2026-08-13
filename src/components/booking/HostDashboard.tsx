@@ -20,30 +20,24 @@ import {
   type AuthSession,
 } from "@/lib/auth/localAuth";
 import { defaultHostProfile } from "@/lib/booking/demo";
-import { loadHostProfile } from "@/lib/booking/hostProfile";
+import {
+  loadHostProfile,
+  resolveEventTypeOrFallback,
+} from "@/lib/booking/hostProfile";
 import { downloadIcs } from "@/lib/booking/ics";
 import {
   cancelBooking,
   listBookings,
   rescheduleBooking,
 } from "@/lib/booking/storage";
-import type { Booking, HostProfile } from "@/lib/booking/types";
+import {
+  pastelForBooking,
+  pastelForEventType,
+  type Booking,
+  type HostProfile,
+} from "@/lib/booking/types";
 
 type NavKey = OfficeRoom;
-
-const PASTELS = [
-  { bg: "#d6ecff", border: "#5ac8fa" },
-  { bg: "#e8deff", border: "#bf5af2" },
-  { bg: "#d8f5e2", border: "#30d158" },
-  { bg: "#ffe8d1", border: "#ff9f0a" },
-  { bg: "#ffd9d6", border: "#ff453a" },
-] as const;
-
-function pastelOf(id: string) {
-  let hash = 0;
-  for (let i = 0; i < id.length; i += 1) hash = (hash + id.charCodeAt(i)) % 97;
-  return PASTELS[hash % PASTELS.length]!;
-}
 
 function durationMinutes(start: Date, end: Date) {
   return Math.max(1, Math.round((+end - +start) / 60000));
@@ -117,7 +111,9 @@ export function HostDashboard() {
     [locale],
   );
 
-  const selectedPastel = selected ? pastelOf(selected.id) : PASTELS[0]!;
+  const selectedPastel = selected
+    ? pastelForBooking(selected, host.eventTypes)
+    : pastelForEventType();
 
   function handleCancel(id: string) {
     const next = cancelBooking(id);
@@ -346,6 +342,7 @@ export function HostDashboard() {
             {nav === "schedule" ? (
               <HostScheduleCalendar
                 bookings={confirmed}
+                eventTypes={host.eventTypes}
                 focusDate={focusDate}
                 onFocusChange={setFocusDate}
                 selectedId={selectedId}
@@ -373,7 +370,11 @@ export function HostDashboard() {
                 role="dialog"
                 aria-modal="true"
                 aria-label={selected.guestName}
-                className="office-dc-modal max-h-[min(90dvh,720px)] w-full max-w-[420px] overflow-auto"
+                className={
+                  rescheduleId === selected.id
+                    ? "office-dc-modal max-h-[min(92dvh,960px)] w-full max-w-[760px] overflow-auto"
+                    : "office-dc-modal max-h-[min(90dvh,720px)] w-full max-w-[420px] overflow-auto"
+                }
                 onClick={(e) => e.stopPropagation()}
               >
                 <div
@@ -447,6 +448,23 @@ export function HostDashboard() {
                     </div>
                   ) : null}
 
+                  {(selected.answers ?? []).length ? (
+                    <div className="space-y-2 text-sm">
+                      {(selected.answers ?? []).map((a) => (
+                        <div key={a.questionId}>
+                          <p className="office-muted text-[11px] font-medium uppercase tracking-wide">
+                            {a.label}
+                          </p>
+                          <p>
+                            {Array.isArray(a.value)
+                              ? a.value.join(", ")
+                              : a.value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+
                   <div className="flex items-center gap-2 pt-1">
                     <span className="h-2 w-2 rounded-full bg-[#30d158]" />
                     <span className="text-sm opacity-80">{t.statusConfirmed}</span>
@@ -460,6 +478,13 @@ export function HostDashboard() {
                     </h3>
                     <ReschedulePicker
                       host={host}
+                      eventType={resolveEventTypeOrFallback(
+                        host.eventTypes,
+                        selected.eventTypeId,
+                        host.eventTitle,
+                        host.durationMinutes,
+                      )}
+                      relaxHorizon={true}
                       excludeBookingId={selected.id}
                       initialStartsAt={selected.startsAt}
                       onConfirm={(startsAt, endsAt) =>

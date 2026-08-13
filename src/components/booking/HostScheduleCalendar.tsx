@@ -6,25 +6,23 @@ import { useLocale } from "@/i18n/LocaleProvider";
 import { useTheme } from "@/i18n/ThemeProvider";
 import { localeDate } from "@/i18n/messages";
 import { getDailyQuote } from "@/lib/booking/dailyQuotes";
-import type { Booking } from "@/lib/booking/types";
+import {
+  pastelForBooking,
+  type Booking,
+  type EventType,
+} from "@/lib/booking/types";
 
 const HOUR_START = 0;
 const HOUR_END = 24;
 const HOUR_PX = 56;
 const TIME_TOP_PAD = 16;
 const TIME_BOTTOM_PAD = 24;
-const PASTELS = [
-  { bg: "#d6ecff", border: "#5ac8fa" },
-  { bg: "#e8deff", border: "#bf5af2" },
-  { bg: "#d8f5e2", border: "#30d158" },
-  { bg: "#ffe8d1", border: "#ff9f0a" },
-  { bg: "#ffd9d6", border: "#ff453a" },
-] as const;
 
 type CalView = "day" | "week" | "month" | "year";
 
 type HostScheduleCalendarProps = {
   bookings: Booking[];
+  eventTypes: EventType[];
   focusDate: Date;
   onFocusChange: (next: Date) => void;
   selectedId: string | null;
@@ -76,12 +74,6 @@ function minutesOfDay(date: Date) {
   return date.getHours() * 60 + date.getMinutes();
 }
 
-function pastelOf(id: string) {
-  let hash = 0;
-  for (let i = 0; i < id.length; i += 1) hash = (hash + id.charCodeAt(i)) % 97;
-  return PASTELS[hash % PASTELS.length]!;
-}
-
 function buildMonthGrid(month: Date) {
   const first = startOfMonth(month);
   const mondayIndex = (first.getDay() + 6) % 7;
@@ -105,6 +97,7 @@ function eventLayout(booking: Booking) {
 
 export function HostScheduleCalendar({
   bookings,
+  eventTypes,
   focusDate,
   onFocusChange,
   selectedId,
@@ -346,7 +339,7 @@ export function HostScheduleCalendar({
         {events.map((booking) => {
           const layout = eventLayout(booking);
           if (!layout) return null;
-          const color = pastelOf(booking.id);
+          const color = pastelForBooking(booking, eventTypes);
           return (
             <button
               key={booking.id}
@@ -487,7 +480,7 @@ export function HostScheduleCalendar({
                   {group.items.map((booking) => {
                     const start = new Date(booking.startsAt);
                     const end = new Date(booking.endsAt);
-                    const color = pastelOf(booking.id);
+                    const color = pastelForBooking(booking, eventTypes);
                     return (
                       <button
                         key={booking.id}
@@ -674,7 +667,7 @@ export function HostScheduleCalendar({
                     </button>
                     <div className="host-cal-month-events">
                       {events.slice(0, 3).map((booking) => {
-                        const color = pastelOf(booking.id);
+                        const color = pastelForBooking(booking, eventTypes);
                         return (
                           <button
                             key={booking.id}

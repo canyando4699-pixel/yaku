@@ -3,7 +3,14 @@ import {
   DEFAULT_BOOKING_BACKGROUND_ID,
 } from "@/lib/booking/backgrounds";
 import { defaultHostProfile } from "@/lib/booking/demo";
-import type { AvatarShape, EventType, HostProfile } from "@/lib/booking/types";
+import { normalizeQuestions } from "@/lib/booking/questions";
+import {
+  EVENT_TYPE_COLORS,
+  type AvatarShape,
+  type EventType,
+  type EventTypeColor,
+  type HostProfile,
+} from "@/lib/booking/types";
 
 function storageKey(slug: string) {
   return `yaku-host-${slug}`;
@@ -14,6 +21,86 @@ function canUseStorage() {
 }
 
 const DURATIONS = [15, 30, 45, 60] as const;
+const DATE_RANGES = [0, 14, 30, 60] as const;
+
+function clampNonNeg(value: unknown, fallback: number) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return fallback;
+  return Math.min(Math.floor(n), 24 * 60);
+}
+
+function asSlotIncrement(raw: unknown, duration: number): 10 | 15 | 30 {
+  const n = Number(raw);
+  const increment: 10 | 15 | 30 =
+    n === 10 || n === 15 || n === 30 ? n : 15;
+  const capped = Math.min(increment, duration);
+  if (capped >= 30) return 30;
+  if (capped >= 15) return 15;
+  return 10;
+}
+
+function asDateRangeDays(raw: unknown): 0 | 14 | 30 | 60 {
+  const n = Number(raw);
+  return DATE_RANGES.includes(n as (typeof DATE_RANGES)[number])
+    ? (n as 0 | 14 | 30 | 60)
+    : 0;
+}
+
+function asColor(raw: unknown): EventTypeColor {
+  return EVENT_TYPE_COLORS.includes(raw as EventTypeColor)
+    ? (raw as EventTypeColor)
+    : "blue";
+}
+
+function eventTypeFields(
+  row: Partial<EventType>,
+  durationMinutes: number,
+  dateRangeDays: 0 | 14 | 30 | 60,
+): Omit<EventType, "id" | "title" | "durationMinutes"> {
+  return {
+    description: typeof row.description === "string" ? row.description : "",
+    color: asColor(row.color),
+    secret: row.secret === true,
+    dateRangeDays,
+    slotIncrementMinutes: asSlotIncrement(row.slotIncrementMinutes, durationMinutes),
+    maxBookingsPerDay: clampNonNeg(row.maxBookingsPerDay, 0),
+    maxBookingsPerWeek: clampNonNeg(row.maxBookingsPerWeek, 0),
+    maxBookingsPerMonth: clampNonNeg(row.maxBookingsPerMonth, 0),
+    cancellationPolicy:
+      typeof row.cancellationPolicy === "string"
+        ? row.cancellationPolicy.trim().slice(0, 400)
+        : "",
+    questions: normalizeQuestions(row.questions),
+  };
+}
+
+function fallbackEventType(
+  id: string,
+  title: string,
+  durationMinutes: number,
+): EventType {
+  return {
+    id,
+    title,
+    durationMinutes,
+    ...eventTypeFields({}, durationMinutes, 0),
+  };
+}
+
+export function resolveEventTypeOrFallback(
+  types: EventType[],
+  typeId?: string,
+  fallbackTitle = "Meeting",
+  fallbackDuration = 30,
+): EventType {
+  if (typeId) {
+    const match = types.find((et) => et.id === typeId);
+    if (match) return match;
+  }
+  return (
+    types[0] ?? fallbackEventType("et_default", fallbackTitle, fallbackDuration)
+  );
+}
 
 function normalizeEventTypes(
   raw: unknown,
@@ -21,13 +108,7 @@ function normalizeEventTypes(
   fallbackDuration: number,
 ): EventType[] {
   if (!Array.isArray(raw) || raw.length === 0) {
-    return [
-      {
-        id: "et_default",
-        title: fallbackTitle,
-        durationMinutes: fallbackDuration,
-      },
-    ];
+    return [fallbackEventType("et_default", fallbackTitle, fallbackDuration)];
   }
 
   const types = raw
@@ -42,19 +123,31 @@ function normalizeEventTypes(
         id: String(row.id || `et_${index}`),
         title: String(row.title || fallbackTitle).trim() || fallbackTitle,
         durationMinutes,
+        ...eventTypeFields(row, durationMinutes, asDateRangeDays(row.dateRangeDays)),
       } satisfies EventType;
     })
     .filter((t): t is EventType => !!t);
 
   return types.length > 0
     ? types
-    : [
-        {
-          id: "et_default",
-          title: fallbackTitle,
-          durationMinutes: fallbackDuration,
-        },
-      ];
+    : [fallbackEventType("et_default", fallbackTitle, fallbackDuration)];
+}
+
+export function createEventType(
+  title: string,
+  durationMinutes = 30,
+): EventType {
+  const duration = DURATIONS.includes(
+    durationMinutes as (typeof DURATIONS)[number],
+  )
+    ? durationMinutes
+    : 30;
+  return {
+    id: `et_${Date.now().toString(36)}`,
+    title,
+    durationMinutes: duration,
+    ...eventTypeFields({}, duration, 60),
+  };
 }
 
 function normalizeAvatarShape(raw: unknown): AvatarShape {
@@ -66,12 +159,6 @@ function normalizeBackgroundId(id: unknown): string {
   const match = BOOKING_BACKGROUNDS.find((b) => b.id === id);
   if (!match || match.src === null) return DEFAULT_BOOKING_BACKGROUND_ID;
   return match.id;
-}
-
-function clampNonNeg(value: unknown, fallback: number) {
-  const n = Number(value);
-  if (!Number.isFinite(n) || n < 0) return fallback;
-  return Math.min(Math.floor(n), 24 * 60);
 }
 
 function normalizeHost(raw: Partial<HostProfile> & { slug: string }): HostProfile {

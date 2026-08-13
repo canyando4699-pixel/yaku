@@ -1,5 +1,18 @@
 import { DEFAULT_BOOKING_BACKGROUND_ID } from "@/lib/booking/backgrounds";
-import type { HostProfile } from "@/lib/booking/types";
+import type { EventType, HostProfile } from "@/lib/booking/types";
+
+const DEMO_TYPE_DEFAULTS: Omit<EventType, "id" | "title" | "durationMinutes"> = {
+  description: "",
+  color: "blue",
+  secret: false,
+  dateRangeDays: 0,
+  slotIncrementMinutes: 15,
+  maxBookingsPerDay: 0,
+  maxBookingsPerWeek: 0,
+  maxBookingsPerMonth: 0,
+  cancellationPolicy: "",
+  questions: [],
+};
 
 export const defaultHostProfile: HostProfile = {
   slug: "demo",
@@ -18,9 +31,9 @@ export const defaultHostProfile: HostProfile = {
   minNoticeHours: 2,
   maxBookingsPerDay: 0,
   eventTypes: [
-    { id: "et_15", title: "Quick chat", durationMinutes: 15 },
-    { id: "et_30", title: "30-min meeting", durationMinutes: 30 },
-    { id: "et_60", title: "Deep dive", durationMinutes: 60 },
+    { id: "et_15", title: "Quick chat", durationMinutes: 15, ...DEMO_TYPE_DEFAULTS },
+    { id: "et_30", title: "30-min meeting", durationMinutes: 30, ...DEMO_TYPE_DEFAULTS },
+    { id: "et_60", title: "Deep dive", durationMinutes: 60, ...DEMO_TYPE_DEFAULTS },
   ],
   allowSeries: true,
   maxSeriesCount: 8,

@@ -10,6 +10,7 @@ function normalizeBooking(raw: Booking & { status?: BookingStatus }): Booking {
   return {
     ...raw,
     status: raw.status ?? "confirmed",
+    answers: Array.isArray(raw.answers) ? raw.answers : [],
   };
 }
 
@@ -40,10 +41,7 @@ export function getBooking(id: string): Booking | null {
 
 export function saveBooking(booking: Booking): void {
   const all = readAll();
-  all.push({
-    ...booking,
-    status: booking.status ?? "confirmed",
-  });
+  all.push(normalizeBooking(booking));
   writeAll(all);
 }
 
@@ -143,6 +141,70 @@ export function countConfirmedOnDay(
     return (
       at.getFullYear() === y && at.getMonth() === m && at.getDate() === d
     );
+  }).length;
+}
+
+function matchesType(
+  booking: Booking,
+  eventTypeId: string,
+  excludeId?: string,
+) {
+  return (
+    booking.status === "confirmed" &&
+    booking.eventTypeId === eventTypeId &&
+    booking.id !== excludeId
+  );
+}
+
+export function countConfirmedForTypeOnDay(
+  slug: string,
+  eventTypeId: string,
+  date: Date,
+  excludeId?: string,
+): number {
+  const y = date.getFullYear();
+  const m = date.getMonth();
+  const d = date.getDate();
+  return listBookings(slug).filter((b) => {
+    if (!matchesType(b, eventTypeId, excludeId)) return false;
+    const at = new Date(b.startsAt);
+    return (
+      at.getFullYear() === y && at.getMonth() === m && at.getDate() === d
+    );
+  }).length;
+}
+
+export function countConfirmedForTypeInWeek(
+  slug: string,
+  eventTypeId: string,
+  date: Date,
+  excludeId?: string,
+): number {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const mondayOffset = (d.getDay() + 6) % 7;
+  const weekStart = new Date(d);
+  weekStart.setDate(d.getDate() - mondayOffset);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 7);
+  return listBookings(slug).filter((b) => {
+    if (!matchesType(b, eventTypeId, excludeId)) return false;
+    const at = new Date(b.startsAt);
+    return at >= weekStart && at < weekEnd;
+  }).length;
+}
+
+export function countConfirmedForTypeInMonth(
+  slug: string,
+  eventTypeId: string,
+  date: Date,
+  excludeId?: string,
+): number {
+  const y = date.getFullYear();
+  const m = date.getMonth();
+  return listBookings(slug).filter((b) => {
+    if (!matchesType(b, eventTypeId, excludeId)) return false;
+    const at = new Date(b.startsAt);
+    return at.getFullYear() === y && at.getMonth() === m;
   }).length;
 }
 

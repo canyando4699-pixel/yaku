@@ -1736,6 +1736,29 @@ select.office-input::-ms-expand {
   display: none;
 }
 
+.office-shell .booking-card .office-input:focus {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.office-shell .booking-card select.office-input.series-count-select.series-count-select--ok,
+.office-shell .booking-card select.office-input.series-count-select.series-count-select--ok:focus {
+  border-color: #30d158;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px #30d158;
+}
+
+.office-shell .booking-card select.office-input.series-count-select.series-count-select--blocked,
+.office-shell .booking-card select.office-input.series-count-select.series-count-select--blocked:focus {
+  border-color: #ff453a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px #ff453a;
+}
+
 .office-input option,
 .office-option {
   background: var(--office-surface);

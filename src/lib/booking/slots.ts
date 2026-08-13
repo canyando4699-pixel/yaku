@@ -1,6 +1,8 @@
-import type { HostProfile } from "@/lib/booking/types";
+import type { EventType, HostProfile } from "@/lib/booking/types";
 import {
-  countConfirmedOnDay,
+  countConfirmedForTypeInMonth,
+  countConfirmedForTypeInWeek,
+  countConfirmedForTypeOnDay,
   isRangeTaken,
 } from "@/lib/booking/storage";
 
@@ -12,9 +14,99 @@ export function isBookableDay(
   date: Date,
   host: HostProfile,
   now = new Date(),
+  eventType?: EventType,
 ) {
   if (!host.weekdays.includes(date.getDay())) return false;
-  return startOfDay(date).getTime() >= startOfDay(now).getTime();
+  if (startOfDay(date).getTime() < startOfDay(now).getTime()) return false;
+  if (eventType && eventType.dateRangeDays > 0) {
+    const latest = startOfDay(now);
+    latest.setDate(latest.getDate() + eventType.dateRangeDays);
+    if (startOfDay(date).getTime() > latest.getTime()) return false;
+  }
+  return true;
+}
+
+function extraStartsOnDay(extraStarts: string[], date: Date) {
+  return extraStarts.filter((iso) => {
+    const at = new Date(iso);
+    return (
+      at.getFullYear() === date.getFullYear() &&
+      at.getMonth() === date.getMonth() &&
+      at.getDate() === date.getDate()
+    );
+  }).length;
+}
+
+function extraStartsInWeek(extraStarts: string[], date: Date) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const mondayOffset = (d.getDay() + 6) % 7;
+  const weekStart = new Date(d);
+  weekStart.setDate(d.getDate() - mondayOffset);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 7);
+  return extraStarts.filter((iso) => {
+    const at = new Date(iso);
+    return at >= weekStart && at < weekEnd;
+  }).length;
+}
+
+function extraStartsInMonth(extraStarts: string[], date: Date) {
+  return extraStarts.filter((iso) => {
+    const at = new Date(iso);
+    return (
+      at.getFullYear() === date.getFullYear() &&
+      at.getMonth() === date.getMonth()
+    );
+  }).length;
+}
+
+function typeCapsReached(
+  host: HostProfile,
+  eventType: EventType,
+  date: Date,
+  excludeBookingId?: string,
+  extraStarts: string[] = [],
+) {
+  if (
+    eventType.maxBookingsPerDay > 0 &&
+    countConfirmedForTypeOnDay(
+      host.slug,
+      eventType.id,
+      date,
+      excludeBookingId,
+    ) +
+      extraStartsOnDay(extraStarts, date) >=
+      eventType.maxBookingsPerDay
+  ) {
+    return true;
+  }
+  if (
+    eventType.maxBookingsPerWeek > 0 &&
+    countConfirmedForTypeInWeek(
+      host.slug,
+      eventType.id,
+      date,
+      excludeBookingId,
+    ) +
+      extraStartsInWeek(extraStarts, date) >=
+      eventType.maxBookingsPerWeek
+  ) {
+    return true;
+  }
+  if (
+    eventType.maxBookingsPerMonth > 0 &&
+    countConfirmedForTypeInMonth(
+      host.slug,
+      eventType.id,
+      date,
+      excludeBookingId,
+    ) +
+      extraStartsInMonth(extraStarts, date) >=
+      eventType.maxBookingsPerMonth
+  ) {
+    return true;
+  }
+  return false;
 }
 
 export function getAvailableSlots(
@@ -22,11 +114,18 @@ export function getAvailableSlots(
   date: Date,
   now = new Date(),
   excludeBookingId?: string,
-  options?: { skipTakenCheck?: boolean; durationMinutes?: number },
+  options?: {
+    skipTakenCheck?: boolean;
+    durationMinutes?: number;
+    eventType?: EventType;
+  },
 ): string[] {
-  if (!isBookableDay(date, host, now)) return [];
+  if (!isBookableDay(date, host, now, options?.eventType)) return [];
 
-  const duration = options?.durationMinutes ?? host.durationMinutes;
+  const duration =
+    options?.eventType?.durationMinutes ??
+    options?.durationMinutes ??
+    host.durationMinutes;
   const slots: string[] = [];
   const startMinutes = host.windowStartMinutes;
   const endMinutes = host.windowEndMinutes;
@@ -35,15 +134,17 @@ export function getAvailableSlots(
   const earliest = now.getTime() + noticeMs;
 
   if (
-    host.maxBookingsPerDay > 0 &&
+    options?.eventType &&
     !skipTakenCheck &&
-    countConfirmedOnDay(host.slug, date, excludeBookingId) >=
-      host.maxBookingsPerDay
+    typeCapsReached(host, options.eventType, date, excludeBookingId)
   ) {
     return [];
   }
 
-  const step = Math.min(15, duration);
+  const step = Math.min(
+    options?.eventType?.slotIncrementMinutes ?? 15,
+    duration,
+  );
 
   for (
     let minutes = startMinutes;
@@ -91,6 +192,8 @@ export function buildSeriesStarts(
   firstStartsAt: string,
   count: number,
   durationMinutes: number,
+  eventType?: EventType,
+  now?: Date,
 ): string[] | null {
   if (count <= 1) return [firstStartsAt];
 
@@ -107,7 +210,14 @@ export function buildSeriesStarts(
       0,
       0,
     );
-    if (!isBookableDay(next, host, first)) return null;
+    if (!isBookableDay(next, host, first, undefined)) return null;
+    if (
+      eventType &&
+      eventType.dateRangeDays > 0 &&
+      !isBookableDay(next, host, now ?? new Date(), eventType)
+    ) {
+      return null;
+    }
 
     const iso = next.toISOString();
     const endIso = addMinutes(iso, durationMinutes);
@@ -124,10 +234,7 @@ export function buildSeriesStarts(
       return null;
     }
 
-    if (
-      host.maxBookingsPerDay > 0 &&
-      countConfirmedOnDay(host.slug, next) >= host.maxBookingsPerDay
-    ) {
+    if (eventType && typeCapsReached(host, eventType, next, undefined, starts)) {
       return null;
     }
 

@@ -46,7 +46,16 @@ export function HostBookingList({ bookings, onOpen }: HostBookingListProps) {
         b.guestName.toLowerCase().includes(q) ||
         b.guestEmail.toLowerCase().includes(q) ||
         (b.note ?? "").toLowerCase().includes(q) ||
-        (b.eventTitle ?? "").toLowerCase().includes(q)
+        (b.eventTitle ?? "").toLowerCase().includes(q) ||
+        (b.answers ?? []).some(
+          (a) =>
+            (a.label ?? "").toLowerCase().includes(q) ||
+            String(
+              Array.isArray(a.value) ? a.value.join(" ") : (a.value ?? ""),
+            )
+              .toLowerCase()
+              .includes(q),
+        )
       );
     });
     list.sort((a, b) => {
