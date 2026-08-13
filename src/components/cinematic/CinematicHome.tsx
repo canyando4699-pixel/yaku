@@ -18,6 +18,7 @@ import {
   type ChapterId,
 } from "@/lib/cinematic/chapters";
 import { createCinematicEngine } from "@/lib/cinematic/engine";
+import { getSession } from "@/lib/auth/localAuth";
 
 const CROSSFADE_MS = 200;
 
@@ -35,6 +36,10 @@ function useMatchMedia(query: string) {
 
 function CinematicHeader() {
   const { t } = useLocale();
+  const [loggedIn, setLoggedIn] = useState(false);
+  useEffect(() => {
+    setLoggedIn(!!getSession());
+  }, []);
   return (
     <header className="cinematic-chrome relative z-20 flex items-center justify-between px-6 py-5 md:px-10">
       <div className="flex items-center gap-3">
@@ -43,8 +48,7 @@ function CinematicHeader() {
             src="/yaku-logo.png"
             alt="Yaku"
             width={40}
-            height={52}
-            className="h-10 w-auto"
+            height={40}
             priority
           />
         </div>
@@ -54,13 +58,13 @@ function CinematicHeader() {
       </div>
       <div className="flex items-center gap-2.5">
         <Link
-          href="/host"
+          href={loggedIn ? "/host" : "/login?next=/host"}
           className={[islandClass("islandMuted", "sm"), "hidden sm:inline-flex"].join(
             " ",
           )}
         >
           <Icon name="list" className="h-3.5 w-3.5 text-white/70" />
-          <span>{t.viewBookings}</span>
+          <span>{loggedIn ? t.viewBookings : t.chromeLogin}</span>
         </Link>
         <a
           href="https://github.com/canyando4699-pixel/yaku"

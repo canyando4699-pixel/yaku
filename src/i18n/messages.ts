@@ -32,6 +32,7 @@ export type Messages = {
   badgeFeatures: string;
   tryDemo: string;
   viewBookings: string;
+  chromeLogin: string;
   prevMonth: string;
   nextMonth: string;
   weekdays: [string, string, string, string, string, string, string];
@@ -84,6 +85,9 @@ export type Messages = {
   displayNameLabel: string;
   businessCardTitle: string;
   avatarLabel: string;
+  avatarShapeLabel: string;
+  avatarShapeRound: string;
+  avatarShapeSquare: string;
   uploadAvatar: string;
   removeAvatar: string;
   bioLabel: string;
@@ -113,6 +117,10 @@ export type Messages = {
   dashSchedule: string;
   dashList: string;
   dashAvailability: string;
+  dashAppearance: string;
+  appearanceHint: string;
+  appearanceSoon: string;
+  appearancePreviewLabel: string;
   dashShareLink: string;
   dashIntegrations: string;
   dashMyActivity: string;
@@ -202,6 +210,7 @@ export const messages: Record<Locale, Messages> = {
     badgeFeatures: "Buchungslink · Verfügbarkeit · Dashboard",
     tryDemo: "Demo buchen",
     viewBookings: "Host-Dashboard",
+    chromeLogin: "Login",
     prevMonth: "Vorheriger Monat",
     nextMonth: "Nächster Monat",
     weekdays: ["MO", "DI", "MI", "DO", "FR", "SA", "SO"],
@@ -255,6 +264,9 @@ export const messages: Record<Locale, Messages> = {
     displayNameLabel: "Anzeigename",
     businessCardTitle: "Visitenkarte",
     avatarLabel: "Foto",
+    avatarShapeLabel: "Form",
+    avatarShapeRound: "Rund",
+    avatarShapeSquare: "Eckig",
     uploadAvatar: "Foto hochladen",
     removeAvatar: "Foto entfernen",
     bioLabel: "Beschreibung",
@@ -293,6 +305,10 @@ export const messages: Record<Locale, Messages> = {
     dashSchedule: "Plan",
     dashList: "Liste",
     dashAvailability: "Verfügbarkeit",
+    dashAppearance: "Ansicht",
+    appearanceHint: "Hintergrund der öffentlichen Buchungsseite.",
+    appearanceSoon: "Platzhalter",
+    appearancePreviewLabel: "Vorschau",
     dashShareLink: "Link teilen",
     dashIntegrations: "Integrationen",
     dashMyActivity: "Meine Termine",
@@ -387,6 +403,7 @@ export const messages: Record<Locale, Messages> = {
     badgeFeatures: "Booking link · Availability · Dashboard",
     tryDemo: "Try demo booking",
     viewBookings: "Host dashboard",
+    chromeLogin: "Login",
     prevMonth: "Previous month",
     nextMonth: "Next month",
     weekdays: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
@@ -440,6 +457,9 @@ export const messages: Record<Locale, Messages> = {
     displayNameLabel: "Display name",
     businessCardTitle: "Business card",
     avatarLabel: "Photo",
+    avatarShapeLabel: "Shape",
+    avatarShapeRound: "Round",
+    avatarShapeSquare: "Square",
     uploadAvatar: "Upload photo",
     removeAvatar: "Remove photo",
     bioLabel: "Bio",
@@ -478,6 +498,10 @@ export const messages: Record<Locale, Messages> = {
     dashSchedule: "Schedule",
     dashList: "List",
     dashAvailability: "Availability",
+    dashAppearance: "View",
+    appearanceHint: "Background of the public booking page.",
+    appearanceSoon: "Placeholder",
+    appearancePreviewLabel: "Preview",
     dashShareLink: "Share link",
     dashIntegrations: "Integrations",
     dashMyActivity: "My activity",
@@ -572,6 +596,7 @@ export const messages: Record<Locale, Messages> = {
     badgeFeatures: "予約リンク · 空き時間 · ダッシュボード",
     tryDemo: "デモを予約",
     viewBookings: "ホスト画面",
+    chromeLogin: "ログイン",
     prevMonth: "前の月",
     nextMonth: "次の月",
     weekdays: ["月", "火", "水", "木", "金", "土", "日"],
@@ -625,6 +650,9 @@ export const messages: Record<Locale, Messages> = {
     displayNameLabel: "表示名",
     businessCardTitle: "名刺",
     avatarLabel: "写真",
+    avatarShapeLabel: "形",
+    avatarShapeRound: "丸",
+    avatarShapeSquare: "四角",
     uploadAvatar: "写真をアップロード",
     removeAvatar: "写真を削除",
     bioLabel: "自己紹介",
@@ -663,6 +691,10 @@ export const messages: Record<Locale, Messages> = {
     dashSchedule: "スケジュール",
     dashList: "リスト",
     dashAvailability: "空き時間",
+    dashAppearance: "表示",
+    appearanceHint: "公開予約ページの背景。",
+    appearanceSoon: "プレースホルダー",
+    appearancePreviewLabel: "プレビュー",
     dashShareLink: "リンク共有",
     dashIntegrations: "連携",
     dashMyActivity: "マイ予定",

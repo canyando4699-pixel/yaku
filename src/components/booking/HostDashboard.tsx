@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { HostAppearance } from "@/components/booking/HostAppearance";
 import { HostAvailability } from "@/components/booking/HostAvailability";
 import { HostBookingList } from "@/components/booking/HostBookingList";
 import { HostScheduleCalendar } from "@/components/booking/HostScheduleCalendar";
@@ -169,11 +170,12 @@ export function HostDashboard() {
   const navItems: {
     key: NavKey;
     label: string;
-    icon: "calendar" | "list" | "clock" | "link" | "grid";
+    icon: "calendar" | "list" | "clock" | "settings" | "link" | "grid";
   }[] = [
     { key: "schedule", label: t.dashSchedule, icon: "calendar" },
     { key: "list", label: t.dashList, icon: "list" },
     { key: "availability", label: t.dashAvailability, icon: "clock" },
+    { key: "appearance", label: t.dashAppearance, icon: "settings" },
     { key: "share", label: t.dashShareLink, icon: "link" },
     { key: "integrations", label: t.dashIntegrations, icon: "grid" },
   ];
@@ -292,6 +294,10 @@ export function HostDashboard() {
                 slug={host.slug}
                 onSaved={(profile) => setHost(profile)}
               />
+            ) : null}
+
+            {nav === "appearance" ? (
+              <HostAppearance slug={host.slug} onSaved={setHost} />
             ) : null}
 
             {nav === "share" ? (

@@ -6,6 +6,8 @@ export type EventType = {
   durationMinutes: number;
 };
 
+export type AvatarShape = "round" | "square";
+
 export type Booking = {
   id: string;
   slug: string;
@@ -31,6 +33,7 @@ export type HostProfile = {
   displayName: string;
   /** Empty string = no photo */
   avatarDataUrl: string;
+  avatarShape: AvatarShape;
   bio: string;
   eventTitle: string;
   durationMinutes: number;
@@ -48,4 +51,5 @@ export type HostProfile = {
   eventTypes: EventType[];
   allowSeries: boolean;
   maxSeriesCount: number;
+  backgroundId: string;
 };

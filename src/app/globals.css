@@ -35,6 +35,9 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.1),
     0 10px 24px rgba(0, 0, 0, 0.22),
     0 0 0 1px rgba(255, 255, 255, 0.08);
+  --yaku-scrollbar-track: #e8e8e8;
+  --yaku-scrollbar-thumb: #a3a3a3;
+  --yaku-scrollbar-thumb-hover: #7a7a7a;
 }
 
 .yaku-glass,
@@ -204,6 +207,43 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--yaku-scrollbar-thumb) var(--yaku-scrollbar-track);
+  }
+
+  *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--yaku-scrollbar-track);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--yaku-scrollbar-thumb);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--yaku-scrollbar-thumb-hover);
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: var(--yaku-scrollbar-track);
+  }
 }
 
 @keyframes yaku-star-twinkle {
@@ -417,6 +457,9 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.1),
     0 10px 24px rgba(0, 0, 0, 0.22),
     0 0 0 1px rgba(255, 255, 255, 0.08);
+  --yaku-scrollbar-track: #2a2824;
+  --yaku-scrollbar-thumb: #8a8680;
+  --yaku-scrollbar-thumb-hover: #b0aca6;
   position: relative;
   isolation: isolate;
   background: var(--office-bg);
@@ -509,6 +552,9 @@ body {
     inset 0 1px 0 #fff,
     inset 0 -1px 0 rgba(42, 40, 36, 0.04),
     0 8px 18px rgba(42, 40, 36, 0.1);
+  --yaku-scrollbar-track: #e8e8e8;
+  --yaku-scrollbar-thumb: #a3a3a3;
+  --yaku-scrollbar-thumb-hover: #7a7a7a;
 }
 
 .office-shell .yaku-glass,
@@ -2323,6 +2369,39 @@ select.office-input::-ms-expand {
   color: var(--hc-sidebar-muted);
 }
 
+.host-cal-quote {
+  margin: 0 0 1rem;
+  padding: 0 0 0.85rem;
+  border-bottom: 1px solid var(--hc-sidebar-line);
+}
+.host-cal-quote-kanji {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  color: var(--hc-sidebar-text);
+}
+.host-cal-quote-gloss {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--hc-sidebar-muted);
+}
+.host-cal-quote-footer {
+  margin: 0;
+}
+.host-cal-quote-source {
+  display: block;
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--hc-sidebar-muted);
+  opacity: 0.75;
+}
+
 .host-cal-agenda-date {
   font-weight: 400;
   letter-spacing: normal;
@@ -2668,6 +2747,10 @@ select.office-input::-ms-expand {
   --split: 0;
   --mx: 0;
   --my: 0;
+  --origin-x: 50%;
+  --origin-y: 50%;
+  --focus-y: 0%;
+  --focus-x: 0%;
   color: #fff;
   min-height: 100%;
 }
@@ -2705,8 +2788,11 @@ select.office-input::-ms-expand {
 .cinematic-stage-media {
   position: absolute;
   inset: -4%;
-  transform: scale(var(--scale))
-    translate3d(calc(var(--mx) * 12px), calc(var(--my) * 8px), 0);
+  transform-origin: var(--origin-x) var(--origin-y);
+  transform:
+    translate3d(calc(var(--mx) * 12px), calc(var(--my) * 8px), 0)
+    translate(var(--focus-x), var(--focus-y))
+    scale(var(--scale));
   filter: blur(var(--blur));
 }
 
@@ -3005,7 +3091,8 @@ select.office-input::-ms-expand {
   .cinematic-stage-media {
     inset: 0;
     filter: none;
-    transform: scale(var(--scale));
+    transform-origin: var(--origin-x) var(--origin-y);
+    transform: translate(var(--focus-x), var(--focus-y)) scale(var(--scale));
   }
 
   .cinematic-panel {

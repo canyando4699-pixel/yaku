@@ -11,6 +11,7 @@ import { Icon } from "@/components/ui/Icon";
 import { IslandButton, IslandPill, islandClass } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { localeDate } from "@/i18n/messages";
+import { resolveBookingBackgroundSrc } from "@/lib/booking/backgrounds";
 import { loadHostProfile } from "@/lib/booking/hostProfile";
 import {
   addMinutes,
@@ -270,7 +271,7 @@ export function BookingFlow({
       data-theme="dark"
     >
       <Image
-        src="/images/sensoji-night.jpg"
+        src={resolveBookingBackgroundSrc(host.backgroundId)}
         alt=""
         fill
         priority
@@ -281,7 +282,7 @@ export function BookingFlow({
       />
       <div
         aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,17,15,0.78)_0%,rgba(18,17,15,0.68)_45%,rgba(18,17,15,0.82)_100%)]"
+        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,17,15,0.55)_0%,rgba(18,17,15,0.48)_45%,rgba(18,17,15,0.62)_100%)]"
       />
 
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
@@ -311,16 +312,16 @@ export function BookingFlow({
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 pb-12 md:px-8">
-        <div className="grid w-full gap-5 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:gap-6">
-          <aside className="booking-card office-ringed relative w-full overflow-hidden rounded-[1.5rem] p-4 lg:sticky lg:top-6 lg:p-5">
-            <OfficeChaseRing />
-            <div className="relative z-[1]">
+      <main className="relative z-10 mx-auto flex w-full min-w-0 flex-1 flex-col items-center justify-center px-5 py-8 md:px-8">
+        <div className="booking-card office-ringed relative w-full max-w-[980px] overflow-hidden rounded-[1.5rem] p-0">
+          <OfficeChaseRing />
+          <div className="relative z-[1] flex min-h-0 flex-col lg:flex-row">
+            <aside className="w-full shrink-0 border-b border-white/10 p-5 lg:w-[240px] lg:shrink-0 lg:border-b-0 lg:border-r lg:border-white/10">
               <p className="office-muted text-[10px] font-medium uppercase tracking-[0.14em]">
                 {t.bookingWith}
               </p>
               <div className="mt-3 flex items-center gap-3 lg:flex-col lg:items-start lg:gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 text-lg font-medium text-[color:var(--office-text)] ring-1 ring-white/15 lg:h-20 lg:w-20 lg:text-2xl">
+                <div className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden ${host.avatarShape === "square" ? "rounded-[8px]" : "rounded-full"} bg-white/10 text-lg font-medium text-[color:var(--office-text)] ring-1 ring-white/15 lg:h-20 lg:w-20 lg:text-2xl`}>
                   {host.avatarDataUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -347,13 +348,10 @@ export function BookingFlow({
                   {host.bio}
                 </p>
               ) : null}
-            </div>
-          </aside>
+            </aside>
 
-          {step === "schedule" ? (
-            <div className="booking-card office-ringed relative w-full overflow-hidden rounded-[1.5rem] p-0">
-              <OfficeChaseRing />
-              <div className="relative z-[1]">
+            {step === "schedule" || !selectedSlot ? (
+              <div className="flex min-w-0 flex-1 flex-col">
                 <div className="border-b border-white/10 px-5 py-4">
                   <StepIndicator
                     active="schedule"
@@ -391,8 +389,8 @@ export function BookingFlow({
                   </div>
                 </div>
 
-                <div className="grid items-start gap-5 px-5 py-4 md:grid-cols-[260px_minmax(0,1fr)] md:gap-6">
-                  <div className="w-full">
+                <div className="grid flex-1 items-start md:grid-cols-[280px_minmax(0,1fr)]">
+                  <div className="min-w-0 px-5 py-4">
                     <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
                       <Icon
                         name="calendar"
@@ -411,7 +409,7 @@ export function BookingFlow({
                     />
                   </div>
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 px-5 py-4 md:border-l md:border-white/10">
                     <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                       <p className="flex items-center gap-1.5 text-xs font-medium text-[color:var(--office-text)]">
                         <Icon
@@ -448,7 +446,7 @@ export function BookingFlow({
                     {slots.length === 0 ? (
                       <p className="office-muted text-xs">{t.noSlots}</p>
                     ) : (
-                      <div className="grid max-h-[280px] grid-cols-3 gap-1.5 overflow-y-auto pr-0.5 sm:grid-cols-4">
+                      <div className="grid max-h-[min(52dvh,420px)] grid-cols-3 gap-1.5 overflow-y-auto pr-0.5 sm:grid-cols-4">
                         {slots.map((slot) => {
                           const active = slot === selectedSlot;
                           return (
@@ -495,16 +493,11 @@ export function BookingFlow({
                   </button>
                 </div>
               </div>
-            </div>
-          ) : null}
-
-          {step === "details" && selectedSlot ? (
-            <form
-              onSubmit={submitBooking}
-              className="booking-card office-ringed relative w-full overflow-hidden rounded-[1.5rem] p-0"
-            >
-              <OfficeChaseRing />
-              <div className="relative z-[1]">
+            ) : (
+              <form
+                onSubmit={submitBooking}
+                className="flex min-w-0 flex-1 flex-col"
+              >
                 <div className="border-b border-white/10 px-5 py-4">
                   <StepIndicator
                     active="details"
@@ -524,7 +517,7 @@ export function BookingFlow({
                   </IslandPill>
                 </div>
 
-                <div className="px-5 py-4">
+                <div className="flex-1 px-5 py-4">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="office-field block text-xs">
                       <span className="mb-1 inline-flex items-center gap-1.5">
@@ -616,9 +609,9 @@ export function BookingFlow({
                     {t.confirmBooking}
                   </IslandButton>
                 </div>
-              </div>
-            </form>
-          ) : null}
+              </form>
+            )}
+          </div>
         </div>
       </main>
     </div>

@@ -13,6 +13,12 @@ export type ChapterDef = {
     scaleTo: number;
     blurFrom: number;
     blurTo: number;
+    scaleSettle?: number;
+    originX?: number;
+    originY?: number;
+    focusY?: number;
+    panX?: number;
+    panSettle?: number;
   };
 };
 
@@ -40,10 +46,14 @@ export const CHAPTERS: readonly ChapterDef[] = [
     enter: 0.28,
     exit: 0.72,
     motion: {
-      scaleFrom: 1.02,
+      scaleFrom: 1.72,
       scaleTo: 1,
-      blurFrom: 0,
+      blurFrom: 0.6,
       blurTo: 0,
+      scaleSettle: 0.18,
+      originX: 0.5,
+      originY: 0.32,
+      focusY: 18,
     },
   },
   {

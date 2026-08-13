@@ -39,6 +39,7 @@ type BookingCalendarProps = {
   onSelect: (date: Date) => void;
   isDayEnabled?: (date: Date) => boolean;
   variant?: "hero" | "embedded";
+  className?: string;
 };
 
 export function BookingCalendar({
@@ -46,6 +47,7 @@ export function BookingCalendar({
   onSelect,
   isDayEnabled,
   variant = "hero",
+  className,
 }: BookingCalendarProps) {
   const { locale, t } = useLocale();
   const [visibleMonth, setVisibleMonth] = useState(() =>
@@ -64,7 +66,12 @@ export function BookingCalendar({
 
   if (variant === "embedded") {
     return (
-      <div className="relative w-full max-w-[260px] overflow-hidden rounded-[1rem] border border-[color:var(--office-border)] bg-[color:var(--office-surface-soft)] px-3 pb-3 pt-2.5">
+      <div
+        className={[
+          "relative w-full overflow-hidden rounded-[1rem] border border-[color:var(--office-border)] bg-[color:var(--office-surface-soft)] px-3 pb-3 pt-2.5",
+          className ?? "max-w-[260px]",
+        ].join(" ")}
+      >
         <div className="mb-3 flex items-center justify-between">
           <button
             type="button"

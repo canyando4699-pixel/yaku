@@ -1,9 +1,11 @@
+import { DEFAULT_BOOKING_BACKGROUND_ID } from "@/lib/booking/backgrounds";
 import type { HostProfile } from "@/lib/booking/types";
 
 export const defaultHostProfile: HostProfile = {
   slug: "demo",
   displayName: "Yaku Demo",
   avatarDataUrl: "",
+  avatarShape: "round",
   bio: "Product designer helping teams ship clearer meeting flows. Happy to chat about scheduling, UX, or Yaku.",
   eventTitle: "30-min meeting",
   durationMinutes: 30,
@@ -22,6 +24,7 @@ export const defaultHostProfile: HostProfile = {
   ],
   allowSeries: true,
   maxSeriesCount: 8,
+  backgroundId: DEFAULT_BOOKING_BACKGROUND_ID,
 };
 
 /** @deprecated Use defaultHostProfile / loadHostProfile */

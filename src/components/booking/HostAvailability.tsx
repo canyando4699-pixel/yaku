@@ -195,7 +195,7 @@ export function HostAvailability({
         <h3 className="font-display text-xl">{t.businessCardTitle}</h3>
 
         <div className="mt-4 flex flex-wrap items-center gap-4">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[color:var(--office-nav-hover)] text-2xl font-medium text-[color:var(--office-text)] ring-1 ring-[color:var(--office-border)]">
+          <div className={`flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden ${draft.avatarShape === "square" ? "rounded-[8px]" : "rounded-full"} bg-[color:var(--office-nav-hover)] text-2xl font-medium text-[color:var(--office-text)] ring-1 ring-[color:var(--office-border)]`}>
             {draft.avatarDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -240,6 +240,42 @@ export function HostAvailability({
             ) : null}
           </div>
         </div>
+
+        <fieldset className="mt-4">
+          <legend className="office-field text-sm">{t.avatarShapeLabel}</legend>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setDraft((p) => ({ ...p, avatarShape: "round" }));
+                setMessage(null);
+              }}
+              className={[
+                "rounded-full px-3.5 py-2 text-sm font-medium transition",
+                draft.avatarShape === "round"
+                  ? "office-liquid-glass"
+                  : "office-chip-idle",
+              ].join(" ")}
+            >
+              {t.avatarShapeRound}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDraft((p) => ({ ...p, avatarShape: "square" }));
+                setMessage(null);
+              }}
+              className={[
+                "rounded-full px-3.5 py-2 text-sm font-medium transition",
+                draft.avatarShape === "square"
+                  ? "office-liquid-glass"
+                  : "office-chip-idle",
+              ].join(" ")}
+            >
+              {t.avatarShapeSquare}
+            </button>
+          </div>
+        </fieldset>
 
         <label className="mt-4 office-field block text-sm">
           {t.bioLabel}

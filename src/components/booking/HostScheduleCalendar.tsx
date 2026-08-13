@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { useTheme } from "@/i18n/ThemeProvider";
 import { localeDate } from "@/i18n/messages";
+import { getDailyQuote } from "@/lib/booking/dailyQuotes";
 import type { Booking } from "@/lib/booking/types";
 
 const HOUR_START = 0;
@@ -146,6 +147,7 @@ export function HostScheduleCalendar({
   const gridHeight =
     hours.length * HOUR_PX + TIME_TOP_PAD + TIME_BOTTOM_PAD;
   const now = new Date();
+  const quote = getDailyQuote(now);
   const miniDays = useMemo(() => buildMonthGrid(sidebarMonth), [sidebarMonth]);
   const monthDays = useMemo(() => buildMonthGrid(focus), [focus]);
 
@@ -463,6 +465,13 @@ export function HostScheduleCalendar({
         </div>
 
         <div className="host-cal-agenda">
+          <blockquote className="host-cal-quote">
+            <p lang="ja" className="host-cal-quote-kanji font-display">{quote.kanji}</p>
+            <p className="host-cal-quote-gloss">{quote.gloss[locale]}</p>
+            <footer className="host-cal-quote-footer">
+              <cite className="host-cal-quote-source font-display">{quote.source[locale]}</cite>
+            </footer>
+          </blockquote>
           {agendaGroups.length === 0 ? (
             <p className="host-cal-agenda-empty">{t.hostBookingsEmpty}</p>
           ) : (

@@ -7,6 +7,7 @@ export type OfficeRoom =
   | "schedule"
   | "list"
   | "availability"
+  | "appearance"
   | "share"
   | "integrations";
 

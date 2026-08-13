@@ -1,5 +1,9 @@
+import {
+  BOOKING_BACKGROUNDS,
+  DEFAULT_BOOKING_BACKGROUND_ID,
+} from "@/lib/booking/backgrounds";
 import { defaultHostProfile } from "@/lib/booking/demo";
-import type { EventType, HostProfile } from "@/lib/booking/types";
+import type { AvatarShape, EventType, HostProfile } from "@/lib/booking/types";
 
 function storageKey(slug: string) {
   return `yaku-host-${slug}`;
@@ -53,6 +57,17 @@ function normalizeEventTypes(
       ];
 }
 
+function normalizeAvatarShape(raw: unknown): AvatarShape {
+  return raw === "square" ? "square" : "round";
+}
+
+function normalizeBackgroundId(id: unknown): string {
+  if (typeof id !== "string") return DEFAULT_BOOKING_BACKGROUND_ID;
+  const match = BOOKING_BACKGROUNDS.find((b) => b.id === id);
+  if (!match || match.src === null) return DEFAULT_BOOKING_BACKGROUND_ID;
+  return match.id;
+}
+
 function clampNonNeg(value: unknown, fallback: number) {
   const n = Number(value);
   if (!Number.isFinite(n) || n < 0) return fallback;
@@ -104,6 +119,7 @@ function normalizeHost(raw: Partial<HostProfile> & { slug: string }): HostProfil
     slug: raw.slug,
     displayName: raw.displayName?.trim() || base.displayName,
     avatarDataUrl,
+    avatarShape: normalizeAvatarShape(raw.avatarShape),
     bio,
     eventTitle,
     durationMinutes: safeDuration,
@@ -130,6 +146,7 @@ function normalizeHost(raw: Partial<HostProfile> & { slug: string }): HostProfil
       12,
       Math.max(1, clampNonNeg(raw.maxSeriesCount, base.maxSeriesCount) || 8),
     ),
+    backgroundId: normalizeBackgroundId(raw.backgroundId),
   };
 }
 

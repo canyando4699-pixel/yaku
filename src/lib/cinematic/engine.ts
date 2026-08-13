@@ -92,8 +92,50 @@ export function createCinematicEngine(
     const p2 = chapterLocalProgress(p, CHAPTERS[1]);
     const p3 = chapterLocalProgress(p, CHAPTERS[2]);
 
-    const scale = lerp(ch.motion.scaleFrom, ch.motion.scaleTo, local);
-    const blur = lerp(ch.motion.blurFrom, ch.motion.blurTo, local);
+    const useSettle =
+      ch.motion.scaleSettle != null && ch.motion.scaleSettle > 0;
+    let scale: number;
+    let blur: number;
+    let mxWrite: number;
+    let myWrite: number;
+    let originX: string;
+    let originY: string;
+    let focusY: string;
+    let focusX: string;
+
+    if (useSettle) {
+      const t = clamp01(local / ch.motion.scaleSettle!);
+      const eased = 1 - (1 - t) ** 4;
+      scale = lerp(ch.motion.scaleFrom, ch.motion.scaleTo, eased);
+      blur = lerp(ch.motion.blurFrom, ch.motion.blurTo, eased);
+      mxWrite = mx * eased;
+      myWrite = my * eased;
+      originX = `${((ch.motion.originX ?? 0.5) * 100).toFixed(2)}%`;
+      originY = `${((ch.motion.originY ?? 0.5) * 100).toFixed(2)}%`;
+      focusY = `${((ch.motion.focusY ?? 0) * (1 - eased)).toFixed(2)}%`;
+      let panFocus = 0;
+      if (
+        ch.motion.panX != null &&
+        ch.motion.panSettle != null &&
+        ch.motion.panSettle > (ch.motion.scaleSettle ?? 0)
+      ) {
+        const start = ch.motion.scaleSettle ?? 0;
+        const panT = clamp01((local - start) / (ch.motion.panSettle - start));
+        const panEased = 1 - (1 - panT) ** 3;
+        panFocus = (ch.motion.panX ?? 0) * panEased;
+      }
+      focusX = `${panFocus.toFixed(2)}%`;
+    } else {
+      scale = lerp(ch.motion.scaleFrom, ch.motion.scaleTo, local);
+      blur = lerp(ch.motion.blurFrom, ch.motion.blurTo, local);
+      mxWrite = mx;
+      myWrite = my;
+      originX = "50%";
+      originY = "50%";
+      focusY = "0%";
+      focusX = "0%";
+    }
+
     const split = Math.sin(local * Math.PI);
 
     root.style.setProperty("--p", p.toFixed(4));
@@ -103,8 +145,12 @@ export function createCinematicEngine(
     root.style.setProperty("--scale", scale.toFixed(4));
     root.style.setProperty("--blur", `${blur.toFixed(2)}px`);
     root.style.setProperty("--split", split.toFixed(4));
-    root.style.setProperty("--mx", mx.toFixed(4));
-    root.style.setProperty("--my", my.toFixed(4));
+    root.style.setProperty("--mx", mxWrite.toFixed(4));
+    root.style.setProperty("--my", myWrite.toFixed(4));
+    root.style.setProperty("--origin-x", originX);
+    root.style.setProperty("--origin-y", originY);
+    root.style.setProperty("--focus-y", focusY);
+    root.style.setProperty("--focus-x", focusX);
     root.dataset.chapter = chapter;
   };
 
