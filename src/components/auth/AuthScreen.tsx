@@ -9,6 +9,7 @@ import { Icon } from "@/components/ui/Icon";
 import { IslandButton } from "@/components/ui/Island";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { ensureDemoAccount, getSession, signIn, signUp } from "@/lib/auth/localAuth";
+import { safeNextPath } from "@/lib/auth/safeNextPath";
 
 type Mode = "login" | "signup";
 
@@ -21,6 +22,7 @@ export function AuthScreen({
 }) {
   const { t } = useLocale();
   const router = useRouter();
+  const redirectTo = safeNextPath(nextPath);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,8 +34,8 @@ export function AuthScreen({
 
   useEffect(() => {
     void ensureDemoAccount();
-    if (getSession()) router.replace(nextPath);
-  }, [nextPath, router]);
+    if (getSession()) router.replace(redirectTo);
+  }, [redirectTo, router]);
 
   function handleOauthSoon() {
     setError(null);
@@ -64,7 +66,7 @@ export function AuthScreen({
       return;
     }
 
-    router.replace(nextPath);
+    router.replace(redirectTo);
   }
 
   return (
@@ -231,7 +233,7 @@ export function AuthScreen({
               <>
                 {t.alreadyHaveAccount}{" "}
                 <Link
-                  href={`/login?next=${encodeURIComponent(nextPath)}`}
+                  href={`/login?next=${encodeURIComponent(redirectTo)}`}
                   className="text-white underline underline-offset-4"
                 >
                   {t.signIn}
@@ -241,7 +243,7 @@ export function AuthScreen({
               <>
                 {t.noAccountYet}{" "}
                 <Link
-                  href={`/signup?next=${encodeURIComponent(nextPath)}`}
+                  href={`/signup?next=${encodeURIComponent(redirectTo)}`}
                   className="text-white underline underline-offset-4"
                 >
                   {t.createAccount}

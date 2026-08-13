@@ -1,5 +1,6 @@
 import { AuthScreen } from "@/components/auth/AuthScreen";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
+import { safeNextPath } from "@/lib/auth/safeNextPath";
 
 export default async function LoginPage({
   searchParams,
@@ -7,8 +8,7 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const params = await searchParams;
-  const nextPath =
-    params.next && params.next.startsWith("/") ? params.next : "/host";
+  const nextPath = safeNextPath(params.next);
 
   return (
     <LocaleProvider>
