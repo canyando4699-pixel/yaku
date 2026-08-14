@@ -306,7 +306,7 @@ async function main() {
     await waitForImages(cdp, 1);
     await sleep(1500);
     await assertEnglish(cdp, "hero");
-    await screenshot(cdp, "hero-en.png");
+    await screenshot(cdp, "hero-en-v2.png");
 
     // Landing calendar (wait for Spline + Booking link slide)
     await evalExpr(
@@ -364,7 +364,7 @@ async function main() {
       await sleep(250);
     }
     await assertEnglish(cdp, "calendar");
-    await screenshot(cdp, "calendar-en.png");
+    await screenshot(cdp, "calendar-en-v2.png");
 
     // Booking
     await goto(cdp, BASE + "/b/demo");
@@ -373,7 +373,7 @@ async function main() {
     await waitForImages(cdp, 1);
     await sleep(1500);
     await assertEnglish(cdp, "booking");
-    await screenshot(cdp, "demo-en.png");
+    await screenshot(cdp, "demo-en-v2.png");
 
     // Login
     await goto(cdp, BASE + "/login");
@@ -382,7 +382,7 @@ async function main() {
     await waitForImages(cdp, 1);
     await sleep(1200);
     await assertEnglish(cdp, "login");
-    await screenshot(cdp, "login.png");
+    await screenshot(cdp, "login-v2.png");
 
     // Host schedule
     await goto(cdp, BASE + "/");
@@ -390,24 +390,24 @@ async function main() {
     await goto(cdp, BASE + "/host");
     await sleep(2500);
     await assertEnglish(cdp, "host-schedule");
-    await screenshot(cdp, "host-schedule.png");
+    await screenshot(cdp, "host-schedule-v2.png");
 
     await clickNav(cdp, "List");
     await sleep(1000);
-    await screenshot(cdp, "host-list.png");
+    await screenshot(cdp, "host-list-v2.png");
 
     await clickNav(cdp, "Availability");
     await sleep(1200);
     await assertEnglish(cdp, "host-availability");
-    await screenshot(cdp, "host-availability.png");
+    await screenshot(cdp, "host-availability-v2.png");
 
     await clickNav(cdp, "View");
     await sleep(1200);
-    await screenshot(cdp, "host-appearance.png");
+    await screenshot(cdp, "host-appearance-v2.png");
 
     await clickNav(cdp, "Share link");
     await sleep(1200);
-    await screenshot(cdp, "host-share.png");
+    await screenshot(cdp, "host-share-v2.png");
 
     cdp.close();
   } finally {

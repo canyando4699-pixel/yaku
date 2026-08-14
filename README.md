@@ -33,17 +33,17 @@ Lightweight, open source, self-hostable. The demo is **local-first** (browser `l
 
 Cinematic scroll story — intro brand lockup, mid product sights, and a CTA chapter into the demo.
 
-![Yaku cinematic intro — brand lockup](docs/screenshots/hero-en.png)
+![Yaku cinematic intro — brand lockup](docs/screenshots/hero-en-v2.png)
 
 Mid chapter with product story and feature sights:
 
-![Yaku cinematic mid — product sights](docs/screenshots/calendar-en.png)
+![Yaku cinematic mid — product sights](docs/screenshots/calendar-en-v2.png)
 
 ### Guest booking
 
 Public booking flow (`/b/demo`) with event types, timezone, date, and time slots — liquid-glass card on a temple night backdrop.
 
-![Yaku demo booking — event type, date, and time](docs/screenshots/demo-en.png)
+![Yaku demo booking — event type, date, and time](docs/screenshots/demo-en-v2.png)
 
 ### Host office
 
@@ -51,21 +51,21 @@ Host dashboard (`/host`) with theme toggle, language switcher, and liquid-glass 
 
 | Schedule | List |
 | --- | --- |
-| ![Host schedule week board](docs/screenshots/host-schedule.png) | ![Host booking list](docs/screenshots/host-list.png) |
+| ![Host schedule week board](docs/screenshots/host-schedule-v2.png) | ![Host booking list](docs/screenshots/host-list-v2.png) |
 
 | Availability | View |
 | --- | --- |
-| ![Host availability — weekly hours and date overrides](docs/screenshots/host-availability.png) | ![Host appearance / booking page background](docs/screenshots/host-appearance.png) |
+| ![Host availability — weekly hours and date overrides](docs/screenshots/host-availability-v2.png) | ![Host appearance / booking page background](docs/screenshots/host-appearance-v2.png) |
 
 | Share link |
 | --- |
-| ![Host share booking link](docs/screenshots/host-share.png) |
+| ![Host share booking link](docs/screenshots/host-share-v2.png) |
 
 ### Sign in
 
 Local auth for the demo host account:
 
-![Yaku local sign-in screen](docs/screenshots/login.png)
+![Yaku local sign-in screen](docs/screenshots/login-v2.png)
 
 ---
 
