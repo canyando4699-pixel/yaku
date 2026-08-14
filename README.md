@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Open-source scheduling</strong> — a lightweight Calendly alternative.<br />
-  Bookings, host office, and a public link — without the bloat.
+  Guest booking, host office, and a public link. Local-first today; cloud next.
 </p>
 
 <p align="center">
@@ -21,9 +21,9 @@
 
 ## One appointment. No bloat.
 
-Yaku turns open time into real appointments. Guests pick a type, date, and slot on your booking link. Hosts manage everything in a dark/light **office dashboard** — schedule, list, availability, and share.
+Yaku turns open time into real appointments. Guests pick a type, date, and slot on your booking link. Hosts manage everything in a dark/light **office dashboard** — schedule, list, availability (weekly hours, date overrides, holidays), appearance, and share.
 
-Lightweight, open source, self-hostable. Local-first for the demo; backend can move to Supabase later.
+Lightweight, open source, self-hostable. The demo is **local-first** (browser `localStorage`). Production will move to Vercel + Supabase, then email, calendar sync, and Calendly-parity office IA.
 
 ---
 
@@ -53,9 +53,13 @@ Host dashboard (`/host`) with theme toggle, language switcher, and liquid-glass 
 | --- | --- |
 | ![Host schedule week board](docs/screenshots/host-schedule.png) | ![Host booking list](docs/screenshots/host-list.png) |
 
-| Availability | Share link |
+| Availability | View |
 | --- | --- |
-| ![Host availability settings](docs/screenshots/host-availability.png) | ![Host share booking link](docs/screenshots/host-share.png) |
+| ![Host availability — weekly hours and date overrides](docs/screenshots/host-availability.png) | ![Host appearance / booking page background](docs/screenshots/host-appearance.png) |
+
+| Share link |
+| --- |
+| ![Host share booking link](docs/screenshots/host-share.png) |
 
 ### Sign in
 
@@ -76,11 +80,31 @@ Early MVP — default UI language **English** (DE / JA via switcher):
 - **Host office** (`/host`)
   - **Schedule** — Fantastical-style day / week / month / year calendar
   - **List** — searchable booking table
-  - **Availability** — weekdays, hours, buffers, notice, max/day, event types, series
+  - **Availability** — Calendly-style tabs: weekly hours, date overrides, German holidays; buffers, notice, event types, series
+  - **View** — booking-page background
   - **Share link** — copy / open public booking URL
   - **Integrations** — placeholder for Google / Apple calendar
   - Dark / light theme + liquid-glass controls
-- **Local-first** storage in the browser (replaceable with Supabase later)
+- **Local-first** storage in the browser
+
+---
+
+## Coming next
+
+**Soon (local, no cloud required)**
+
+- Calendly-style **office sidebar** (event types / one-off links / polls, meetings, availability)
+- **Meeting limits** (global caps across event types)
+- **One-off / single-use** booking links
+
+**Then (needs a backend)**
+
+- **Vercel** deploy + README split for local demo vs production
+- **Supabase** auth + bookings so guests and hosts are not stuck in one browser
+- Per-host public slug `/b/[slug]`
+- **Email** confirmation (Resend), then reminders
+- **Google Calendar** busy/create (Outlook later)
+- Group events, routing, workflows, payments, teams / admin center
 
 ---
 

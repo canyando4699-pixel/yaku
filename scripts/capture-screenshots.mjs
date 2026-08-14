@@ -133,7 +133,40 @@ async function clearSession(cdp) {
   );
 }
 
+function sampleBookings() {
+  const at = (offsetDays, hour, minute, durationMin) => {
+    const start = new Date();
+    start.setDate(start.getDate() + offsetDays);
+    start.setHours(hour, minute, 0, 0);
+    const end = new Date(start.getTime() + durationMin * 60_000);
+    return { startsAt: start.toISOString(), endsAt: end.toISOString() };
+  };
+  const now = new Date().toISOString();
+  const rows = [
+    { name: "Maya Chen", email: "maya@example.com", title: "30-min meeting", type: "et_30", dur: 30, when: at(0, 10, 0, 30) },
+    { name: "Jonas Weber", email: "jonas@example.com", title: "Deep dive", type: "et_60", dur: 60, when: at(0, 14, 0, 60) },
+    { name: "Aiko Tanaka", email: "aiko@example.com", title: "Quick chat", type: "et_15", dur: 15, when: at(1, 11, 0, 15) },
+    { name: "Sam Rivera", email: "sam@example.com", title: "30-min meeting", type: "et_30", dur: 30, when: at(3, 9, 30, 30) },
+  ];
+  return rows.map((row, i) => ({
+    id: `ss_${i}`,
+    slug: "demo",
+    guestName: row.name,
+    guestEmail: row.email,
+    note: "",
+    startsAt: row.when.startsAt,
+    endsAt: row.when.endsAt,
+    createdAt: now,
+    status: "confirmed",
+    eventTypeId: row.type,
+    eventTitle: row.title,
+    guestTimezone: "Europe/Berlin",
+    answers: [],
+  }));
+}
+
 async function ensureSession(cdp) {
+  const bookings = JSON.stringify(sampleBookings());
   await evalExpr(
     cdp,
     `(() => {
@@ -151,6 +184,7 @@ async function ensureSession(cdp) {
         salt: "x",
         createdAt: new Date().toISOString()
       }]));
+      localStorage.setItem("yaku-bookings", ${JSON.stringify(bookings)});
       return true;
     })()`,
   );
@@ -366,6 +400,10 @@ async function main() {
     await sleep(1200);
     await assertEnglish(cdp, "host-availability");
     await screenshot(cdp, "host-availability.png");
+
+    await clickNav(cdp, "View");
+    await sleep(1200);
+    await screenshot(cdp, "host-appearance.png");
 
     await clickNav(cdp, "Share link");
     await sleep(1200);
