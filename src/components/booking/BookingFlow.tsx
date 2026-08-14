@@ -682,7 +682,7 @@ export function BookingFlow({
                                     [q.id]: opt,
                                   }))
                                 }
-                                className="h-4 w-4 accent-[var(--accent)]"
+                                className="h-4 w-4 accent-[var(--office-text)]"
                               />
                               {opt}
                             </label>
@@ -720,7 +720,7 @@ export function BookingFlow({
                                     return { ...m, [q.id]: next };
                                   })
                                 }
-                                className="h-4 w-4 accent-[var(--accent)]"
+                                className="h-4 w-4 accent-[var(--office-text)]"
                               />
                               {opt}
                             </label>

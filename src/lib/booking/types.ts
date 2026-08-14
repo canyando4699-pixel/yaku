@@ -1,3 +1,5 @@
+import type { DeHolidayId } from "@/lib/booking/holidays";
+
 export type BookingStatus = "confirmed" | "cancelled";
 
 export const EVENT_TYPE_COLORS = ["blue", "purple", "green", "orange", "red"] as const;
@@ -50,6 +52,35 @@ export type EventType = {
 
 export type AvatarShape = "round" | "square";
 
+export const MAX_INTERVALS_PER_DAY = 4;
+export const MAX_DATE_OVERRIDES = 40;
+export const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+export type TimeInterval = {
+  startMinutes: number; // 0..1439
+  endMinutes: number; // 1..1440, must be > startMinutes
+};
+
+export type DateOverrideKind = "hours" | "unavailable";
+
+export type DateOverride = {
+  id: string; // `ovr_${Date.now().toString(36)}`
+  startDate: string; // YYYY-MM-DD inclusive
+  endDate: string; // YYYY-MM-DD inclusive, >= startDate
+  kind: DateOverrideKind;
+  intervals: TimeInterval[]; // kind==="hours": ≥1; kind==="unavailable": []
+};
+
+export type WeeklyHours = [
+  TimeInterval[], // 0 Sun
+  TimeInterval[], // 1 Mon
+  TimeInterval[],
+  TimeInterval[],
+  TimeInterval[],
+  TimeInterval[],
+  TimeInterval[], // 6 Sat
+];
+
 export type Booking = {
   id: string;
   slug: string;
@@ -81,10 +112,10 @@ export type HostProfile = {
   eventTitle: string;
   durationMinutes: number;
   timezone: string;
-  /** JS Date.getDay(): 0=Sun … 6=Sat */
-  weekdays: number[];
-  windowStartMinutes: number;
-  windowEndMinutes: number;
+  weeklyHours: WeeklyHours;
+  dateOverrides: DateOverride[];
+  holidayCalendarEnabled: boolean;
+  enabledHolidayIds: DeHolidayId[];
   bufferBeforeMinutes: number;
   bufferAfterMinutes: number;
   /** Hours before a slot can be booked */

@@ -1,4 +1,5 @@
 import { DEFAULT_BOOKING_BACKGROUND_ID } from "@/lib/booking/backgrounds";
+import { DE_HOLIDAY_IDS } from "@/lib/booking/holidays";
 import type { EventType, HostProfile } from "@/lib/booking/types";
 
 const DEMO_TYPE_DEFAULTS: Omit<EventType, "id" | "title" | "durationMinutes"> = {
@@ -23,9 +24,18 @@ export const defaultHostProfile: HostProfile = {
   eventTitle: "30-min meeting",
   durationMinutes: 30,
   timezone: "Europe/Berlin",
-  weekdays: [1, 2, 3, 4, 5],
-  windowStartMinutes: 9 * 60,
-  windowEndMinutes: 17 * 60,
+  weeklyHours: [
+    [],
+    [{ startMinutes: 540, endMinutes: 1020 }],
+    [{ startMinutes: 540, endMinutes: 1020 }],
+    [{ startMinutes: 540, endMinutes: 1020 }],
+    [{ startMinutes: 540, endMinutes: 1020 }],
+    [{ startMinutes: 540, endMinutes: 1020 }],
+    [],
+  ],
+  dateOverrides: [],
+  holidayCalendarEnabled: false,
+  enabledHolidayIds: [...DE_HOLIDAY_IDS],
   bufferBeforeMinutes: 0,
   bufferAfterMinutes: 10,
   minNoticeHours: 2,

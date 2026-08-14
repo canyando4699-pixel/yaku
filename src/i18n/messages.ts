@@ -101,6 +101,33 @@ export type Messages = {
   weekdayNames: [string, string, string, string, string, string, string];
   needOneWeekday: string;
   invalidWindow: string;
+  availTabSchedules: string;
+  availTabCalendars: string;
+  availTabAdvanced: string;
+  scheduleDefaultName: string;
+  weeklyHoursLabel: string;
+  dayUnavailable: string;
+  addInterval: string;
+  removeInterval: string;
+  overridesTitle: string;
+  overridesEmpty: string;
+  overrideAddHours: string;
+  overrideRange: string;
+  overrideKindHours: string;
+  overrideUnavailable: string;
+  overrideApply: string;
+  availCalendarStub: string;
+  holidayMasterLabel: string;
+  holidayMasterHint: string;
+  holidayName_new_year: string;
+  holidayName_good_friday: string;
+  holidayName_easter_monday: string;
+  holidayName_labour_day: string;
+  holidayName_ascension: string;
+  holidayName_whit_monday: string;
+  holidayName_german_unity: string;
+  holidayName_christmas_day: string;
+  holidayName_boxing_day: string;
   password: string;
   passwordConfirm: string;
   signIn: string;
@@ -325,6 +352,35 @@ export const messages: Record<Locale, Messages> = {
     ],
     needOneWeekday: "Mindestens einen Wochentag wählen.",
     invalidWindow: "Endzeit muss nach der Startzeit liegen.",
+    availTabSchedules: "Zeitpläne",
+    availTabCalendars: "Kalendereinstellungen",
+    availTabAdvanced: "Erweiterte Einstellungen",
+    scheduleDefaultName: "Arbeitszeiten (Standard)",
+    weeklyHoursLabel: "Wochenstunden",
+    dayUnavailable: "Nicht verfügbar",
+    addInterval: "Stunden hinzufügen",
+    removeInterval: "Entfernen",
+    overridesTitle: "Datumsüberschreibungen",
+    overridesEmpty: "Keine Überschreibungen.",
+    overrideAddHours: "Stunden hinzufügen",
+    overrideRange: "Zeitraum",
+    overrideKindHours: "Stunden",
+    overrideUnavailable: "Nicht verfügbar",
+    overrideApply: "Übernehmen",
+    availCalendarStub:
+      "Kalenderverbindung kommt als Nächstes. Termine gelten weiter nach den Zeitplänen oben.",
+    holidayMasterLabel: "Deutsche Feiertage berücksichtigen",
+    holidayMasterHint:
+      "Nur bundesweite Feiertage. Bestehende Buchungen bleiben.",
+    holidayName_new_year: "Neujahr",
+    holidayName_good_friday: "Karfreitag",
+    holidayName_easter_monday: "Ostermontag",
+    holidayName_labour_day: "Tag der Arbeit",
+    holidayName_ascension: "Christi Himmelfahrt",
+    holidayName_whit_monday: "Pfingstmontag",
+    holidayName_german_unity: "Tag der Deutschen Einheit",
+    holidayName_christmas_day: "1. Weihnachtstag",
+    holidayName_boxing_day: "2. Weihnachtstag",
     password: "Passwort",
     passwordConfirm: "Passwort bestätigen",
     signIn: "Anmelden",
@@ -557,6 +613,34 @@ export const messages: Record<Locale, Messages> = {
     ],
     needOneWeekday: "Select at least one weekday.",
     invalidWindow: "End time must be after start time.",
+    availTabSchedules: "Schedules",
+    availTabCalendars: "Calendar settings",
+    availTabAdvanced: "Advanced settings",
+    scheduleDefaultName: "Working hours (Default)",
+    weeklyHoursLabel: "Weekly hours",
+    dayUnavailable: "Unavailable",
+    addInterval: "Add hours",
+    removeInterval: "Remove",
+    overridesTitle: "Date overrides",
+    overridesEmpty: "No overrides.",
+    overrideAddHours: "Add hours",
+    overrideRange: "Date range",
+    overrideKindHours: "Hours",
+    overrideUnavailable: "Unavailable",
+    overrideApply: "Apply",
+    availCalendarStub:
+      "Calendar connection comes next. Appointments still follow the schedules above.",
+    holidayMasterLabel: "Honor German public holidays",
+    holidayMasterHint: "Federal holidays only. Existing bookings stay.",
+    holidayName_new_year: "New Year's Day",
+    holidayName_good_friday: "Good Friday",
+    holidayName_easter_monday: "Easter Monday",
+    holidayName_labour_day: "Labour Day",
+    holidayName_ascension: "Ascension Day",
+    holidayName_whit_monday: "Whit Monday",
+    holidayName_german_unity: "German Unity Day",
+    holidayName_christmas_day: "Christmas Day",
+    holidayName_boxing_day: "Boxing Day",
     password: "Password",
     passwordConfirm: "Confirm password",
     signIn: "Sign in",
@@ -789,6 +873,34 @@ export const messages: Record<Locale, Messages> = {
     ],
     needOneWeekday: "曜日を1つ以上選んでください。",
     invalidWindow: "終了は開始より後にしてください。",
+    availTabSchedules: "スケジュール",
+    availTabCalendars: "カレンダー設定",
+    availTabAdvanced: "詳細設定",
+    scheduleDefaultName: "勤務時間（標準）",
+    weeklyHoursLabel: "週間の営業時間",
+    dayUnavailable: "利用不可",
+    addInterval: "時間を追加",
+    removeInterval: "削除",
+    overridesTitle: "日付の上書き",
+    overridesEmpty: "上書きはありません。",
+    overrideAddHours: "時間を追加",
+    overrideRange: "期間",
+    overrideKindHours: "時間",
+    overrideUnavailable: "利用不可",
+    overrideApply: "適用",
+    availCalendarStub:
+      "カレンダー連携は次のステップです。予約は上のスケジュールに従います。",
+    holidayMasterLabel: "ドイツの祝日を考慮する",
+    holidayMasterHint: "連邦祝日のみ。既存の予約はそのままです。",
+    holidayName_new_year: "元日",
+    holidayName_good_friday: "聖金曜日",
+    holidayName_easter_monday: "イースターマンデー",
+    holidayName_labour_day: "労働の日",
+    holidayName_ascension: "キリスト昇天祭",
+    holidayName_whit_monday: "聖霊降臨祭の翌日",
+    holidayName_german_unity: "ドイツ統一の日",
+    holidayName_christmas_day: "クリスマス",
+    holidayName_boxing_day: "ボクシング・デー",
     password: "パスワード",
     passwordConfirm: "パスワード確認",
     signIn: "ログイン",

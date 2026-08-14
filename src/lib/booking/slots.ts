@@ -1,4 +1,5 @@
-import type { EventType, HostProfile } from "@/lib/booking/types";
+import { deHolidayOn, toYmd } from "@/lib/booking/holidays";
+import type { EventType, HostProfile, TimeInterval } from "@/lib/booking/types";
 import {
   countConfirmedForTypeInMonth,
   countConfirmedForTypeInWeek,
@@ -10,13 +11,61 @@ function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
+export function resolveDayIntervals(
+  host: HostProfile,
+  date: Date,
+): TimeInterval[] {
+  const ymd = toYmd(date);
+  const covering = host.dateOverrides.filter(
+    (o) => o.startDate <= ymd && ymd <= o.endDate,
+  );
+
+  const singleHours = covering.filter(
+    (o) => o.startDate === o.endDate && o.startDate === ymd && o.kind === "hours",
+  );
+  if (singleHours.length > 0) {
+    return singleHours[singleHours.length - 1].intervals;
+  }
+
+  if (
+    covering.some((o) => o.startDate === o.endDate && o.kind === "unavailable")
+  ) {
+    return [];
+  }
+
+  if (
+    covering.some((o) => o.startDate !== o.endDate && o.kind === "unavailable")
+  ) {
+    return [];
+  }
+
+  const rangeHours = covering.filter(
+    (o) => o.startDate !== o.endDate && o.kind === "hours",
+  );
+  if (rangeHours.length > 0) {
+    return rangeHours[rangeHours.length - 1].intervals;
+  }
+
+  if (host.holidayCalendarEnabled) {
+    const holiday = deHolidayOn(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      host.enabledHolidayIds,
+    );
+    if (holiday) return [];
+  }
+
+  return host.weeklyHours[date.getDay()] ?? [];
+}
+
 export function isBookableDay(
   date: Date,
   host: HostProfile,
   now = new Date(),
   eventType?: EventType,
 ) {
-  if (!host.weekdays.includes(date.getDay())) return false;
+  if (resolveDayIntervals(host, date).length === 0) return false;
   if (startOfDay(date).getTime() < startOfDay(now).getTime()) return false;
   if (eventType && eventType.dateRangeDays > 0) {
     const latest = startOfDay(now);
@@ -127,8 +176,7 @@ export function getAvailableSlots(
     options?.durationMinutes ??
     host.durationMinutes;
   const slots: string[] = [];
-  const startMinutes = host.windowStartMinutes;
-  const endMinutes = host.windowEndMinutes;
+  const seen = new Set<string>();
   const skipTakenCheck = options?.skipTakenCheck ?? false;
   const noticeMs = host.minNoticeHours * 60 * 60_000;
   const earliest = now.getTime() + noticeMs;
@@ -146,41 +194,46 @@ export function getAvailableSlots(
     duration,
   );
 
-  for (
-    let minutes = startMinutes;
-    minutes + duration <= endMinutes;
-    minutes += step
-  ) {
-    const startsAt = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      Math.floor(minutes / 60),
-      minutes % 60,
-      0,
-      0,
-    );
-
-    if (startsAt.getTime() < earliest) continue;
-
-    const endsAt = new Date(startsAt.getTime() + duration * 60_000);
-    const iso = startsAt.toISOString();
-    const endIso = endsAt.toISOString();
-
-    if (
-      !skipTakenCheck &&
-      isRangeTaken(
-        host.slug,
-        iso,
-        endIso,
-        excludeBookingId,
-        host.bufferBeforeMinutes,
-        host.bufferAfterMinutes,
-      )
+  for (const interval of resolveDayIntervals(host, date)) {
+    for (
+      let minutes = interval.startMinutes;
+      minutes + duration <= interval.endMinutes;
+      minutes += step
     ) {
-      continue;
+      const startsAt = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        Math.floor(minutes / 60),
+        minutes % 60,
+        0,
+        0,
+      );
+
+      if (startsAt.getTime() < earliest) continue;
+
+      const endsAt = new Date(startsAt.getTime() + duration * 60_000);
+      const iso = startsAt.toISOString();
+      const endIso = endsAt.toISOString();
+
+      if (seen.has(iso)) continue;
+
+      if (
+        !skipTakenCheck &&
+        isRangeTaken(
+          host.slug,
+          iso,
+          endIso,
+          excludeBookingId,
+          host.bufferBeforeMinutes,
+          host.bufferAfterMinutes,
+        )
+      ) {
+        continue;
+      }
+      seen.add(iso);
+      slots.push(iso);
     }
-    slots.push(iso);
   }
 
   return slots;
@@ -211,6 +264,17 @@ export function buildSeriesStarts(
       0,
     );
     if (!isBookableDay(next, host, first, undefined)) return null;
+    const intervals = resolveDayIntervals(host, next);
+    const startMin = first.getHours() * 60 + first.getMinutes();
+    if (
+      !intervals.some(
+        (iv) =>
+          startMin >= iv.startMinutes &&
+          startMin + durationMinutes <= iv.endMinutes,
+      )
+    ) {
+      return null;
+    }
     if (
       eventType &&
       eventType.dateRangeDays > 0 &&

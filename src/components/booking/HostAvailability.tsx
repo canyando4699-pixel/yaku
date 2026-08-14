@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { HostScheduleHours } from "@/components/booking/HostScheduleHours";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { defaultHostProfile } from "@/lib/booking/demo";
+import { DE_HOLIDAY_IDS } from "@/lib/booking/holidays";
 import {
   createEventType,
   loadHostProfile,
@@ -12,7 +14,7 @@ import {
   MAX_INVITEE_QUESTIONS,
   createInviteeQuestion,
 } from "@/lib/booking/questions";
-import { COMMON_TIMEZONES, formatMinutesAsTime } from "@/lib/booking/slots";
+import { COMMON_TIMEZONES } from "@/lib/booking/slots";
 import {
   EVENT_TYPE_COLORS,
   EVENT_TYPE_PASTELS,
@@ -36,15 +38,9 @@ const COLOR_LABEL: Record<EventTypeColor, "colorBlue" | "colorPurple" | "colorGr
   orange: "colorOrange",
   red: "colorRed",
 };
-/** Mon→Sun display order with JS getDay values */
-const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
 const AVATAR_MAX_PX = 256;
-
-function timeOptions() {
-  const options: number[] = [];
-  for (let m = 0; m <= 24 * 60; m += 30) options.push(m);
-  return options;
-}
+const AVAIL_TABS = ["schedules", "calendars", "advanced"] as const;
+type AvailTab = (typeof AVAIL_TABS)[number];
 
 function resizeImageToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -91,25 +87,12 @@ export function HostAvailability({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiedTypeId, setCopiedTypeId] = useState<string | null>(null);
+  const [tab, setTab] = useState<AvailTab>("schedules");
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setDraft(loadHostProfile(slug));
   }, [slug]);
-
-  const times = useMemo(() => timeOptions(), []);
-
-  function toggleWeekday(day: number) {
-    setDraft((prev) => {
-      const has = prev.weekdays.includes(day);
-      const weekdays = has
-        ? prev.weekdays.filter((d) => d !== day)
-        : [...prev.weekdays, day].sort((a, b) => a - b);
-      return { ...prev, weekdays };
-    });
-    setMessage(null);
-    setError(null);
-  }
 
   function updateEventType(id: string, patch: Partial<EventType>) {
     setDraft((prev) => ({
@@ -168,11 +151,21 @@ export function HostAvailability({
 
   function handleSave(event: React.FormEvent) {
     event.preventDefault();
-    if (draft.weekdays.length === 0) {
+    if (draft.weeklyHours.every((day) => day.length === 0)) {
       setError(t.needOneWeekday);
       return;
     }
-    if (draft.windowEndMinutes <= draft.windowStartMinutes) {
+    if (
+      draft.weeklyHours.some((day) =>
+        day.some((iv) => iv.endMinutes <= iv.startMinutes),
+      ) ||
+      draft.dateOverrides.some(
+        (o) =>
+          o.kind === "hours" &&
+          (o.intervals.length < 1 ||
+            o.intervals.some((iv) => iv.endMinutes <= iv.startMinutes)),
+      )
+    ) {
       setError(t.invalidWindow);
       return;
     }
@@ -207,6 +200,44 @@ export function HostAvailability({
         </p>
       ) : null}
       {error ? <p className="mt-4 text-sm text-[#ff453a]">{error}</p> : null}
+
+      <div className="mt-6 flex flex-wrap gap-2">
+        {AVAIL_TABS.map((id) => (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={tab === id}
+            onClick={() => setTab(id)}
+            className={[
+              "rounded-full px-3.5 py-2 text-sm font-medium transition",
+              tab === id ? "office-liquid-glass" : "office-chip-idle",
+            ].join(" ")}
+          >
+            {id === "schedules"
+              ? t.availTabSchedules
+              : id === "calendars"
+                ? t.availTabCalendars
+                : t.availTabAdvanced}
+          </button>
+        ))}
+      </div>
+
+      {tab === "schedules" ? (
+        <>
+      <HostScheduleHours
+        weeklyHours={draft.weeklyHours}
+        dateOverrides={draft.dateOverrides}
+        onChangeWeekly={(weeklyHours) => {
+          setDraft((p) => ({ ...p, weeklyHours }));
+          setMessage(null);
+          setError(null);
+        }}
+        onChangeOverrides={(dateOverrides) => {
+          setDraft((p) => ({ ...p, dateOverrides }));
+          setMessage(null);
+          setError(null);
+        }}
+      />
 
       <label className="mt-6 office-field block text-sm">
         {t.displayNameLabel}
@@ -340,76 +371,6 @@ export function HostAvailability({
             ))}
         </select>
       </label>
-
-      <fieldset className="mt-6">
-        <legend className="office-field text-sm">{t.weekdaysLabel}</legend>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {WEEKDAY_ORDER.map((day) => {
-            const active = draft.weekdays.includes(day);
-            return (
-              <button
-                key={day}
-                type="button"
-                onClick={() => toggleWeekday(day)}
-                className={[
-                  "rounded-full px-3.5 py-2 text-sm font-medium transition",
-                  active ? "office-liquid-glass" : "office-chip-idle",
-                ].join(" ")}
-              >
-                {t.weekdayNames[day]}
-              </button>
-            );
-          })}
-        </div>
-      </fieldset>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <label className="office-field block text-sm">
-          {t.windowStartLabel}
-          <select
-            value={draft.windowStartMinutes}
-            onChange={(e) => {
-              setDraft((p) => ({
-                ...p,
-                windowStartMinutes: Number(e.target.value),
-              }));
-              setMessage(null);
-            }}
-            className="office-dc-input mt-1 w-full outline-none"
-          >
-            {times
-              .filter((m) => m < 24 * 60)
-              .map((m) => (
-                <option key={m} value={m} className="office-option">
-                  {formatMinutesAsTime(m)}
-                </option>
-              ))}
-          </select>
-        </label>
-
-        <label className="office-field block text-sm">
-          {t.windowEndLabel}
-          <select
-            value={draft.windowEndMinutes}
-            onChange={(e) => {
-              setDraft((p) => ({
-                ...p,
-                windowEndMinutes: Number(e.target.value),
-              }));
-              setMessage(null);
-            }}
-            className="office-dc-input mt-1 w-full outline-none"
-          >
-            {times
-              .filter((m) => m > 0)
-              .map((m) => (
-                <option key={m} value={m} className="office-option">
-                  {formatMinutesAsTime(m)}
-                </option>
-              ))}
-          </select>
-        </label>
-      </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <label className="office-field block text-sm">
@@ -774,7 +735,7 @@ export function HostAvailability({
                             ),
                           })
                         }
-                        className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+                        className="mt-0.5 h-4 w-4 accent-[var(--office-text)]"
                       />
                       {t.questionRequired}
                     </label>
@@ -846,7 +807,7 @@ export function HostAvailability({
                   onChange={(e) =>
                     updateEventType(et.id, { secret: e.target.checked })
                   }
-                  className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+                  className="mt-0.5 h-4 w-4 accent-[var(--office-text)]"
                 />
                 <span>
                   {t.eventTypeSecretLabel}
@@ -888,7 +849,7 @@ export function HostAvailability({
               setDraft((p) => ({ ...p, allowSeries: e.target.checked }));
               setMessage(null);
             }}
-            className="h-4 w-4 accent-[var(--accent)]"
+            className="h-4 w-4 accent-[var(--office-text)]"
           />
           {t.allowSeriesLabel}
         </label>
@@ -915,6 +876,69 @@ export function HostAvailability({
           </label>
         ) : null}
       </div>
+        </>
+      ) : tab === "calendars" ? (
+        <div className="mt-6">
+          <h3 className="font-display text-xl">{t.availTabCalendars}</h3>
+          <p className="office-muted mt-2 text-sm">{t.availCalendarStub}</p>
+        </div>
+      ) : (
+        <div className="mt-6">
+          <label className="flex items-start gap-3 office-field text-sm">
+            <input
+              type="checkbox"
+              checked={draft.holidayCalendarEnabled}
+              onChange={(e) => {
+                setDraft((p) => ({
+                  ...p,
+                  holidayCalendarEnabled: e.target.checked,
+                }));
+                setMessage(null);
+              }}
+              className="mt-0.5 h-4 w-4 accent-[var(--office-text)]"
+            />
+            <span>
+              {t.holidayMasterLabel}
+              <span className="office-muted mt-1 block text-xs font-normal">
+                {t.holidayMasterHint}
+              </span>
+            </span>
+          </label>
+          <ul
+            className={[
+              "mt-4 space-y-2",
+              draft.holidayCalendarEnabled ? "" : "opacity-50",
+            ].join(" ")}
+          >
+            {DE_HOLIDAY_IDS.map((id) => (
+              <li key={id}>
+                <label className="flex items-center gap-3 office-field text-sm">
+                  <input
+                    type="checkbox"
+                    disabled={!draft.holidayCalendarEnabled}
+                    checked={draft.enabledHolidayIds.includes(id)}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setDraft((p) => ({
+                        ...p,
+                        enabledHolidayIds: checked
+                          ? DE_HOLIDAY_IDS.filter(
+                              (hid) =>
+                                p.enabledHolidayIds.includes(hid) || hid === id,
+                            )
+                          : p.enabledHolidayIds.filter((hid) => hid !== id),
+                      }));
+                      setMessage(null);
+                    }}
+                    className="h-4 w-4 accent-[var(--office-text)]"
+                  />
+                  {t[`holidayName_${id}`]}
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <button
         type="submit"
