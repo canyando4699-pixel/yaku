@@ -85,19 +85,6 @@ export function rescheduleBooking(
   });
 }
 
-export function isSlotTaken(
-  slug: string,
-  startsAt: string,
-  excludeId?: string,
-): boolean {
-  return listBookings(slug).some(
-    (b) =>
-      b.status === "confirmed" &&
-      b.startsAt === startsAt &&
-      b.id !== excludeId,
-  );
-}
-
 function rangesOverlap(
   aStart: number,
   aEnd: number,

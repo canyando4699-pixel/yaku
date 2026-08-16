@@ -417,3 +417,44 @@ export function saveHostProfile(profile: HostProfile): HostProfile {
   }
   return next;
 }
+
+export type HostProfileSaveReason =
+  | "needOneWeekday"
+  | "invalidWindow"
+  | "needOneEventType";
+
+export type HostProfileSaveResult =
+  | { ok: true; profile: HostProfile }
+  | { ok: false; reason: HostProfileSaveReason };
+
+export function prepareHostProfileSave(
+  draft: HostProfile,
+): HostProfileSaveResult {
+  if (draft.weeklyHours.every((day) => day.length === 0)) {
+    return { ok: false, reason: "needOneWeekday" };
+  }
+  if (
+    draft.weeklyHours.some((day) =>
+      day.some((iv) => iv.endMinutes <= iv.startMinutes),
+    ) ||
+    draft.dateOverrides.some(
+      (o) =>
+        o.kind === "hours" &&
+        (o.intervals.length < 1 ||
+          o.intervals.some((iv) => iv.endMinutes <= iv.startMinutes)),
+    )
+  ) {
+    return { ok: false, reason: "invalidWindow" };
+  }
+  if (draft.eventTypes.length === 0) {
+    return { ok: false, reason: "needOneEventType" };
+  }
+  return {
+    ok: true,
+    profile: {
+      ...draft,
+      durationMinutes: draft.eventTypes[0]?.durationMinutes ?? draft.durationMinutes,
+      eventTitle: draft.eventTypes[0]?.title ?? draft.eventTitle,
+    },
+  };
+}

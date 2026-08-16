@@ -34,10 +34,6 @@ export function ChapterVideo({
     if (posterOnly) return;
 
     let cancelled = false;
-    setReady(false);
-    setFailed(false);
-    setNeedsGesture(false);
-    setFadeIn(false);
 
     const el = videoRef.current;
     if (!el) return;

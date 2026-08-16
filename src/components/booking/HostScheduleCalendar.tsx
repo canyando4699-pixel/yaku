@@ -106,14 +106,13 @@ export function HostScheduleCalendar({
   const { locale, t } = useLocale();
   const { theme } = useTheme();
   const [view, setView] = useState<CalView>("week");
-  const [sidebarMonth, setSidebarMonth] = useState(() =>
-    startOfMonth(focusDate),
-  );
+  type SidebarBrowse = { focus: Date; month: Date };
+  const [sidebarBrowse, setSidebarBrowse] = useState<SidebarBrowse | null>(null);
+  const sidebarMonth =
+    sidebarBrowse !== null && sidebarBrowse.focus === focusDate
+      ? sidebarBrowse.month
+      : startOfMonth(focusDate);
   const timeScrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setSidebarMonth(startOfMonth(focusDate));
-  }, [focusDate]);
 
   useEffect(() => {
     if (view !== "day" && view !== "week") return;
@@ -410,7 +409,15 @@ export function HostScheduleCalendar({
               type="button"
               aria-label={t.prevMonth}
               className="host-cal-mini-nav-btn"
-              onClick={() => setSidebarMonth((m) => addMonths(m, -1))}
+              onClick={() => {
+                setSidebarBrowse((prev) => {
+                  const base =
+                    prev !== null && prev.focus === focusDate
+                      ? prev.month
+                      : startOfMonth(focusDate);
+                  return { focus: focusDate, month: addMonths(base, -1) };
+                });
+              }}
             >
               <Icon name="chevronLeft" className="h-3.5 w-3.5" />
             </button>
@@ -418,7 +425,15 @@ export function HostScheduleCalendar({
               type="button"
               aria-label={t.nextMonth}
               className="host-cal-mini-nav-btn"
-              onClick={() => setSidebarMonth((m) => addMonths(m, 1))}
+              onClick={() => {
+                setSidebarBrowse((prev) => {
+                  const base =
+                    prev !== null && prev.focus === focusDate
+                      ? prev.month
+                      : startOfMonth(focusDate);
+                  return { focus: focusDate, month: addMonths(base, 1) };
+                });
+              }}
             >
               <Icon name="chevronRight" className="h-3.5 w-3.5" />
             </button>

@@ -2,10 +2,18 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { HostAppearance } from "@/components/booking/HostAppearance";
 import { HostAvailability } from "@/components/booking/HostAvailability";
 import { HostBookingList } from "@/components/booking/HostBookingList";
+import { HostEventTypes } from "@/components/booking/HostEventTypes";
 import { HostScheduleCalendar } from "@/components/booking/HostScheduleCalendar";
 import { OfficeEmptyState } from "@/components/booking/OfficeEmptyState";
 import { OfficeShell, type OfficeRoom } from "@/components/booking/OfficeShell";
@@ -31,6 +39,7 @@ import {
   listBookings,
   rescheduleBooking,
 } from "@/lib/booking/storage";
+import { subscribeNoop, useIsClient } from "@/lib/useIsClient";
 import {
   pastelForBooking,
   pastelForEventType,
@@ -163,21 +172,64 @@ function durationMinutes(start: Date, end: Date) {
   return Math.max(1, Math.round((+end - +start) / 60000));
 }
 
+function getHasSessionSnapshot(): boolean {
+  return getSession() !== null;
+}
+
+function getHasSessionServerSnapshot(): boolean {
+  return false;
+}
+
 export function HostDashboard() {
+  const router = useRouter();
+  const isClient = useIsClient();
+  const hasSession = useSyncExternalStore(
+    subscribeNoop,
+    getHasSessionSnapshot,
+    getHasSessionServerSnapshot,
+  );
+
+  useEffect(() => {
+    if (!isClient) return;
+    if (!hasSession) router.replace("/login?next=/host");
+  }, [isClient, hasSession, router]);
+
+  if (!isClient || !hasSession) {
+    return (
+      <div className="flex min-h-full flex-1 items-center justify-center bg-[#12110f] text-white/50">
+        …
+      </div>
+    );
+  }
+
+  const session = getSession();
+  if (!session) {
+    return (
+      <div className="flex min-h-full flex-1 items-center justify-center bg-[#12110f] text-white/50">
+        …
+      </div>
+    );
+  }
+
+  return <HostDashboardClient session={session} />;
+}
+
+function HostDashboardClient({ session }: { session: AuthSession }) {
   const { locale, t } = useLocale();
   const router = useRouter();
-  const [session, setSession] = useState<AuthSession | null>(null);
-  const [ready, setReady] = useState(false);
   const [nav, setNav] = useState<NavKey>("scheduling");
   const [schedulingTab, setSchedulingTab] = useState<SchedulingTab>("eventTypes");
   const [meetingsTab, setMeetingsTab] = useState<MeetingsTab>("plan");
   const [integrationsTab, setIntegrationsTab] = useState<IntegrationsTab>("discover");
   const [spawnEventTypeKey, setSpawnEventTypeKey] = useState(0);
-  const spawnConsumedRef = useRef(0);
   const [host, setHost] = useState<HostProfile>(() =>
     loadHostProfile(defaultHostProfile.slug),
   );
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>(() =>
+    listBookings(defaultHostProfile.slug).sort(
+      (a, b) => +new Date(a.startsAt) - +new Date(b.startsAt),
+    ),
+  );
   const [focusDate, setFocusDate] = useState(() => new Date());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rescheduleId, setRescheduleId] = useState<string | null>(null);
@@ -194,17 +246,6 @@ export function HostDashboard() {
       ),
     );
   }
-
-  useEffect(() => {
-    const current = getSession();
-    if (!current) {
-      router.replace("/login?next=/host");
-      return;
-    }
-    setSession(current);
-    reload();
-    setReady(true);
-  }, [router]);
 
   const confirmed = useMemo(
     () => bookings.filter((b) => b.status === "confirmed"),
@@ -275,6 +316,8 @@ export function HostDashboard() {
     }
   }
 
+  const handleSpawnHandled = useCallback(() => setSpawnEventTypeKey(0), []);
+
   function applyCreate(action: "eventType" | "oneOff" | "polls" | "copy") {
     if (action === "eventType") {
       setNav("scheduling");
@@ -298,14 +341,6 @@ export function HostDashboard() {
   function handleLogout() {
     signOut();
     router.replace("/login");
-  }
-
-  if (!ready || !session) {
-    return (
-      <div className="flex min-h-full flex-1 items-center justify-center bg-[#12110f] text-white/50">
-        …
-      </div>
-    );
   }
 
   const navItems: {
@@ -542,11 +577,11 @@ export function HostDashboard() {
             ) : null}
 
             {nav === "scheduling" && schedulingTab === "eventTypes" ? (
-              <HostAvailability
+              <HostEventTypes
+                key={host.slug}
                 slug={host.slug}
-                section="eventTypes"
                 spawnEventTypeKey={spawnEventTypeKey}
-                spawnConsumedRef={spawnConsumedRef}
+                onSpawnHandled={handleSpawnHandled}
                 onSaved={(p) => setHost(p)}
               />
             ) : null}
@@ -593,14 +628,14 @@ export function HostDashboard() {
 
             {nav === "availability" ? (
               <HostAvailability
+                key={host.slug}
                 slug={host.slug}
-                section="hours"
                 onSaved={(profile) => setHost(profile)}
               />
             ) : null}
 
             {nav === "appearance" ? (
-              <HostAppearance slug={host.slug} onSaved={setHost} />
+              <HostAppearance key={host.slug} slug={host.slug} onSaved={setHost} />
             ) : null}
 
             {nav === "contacts" ? (

@@ -97,7 +97,6 @@ export type Messages = {
   durationLabel: string;
   windowStartLabel: string;
   windowEndLabel: string;
-  weekdaysLabel: string;
   weekdayNames: [string, string, string, string, string, string, string];
   needOneWeekday: string;
   invalidWindow: string;
@@ -151,7 +150,6 @@ export type Messages = {
   appearanceHint: string;
   appearanceSoon: string;
   appearancePreviewLabel: string;
-  dashShareLink: string;
   dashIntegrations: string;
   dashCreate: string;
   dashCreateEventType: string;
@@ -191,10 +189,6 @@ export type Messages = {
   dashEmptyAnalyticsBody: string;
   dashMyActivity: string;
   dashSelectBooking: string;
-  integrationsTitle: string;
-  integrationsHint: string;
-  connectGoogleCalendar: string;
-  connectAppleCalendar: string;
   copyLink: string;
   linkCopied: string;
   prevWeek: string;
@@ -376,7 +370,6 @@ export const messages: Record<Locale, Messages> = {
     durationLabel: "Dauer",
     windowStartLabel: "Von",
     windowEndLabel: "Bis",
-    weekdaysLabel: "Wochentage",
     weekdayNames: [
       "Sonntag",
       "Montag",
@@ -441,7 +434,6 @@ export const messages: Record<Locale, Messages> = {
     appearanceHint: "Hintergrund der öffentlichen Buchungsseite.",
     appearanceSoon: "Platzhalter",
     appearancePreviewLabel: "Vorschau",
-    dashShareLink: "Link teilen",
     dashIntegrations: "Integrationen",
     dashCreate: "Erstellen",
     dashCreateEventType: "Neuer Ereignistyp",
@@ -481,11 +473,6 @@ export const messages: Record<Locale, Messages> = {
     dashEmptyAnalyticsBody: "Kommt als Nächstes.",
     dashMyActivity: "Meine Termine",
     dashSelectBooking: "Wähle einen Termin in der Woche.",
-    integrationsTitle: "Kalender verbinden",
-    integrationsHint:
-      "Google- und Apple-Kalender kommen als Nächstes. Noch lokal, ohne Cloud-Sync.",
-    connectGoogleCalendar: "Google Kalender",
-    connectAppleCalendar: "Apple Kalender",
     copyLink: "Link kopieren",
     linkCopied: "Link kopiert",
     prevWeek: "Vorherige Woche",
@@ -673,7 +660,6 @@ export const messages: Record<Locale, Messages> = {
     durationLabel: "Duration",
     windowStartLabel: "From",
     windowEndLabel: "Until",
-    weekdaysLabel: "Weekdays",
     weekdayNames: [
       "Sunday",
       "Monday",
@@ -737,7 +723,6 @@ export const messages: Record<Locale, Messages> = {
     appearanceHint: "Background of the public booking page.",
     appearanceSoon: "Placeholder",
     appearancePreviewLabel: "Preview",
-    dashShareLink: "Share link",
     dashIntegrations: "Integrations",
     dashCreate: "Create",
     dashCreateEventType: "New event type",
@@ -777,11 +762,6 @@ export const messages: Record<Locale, Messages> = {
     dashEmptyAnalyticsBody: "Coming next.",
     dashMyActivity: "My activity",
     dashSelectBooking: "Select a booking in the week view.",
-    integrationsTitle: "Connect calendars",
-    integrationsHint:
-      "Google and Apple Calendar come next. Still local — no cloud sync yet.",
-    connectGoogleCalendar: "Google Calendar",
-    connectAppleCalendar: "Apple Calendar",
     copyLink: "Copy link",
     linkCopied: "Link copied",
     prevWeek: "Previous week",
@@ -969,7 +949,6 @@ export const messages: Record<Locale, Messages> = {
     durationLabel: "時間",
     windowStartLabel: "開始",
     windowEndLabel: "終了",
-    weekdaysLabel: "曜日",
     weekdayNames: [
       "日曜日",
       "月曜日",
@@ -1033,7 +1012,6 @@ export const messages: Record<Locale, Messages> = {
     appearanceHint: "公開予約ページの背景。",
     appearanceSoon: "プレースホルダー",
     appearancePreviewLabel: "プレビュー",
-    dashShareLink: "リンク共有",
     dashIntegrations: "連携",
     dashCreate: "作成",
     dashCreateEventType: "新しいイベントタイプ",
@@ -1073,11 +1051,6 @@ export const messages: Record<Locale, Messages> = {
     dashEmptyAnalyticsBody: "次に追加します。",
     dashMyActivity: "マイ予定",
     dashSelectBooking: "週の予定から選択してください。",
-    integrationsTitle: "カレンダー連携",
-    integrationsHint:
-      "Google と Apple カレンダーは次のステップです。まだローカルのみで、クラウド同期はありません。",
-    connectGoogleCalendar: "Google カレンダー",
-    connectAppleCalendar: "Apple カレンダー",
     copyLink: "リンクをコピー",
     linkCopied: "コピーしました",
     prevWeek: "前の週",

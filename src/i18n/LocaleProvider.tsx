@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from "react";
 import {
   localeHtmlLang,
@@ -14,6 +15,7 @@ import {
   type Locale,
   type Messages,
 } from "@/i18n/messages";
+import { subscribeNoop } from "@/lib/useIsClient";
 
 const STORAGE_KEY = "yaku-locale";
 
@@ -29,20 +31,30 @@ function isLocale(value: string | null): value is Locale {
   return value === "de" || value === "en" || value === "ja";
 }
 
-export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+function getLocaleSnapshot(): Locale {
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  return isLocale(stored) ? stored : "en";
+}
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (isLocale(stored)) setLocaleState(stored);
-  }, []);
+function getLocaleServerSnapshot(): Locale {
+  return "en";
+}
+
+export function LocaleProvider({ children }: { children: React.ReactNode }) {
+  const storedLocale = useSyncExternalStore(
+    subscribeNoop,
+    getLocaleSnapshot,
+    getLocaleServerSnapshot,
+  );
+  const [localeOverride, setLocaleOverride] = useState<Locale | null>(null);
+  const locale = localeOverride ?? storedLocale;
 
   useEffect(() => {
     document.documentElement.lang = localeHtmlLang[locale];
   }, [locale]);
 
   const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
+    setLocaleOverride(next);
     window.localStorage.setItem(STORAGE_KEY, next);
   }, []);
 

@@ -50,9 +50,6 @@ export const defaultHostProfile: HostProfile = {
   backgroundId: DEFAULT_BOOKING_BACKGROUND_ID,
 };
 
-/** @deprecated Use defaultHostProfile / loadHostProfile */
-export const demoHost = defaultHostProfile;
-
 export function getHostBySlug(slug: string): HostProfile | null {
   if (slug === defaultHostProfile.slug) return defaultHostProfile;
   return null;

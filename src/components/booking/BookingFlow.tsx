@@ -3,7 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { OfficeChaseRing } from "@/components/booking/OfficeChaseRing";
@@ -37,6 +43,7 @@ import {
   type EventType,
   type HostProfile,
 } from "@/lib/booking/types";
+import { subscribeNoop, useIsClient } from "@/lib/useIsClient";
 
 type Step = "types" | "schedule" | "details";
 
@@ -128,6 +135,261 @@ function StepIndicator({
   );
 }
 
+function getUtc() {
+  return "UTC";
+}
+
+function InviteeQuestionFields({
+  eventType,
+  answersMap,
+  setAnswersMap,
+}: {
+  eventType: EventType;
+  answersMap: Record<string, string | string[]>;
+  setAnswersMap: Dispatch<SetStateAction<Record<string, string | string[]>>>;
+}) {
+  return (
+    <>
+      {eventType.questions.map((q) => {
+                    if (!q.label.trim()) return null;
+                    if (
+                      (q.type === "radio" || q.type === "dropdown") &&
+                      q.options.filter((o) => o.trim()).length < 2
+                    ) {
+                      return null;
+                    }
+                    if (
+                      q.type === "checkbox" &&
+                      q.options.filter((o) => o.trim()).length < 1
+                    ) {
+                      return null;
+                    }
+
+                    const choiceOptions = q.options.filter((o) => o.trim());
+
+                    if (q.type === "text") {
+                      return (
+                        <label
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          <input
+                            required={q.required}
+                            value={
+                              typeof answersMap[q.id] === "string"
+                                ? answersMap[q.id]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setAnswersMap((m) => ({
+                                ...m,
+                                [q.id]: e.target.value,
+                              }))
+                            }
+                            className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
+                          />
+                        </label>
+                      );
+                    }
+
+                    if (q.type === "textarea") {
+                      return (
+                        <label
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          <textarea
+                            required={q.required}
+                            value={
+                              typeof answersMap[q.id] === "string"
+                                ? answersMap[q.id]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setAnswersMap((m) => ({
+                                ...m,
+                                [q.id]: e.target.value,
+                              }))
+                            }
+                            rows={3}
+                            className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-3.5 py-2.5 text-sm outline-none"
+                          />
+                        </label>
+                      );
+                    }
+
+                    if (q.type === "phone") {
+                      return (
+                        <label
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          <input
+                            type="tel"
+                            required={q.required}
+                            value={
+                              typeof answersMap[q.id] === "string"
+                                ? answersMap[q.id]
+                                : ""
+                            }
+                            onChange={(e) =>
+                              setAnswersMap((m) => ({
+                                ...m,
+                                [q.id]: e.target.value,
+                              }))
+                            }
+                            className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
+                          />
+                        </label>
+                      );
+                    }
+
+                    if (q.type === "radio") {
+                      return (
+                        <div
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          {choiceOptions.map((opt, i) => (
+                            <label
+                              key={`${q.id}-${i}`}
+                              className="mt-1 flex items-center gap-2"
+                            >
+                              <input
+                                type="radio"
+                                name={q.id}
+                                value={opt}
+                                required={q.required}
+                                checked={answersMap[q.id] === opt}
+                                onChange={() =>
+                                  setAnswersMap((m) => ({
+                                    ...m,
+                                    [q.id]: opt,
+                                  }))
+                                }
+                                className="h-4 w-4 accent-[var(--office-text)]"
+                              />
+                              {opt}
+                            </label>
+                          ))}
+                        </div>
+                      );
+                    }
+
+                    if (q.type === "checkbox") {
+                      const current = answersMap[q.id];
+                      const selected = Array.isArray(current) ? current : [];
+                      return (
+                        <div
+                          key={q.id}
+                          className="office-field mt-3 block text-xs"
+                        >
+                          {q.label}
+                          {choiceOptions.map((opt, i) => (
+                            <label
+                              key={`${q.id}-${i}`}
+                              className="mt-1 flex items-center gap-2"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selected.includes(opt)}
+                                onChange={() =>
+                                  setAnswersMap((m) => {
+                                    const existing = m[q.id];
+                                    const prev = Array.isArray(existing)
+                                      ? existing
+                                      : [];
+                                    const next = prev.includes(opt)
+                                      ? prev.filter((x) => x !== opt)
+                                      : [...prev, opt];
+                                    return { ...m, [q.id]: next };
+                                  })
+                                }
+                                className="h-4 w-4 accent-[var(--office-text)]"
+                              />
+                              {opt}
+                            </label>
+                          ))}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <label
+                        key={q.id}
+                        className="office-field mt-3 block text-xs"
+                      >
+                        {q.label}
+                        <select
+                          required={q.required}
+                          value={
+                            typeof answersMap[q.id] === "string"
+                              ? answersMap[q.id]
+                              : ""
+                          }
+                          onChange={(e) =>
+                            setAnswersMap((m) => ({
+                              ...m,
+                              [q.id]: e.target.value,
+                            }))
+                          }
+                          className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
+                        >
+                          <option value="" className="office-option" />
+                          {choiceOptions.map((opt, i) => (
+                            <option
+                              key={`${q.id}-${i}`}
+                              value={opt}
+                              className="office-option"
+                            >
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    );
+                  })}
+    </>
+  );
+}
+
+function BookingDetailsForm({
+  eventType,
+  className,
+  onSubmit,
+  children,
+}: {
+  eventType: EventType;
+  className?: string;
+  onSubmit: (
+    event: React.FormEvent<HTMLFormElement>,
+    answersMap: Record<string, string | string[]>,
+  ) => void;
+  children: (questionFields: React.ReactNode) => React.ReactNode;
+}) {
+  const [answersMap, setAnswersMap] = useState<
+    Record<string, string | string[]>
+  >({});
+  return (
+    <form
+      className={className}
+      onSubmit={(event) => onSubmit(event, answersMap)}
+    >
+      {children(
+        <InviteeQuestionFields
+          eventType={eventType}
+          answersMap={answersMap}
+          setAnswersMap={setAnswersMap}
+        />,
+      )}
+    </form>
+  );
+}
+
 export function BookingFlow({
   host: initialHost,
   fromHost = false,
@@ -137,54 +399,58 @@ export function BookingFlow({
   fromHost?: boolean;
   initialTypeId?: string;
 }) {
+  const isClient = useIsClient();
+  const host = useMemo(
+    () => (isClient ? loadHostProfile(initialHost.slug) : initialHost),
+    [isClient, initialHost],
+  );
+
+  return (
+    <BookingFlowClient
+      key={`${initialHost.slug}:${initialTypeId ?? ""}:${isClient ? "c" : "s"}`}
+      host={host}
+      initialTypeId={initialTypeId}
+      fromHost={fromHost}
+      hydrated={isClient}
+    />
+  );
+}
+
+function BookingFlowClient({
+  host,
+  initialTypeId,
+  fromHost = false,
+  hydrated,
+}: {
+  host: HostProfile;
+  initialTypeId?: string;
+  fromHost?: boolean;
+  hydrated: boolean;
+}) {
   const router = useRouter();
   const { locale, t } = useLocale();
-  const [host, setHost] = useState(initialHost);
   const typeLocked = Boolean(
     initialTypeId && host.eventTypes.some((et) => et.id === initialTypeId),
   );
-  const matched = findEventType(initialHost.eventTypes, initialTypeId);
-  const [eventType, setEventType] = useState<EventType | undefined>(() => matched);
+  const matched = findEventType(host.eventTypes, initialTypeId);
+  const [eventType, setEventType] = useState(() => matched);
   const [step, setStep] = useState<Step>(() => (matched ? "schedule" : "types"));
   const [selectedDate, setSelectedDate] = useState(() =>
-    nextBookableDay(initialHost, matched),
+    nextBookableDay(host, matched),
   );
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
-  const [answersMap, setAnswersMap] = useState<
-    Record<string, string | string[]>
-  >({});
   const [seriesCount, setSeriesCount] = useState(1);
-  const [guestTimezone, setGuestTimezone] = useState("UTC");
+  const detectedTz = useSyncExternalStore(
+    subscribeNoop,
+    detectGuestTimezone,
+    getUtc,
+  );
+  const [tzOverride, setTzOverride] = useState<string | null>(null);
+  const guestTimezone = tzOverride ?? detectedTz;
   const [error, setError] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(true);
-    const loaded = loadHostProfile(initialHost.slug);
-    setHost(loaded);
-    setSelectedSlot(null);
-    setSeriesCount(1);
-    const detected = detectGuestTimezone();
-    setGuestTimezone(detected);
-
-    const urlMatch = findEventType(loaded.eventTypes, initialTypeId);
-    if (urlMatch) {
-      setEventType(urlMatch);
-      setStep("schedule");
-      setSelectedDate(nextBookableDay(loaded, urlMatch));
-    } else {
-      setEventType(undefined);
-      setStep("types");
-      setSelectedDate(nextBookableDay(loaded, undefined));
-    }
-  }, [initialHost.slug, initialTypeId]);
-
-  useEffect(() => {
-    setAnswersMap({});
-  }, [eventType?.id]);
 
   const activeHost = useMemo(
     () => ({
@@ -256,7 +522,10 @@ export function BookingFlow({
 
   const seriesSlotsFree = isSeriesCountFree(seriesCount);
 
-  function submitBooking(event: React.FormEvent) {
+  function submitBooking(
+    event: React.FormEvent<HTMLFormElement>,
+    answersMap: Record<string, string | string[]>,
+  ) {
     event.preventDefault();
     if (!selectedSlot || !eventType) return;
 
@@ -482,10 +751,14 @@ export function BookingFlow({
                 </div>
               </div>
             ) : step === "details" && selectedSlot ? (
-              <form
-                onSubmit={submitBooking}
+              <BookingDetailsForm
+                key={eventType.id}
+                eventType={eventType}
                 className="flex min-w-0 flex-1 flex-col"
+                onSubmit={submitBooking}
               >
+                {(questionFields) => (
+                  <>
                 <div className="border-b border-white/10 px-5 py-4">
                   <StepIndicator
                     active="details"
@@ -561,209 +834,7 @@ export function BookingFlow({
                     />
                   </label>
 
-                  {eventType.questions.map((q) => {
-                    if (!q.label.trim()) return null;
-                    if (
-                      (q.type === "radio" || q.type === "dropdown") &&
-                      q.options.filter((o) => o.trim()).length < 2
-                    ) {
-                      return null;
-                    }
-                    if (
-                      q.type === "checkbox" &&
-                      q.options.filter((o) => o.trim()).length < 1
-                    ) {
-                      return null;
-                    }
-
-                    const choiceOptions = q.options.filter((o) => o.trim());
-
-                    if (q.type === "text") {
-                      return (
-                        <label
-                          key={q.id}
-                          className="office-field mt-3 block text-xs"
-                        >
-                          {q.label}
-                          <input
-                            required={q.required}
-                            value={
-                              typeof answersMap[q.id] === "string"
-                                ? answersMap[q.id]
-                                : ""
-                            }
-                            onChange={(e) =>
-                              setAnswersMap((m) => ({
-                                ...m,
-                                [q.id]: e.target.value,
-                              }))
-                            }
-                            className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
-                          />
-                        </label>
-                      );
-                    }
-
-                    if (q.type === "textarea") {
-                      return (
-                        <label
-                          key={q.id}
-                          className="office-field mt-3 block text-xs"
-                        >
-                          {q.label}
-                          <textarea
-                            required={q.required}
-                            value={
-                              typeof answersMap[q.id] === "string"
-                                ? answersMap[q.id]
-                                : ""
-                            }
-                            onChange={(e) =>
-                              setAnswersMap((m) => ({
-                                ...m,
-                                [q.id]: e.target.value,
-                              }))
-                            }
-                            rows={3}
-                            className="office-input mt-1 w-full resize-none rounded-[1rem] border-0 px-3.5 py-2.5 text-sm outline-none"
-                          />
-                        </label>
-                      );
-                    }
-
-                    if (q.type === "phone") {
-                      return (
-                        <label
-                          key={q.id}
-                          className="office-field mt-3 block text-xs"
-                        >
-                          {q.label}
-                          <input
-                            type="tel"
-                            required={q.required}
-                            value={
-                              typeof answersMap[q.id] === "string"
-                                ? answersMap[q.id]
-                                : ""
-                            }
-                            onChange={(e) =>
-                              setAnswersMap((m) => ({
-                                ...m,
-                                [q.id]: e.target.value,
-                              }))
-                            }
-                            className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
-                          />
-                        </label>
-                      );
-                    }
-
-                    if (q.type === "radio") {
-                      return (
-                        <div
-                          key={q.id}
-                          className="office-field mt-3 block text-xs"
-                        >
-                          {q.label}
-                          {choiceOptions.map((opt, i) => (
-                            <label
-                              key={`${q.id}-${i}`}
-                              className="mt-1 flex items-center gap-2"
-                            >
-                              <input
-                                type="radio"
-                                name={q.id}
-                                value={opt}
-                                required={q.required}
-                                checked={answersMap[q.id] === opt}
-                                onChange={() =>
-                                  setAnswersMap((m) => ({
-                                    ...m,
-                                    [q.id]: opt,
-                                  }))
-                                }
-                                className="h-4 w-4 accent-[var(--office-text)]"
-                              />
-                              {opt}
-                            </label>
-                          ))}
-                        </div>
-                      );
-                    }
-
-                    if (q.type === "checkbox") {
-                      const current = answersMap[q.id];
-                      const selected = Array.isArray(current) ? current : [];
-                      return (
-                        <div
-                          key={q.id}
-                          className="office-field mt-3 block text-xs"
-                        >
-                          {q.label}
-                          {choiceOptions.map((opt, i) => (
-                            <label
-                              key={`${q.id}-${i}`}
-                              className="mt-1 flex items-center gap-2"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selected.includes(opt)}
-                                onChange={() =>
-                                  setAnswersMap((m) => {
-                                    const existing = m[q.id];
-                                    const prev = Array.isArray(existing)
-                                      ? existing
-                                      : [];
-                                    const next = prev.includes(opt)
-                                      ? prev.filter((x) => x !== opt)
-                                      : [...prev, opt];
-                                    return { ...m, [q.id]: next };
-                                  })
-                                }
-                                className="h-4 w-4 accent-[var(--office-text)]"
-                              />
-                              {opt}
-                            </label>
-                          ))}
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <label
-                        key={q.id}
-                        className="office-field mt-3 block text-xs"
-                      >
-                        {q.label}
-                        <select
-                          required={q.required}
-                          value={
-                            typeof answersMap[q.id] === "string"
-                              ? answersMap[q.id]
-                              : ""
-                          }
-                          onChange={(e) =>
-                            setAnswersMap((m) => ({
-                              ...m,
-                              [q.id]: e.target.value,
-                            }))
-                          }
-                          className="office-input mt-1 w-full rounded-full border-0 px-3.5 py-2.5 text-sm outline-none"
-                        >
-                          <option value="" className="office-option" />
-                          {choiceOptions.map((opt, i) => (
-                            <option
-                              key={`${q.id}-${i}`}
-                              value={opt}
-                              className="office-option"
-                            >
-                              {opt}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    );
-                  })}
+                  {questionFields}
 
                   {host.allowSeries ? (
                     <label className="office-field mt-4 block text-sm">
@@ -830,7 +901,9 @@ export function BookingFlow({
                     {t.confirmBooking}
                   </IslandButton>
                 </div>
-              </form>
+                  </>
+                )}
+              </BookingDetailsForm>
             ) : (
               <div className="flex min-w-0 flex-1 flex-col">
                 <div className="border-b border-white/10 px-5 py-4">
@@ -907,7 +980,7 @@ export function BookingFlow({
                         <span>{t.guestTimezoneLabel}</span>
                         <select
                           value={guestTimezone}
-                          onChange={(e) => setGuestTimezone(e.target.value)}
+                          onChange={(e) => setTzOverride(e.target.value)}
                           className="office-input rounded-full border-0 px-2.5 py-1 text-[11px] outline-none"
                         >
                           {tzOptions.map((tz) => (

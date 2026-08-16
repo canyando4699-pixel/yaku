@@ -4,10 +4,11 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from "react";
+import { subscribeNoop } from "@/lib/useIsClient";
 
 export type ThemeMode = "light" | "dark";
 
@@ -25,26 +26,34 @@ function isTheme(value: string | null): value is ThemeMode {
   return value === "light" || value === "dark";
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>("dark");
+function getThemeSnapshot(): ThemeMode {
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  return isTheme(stored) ? stored : "dark";
+}
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (isTheme(stored)) setThemeState(stored);
-  }, []);
+function getThemeServerSnapshot(): ThemeMode {
+  return "dark";
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const storedTheme = useSyncExternalStore(
+    subscribeNoop,
+    getThemeSnapshot,
+    getThemeServerSnapshot,
+  );
+  const [themeOverride, setThemeOverride] = useState<ThemeMode | null>(null);
+  const theme = themeOverride ?? storedTheme;
 
   const setTheme = useCallback((next: ThemeMode) => {
-    setThemeState(next);
+    setThemeOverride(next);
     window.localStorage.setItem(STORAGE_KEY, next);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemeState((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
-      window.localStorage.setItem(STORAGE_KEY, next);
-      return next;
-    });
-  }, []);
+    const next = (themeOverride ?? storedTheme) === "dark" ? "light" : "dark";
+    setThemeOverride(next);
+    window.localStorage.setItem(STORAGE_KEY, next);
+  }, [themeOverride, storedTheme]);
 
   const value = useMemo(
     () => ({ theme, setTheme, toggleTheme }),

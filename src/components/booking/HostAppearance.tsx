@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocale } from "@/i18n/LocaleProvider";
 import {
   BOOKING_BACKGROUNDS,
@@ -25,10 +25,6 @@ export function HostAppearance({
 }: HostAppearanceProps) {
   const { t } = useLocale();
   const [draft, setDraft] = useState<HostProfile>(() => loadHostProfile(slug));
-
-  useEffect(() => {
-    setDraft(loadHostProfile(slug));
-  }, [slug]);
 
   function selectBackground(id: string) {
     const match = BOOKING_BACKGROUNDS.find((b) => b.id === id);

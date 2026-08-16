@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ReschedulePicker } from "@/components/booking/ReschedulePicker";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Icon } from "@/components/ui/Icon";
@@ -18,7 +18,8 @@ import {
   getBooking,
   rescheduleBooking,
 } from "@/lib/booking/storage";
-import type { Booking, HostProfile } from "@/lib/booking/types";
+import type { HostProfile } from "@/lib/booking/types";
+import { useIsClient } from "@/lib/useIsClient";
 
 type Mode = "view" | "reschedule";
 
@@ -31,20 +32,45 @@ export function ManageBooking({
   bookingId: string;
   fromHost?: boolean;
 }) {
+  const isClient = useIsClient();
+
+  if (!isClient) {
+    return (
+      <div className="flex min-h-full flex-1 items-center justify-center px-6">
+        <p className="text-muted">…</p>
+      </div>
+    );
+  }
+
+  return (
+    <ManageBookingClient
+      key={`${bookingId}:${initialHost.slug}`}
+      initialHost={initialHost}
+      bookingId={bookingId}
+      fromHost={fromHost}
+    />
+  );
+}
+
+function ManageBookingClient({
+  initialHost,
+  bookingId,
+  fromHost = false,
+}: {
+  initialHost: HostProfile;
+  bookingId: string;
+  fromHost?: boolean;
+}) {
   const { locale, t } = useLocale();
-  const [host, setHost] = useState(initialHost);
-  const [booking, setBooking] = useState<Booking | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const host = useMemo(
+    () => loadHostProfile(initialHost.slug),
+    [initialHost.slug],
+  );
+  const [booking, setBooking] = useState(() => getBooking(bookingId));
   const [mode, setMode] = useState<Mode>("view");
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setHost(loadHostProfile(initialHost.slug));
-    setBooking(getBooking(bookingId));
-    setLoaded(true);
-  }, [bookingId, initialHost.slug]);
 
   const dateFormatter = useMemo(
     () =>
@@ -88,14 +114,6 @@ export function ManageBooking({
     setMode("view");
     setMessage(t.rescheduledBody);
     setError(null);
-  }
-
-  if (!loaded) {
-    return (
-      <div className="flex min-h-full flex-1 items-center justify-center px-6">
-        <p className="text-muted">…</p>
-      </div>
-    );
   }
 
   if (!booking || booking.slug !== host.slug) {

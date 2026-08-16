@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ChapterVideo } from "@/components/cinematic/ChapterVideo";
 import { CinematicFooter } from "@/components/cinematic/CinematicFooter";
 import { SceneStage } from "@/components/cinematic/SceneStage";
@@ -19,6 +19,7 @@ import {
 } from "@/lib/cinematic/chapters";
 import { createCinematicEngine } from "@/lib/cinematic/engine";
 import { getSession } from "@/lib/auth/localAuth";
+import { subscribeNoop } from "@/lib/useIsClient";
 
 const CROSSFADE_MS = 200;
 
@@ -34,12 +35,21 @@ function useMatchMedia(query: string) {
   return matches;
 }
 
+function getLoggedInSnapshot() {
+  return getSession() !== null;
+}
+
+function getLoggedInServerSnapshot() {
+  return false;
+}
+
 function CinematicHeader() {
   const { t } = useLocale();
-  const [loggedIn, setLoggedIn] = useState(false);
-  useEffect(() => {
-    setLoggedIn(!!getSession());
-  }, []);
+  const loggedIn = useSyncExternalStore(
+    subscribeNoop,
+    getLoggedInSnapshot,
+    getLoggedInServerSnapshot,
+  );
   return (
     <header className="cinematic-chrome relative z-20 flex items-center justify-between px-6 py-5 md:px-10">
       <div className="flex items-center gap-3">
