@@ -744,6 +744,11 @@ body {
   opacity: 0.85;
 }
 
+.office-dc-nav-row:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .office-dc-nav-divider {
   height: 1px;
   margin: 6px 4px;

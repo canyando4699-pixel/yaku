@@ -76,11 +76,17 @@ function resizeImageToDataUrl(file: File): Promise<string> {
 type HostAvailabilityProps = {
   slug?: string;
   onSaved?: (profile: HostProfile) => void;
+  section?: "hours" | "eventTypes";
+  spawnEventTypeKey?: number;
+  spawnConsumedRef?: { current: number };
 };
 
 export function HostAvailability({
   slug = defaultHostProfile.slug,
   onSaved,
+  section = "hours",
+  spawnEventTypeKey = 0,
+  spawnConsumedRef,
 }: HostAvailabilityProps) {
   const { t } = useLocale();
   const [draft, setDraft] = useState<HostProfile>(() => loadHostProfile(slug));
@@ -93,6 +99,22 @@ export function HostAvailability({
   useEffect(() => {
     setDraft(loadHostProfile(slug));
   }, [slug]);
+
+  useEffect(() => {
+    if (section !== "eventTypes" || spawnEventTypeKey === 0) return;
+    if (spawnConsumedRef && spawnConsumedRef.current === spawnEventTypeKey) {
+      return;
+    }
+    if (spawnConsumedRef) spawnConsumedRef.current = spawnEventTypeKey;
+    setDraft((prev) => ({
+      ...prev,
+      eventTypes: [
+        ...prev.eventTypes,
+        createEventType(t.eventTypeDefaultTitle, 30),
+      ],
+    }));
+    setMessage(null);
+  }, [section, spawnConsumedRef, spawnEventTypeKey, t.eventTypeDefaultTitle]);
 
   function updateEventType(id: string, patch: Partial<EventType>) {
     setDraft((prev) => ({
@@ -191,8 +213,12 @@ export function HostAvailability({
       onSubmit={handleSave}
       className="office-dc-card p-6 md:p-7"
     >
-      <h2 className="font-display text-2xl">{t.availabilityTitle}</h2>
-      <p className="office-muted mt-2 text-sm">{t.availabilityHint}</p>
+      <h2 className="font-display text-2xl">
+        {section === "eventTypes" ? t.eventTypesTitle : t.availabilityTitle}
+      </h2>
+      <p className="office-muted mt-2 text-sm">
+        {section === "eventTypes" ? t.eventTypesHint : t.availabilityHint}
+      </p>
 
       {message ? (
         <p className="mt-4 rounded-[8px] bg-[#1f8f4e]/20 px-4 py-2 text-sm text-[#7ddea8]">
@@ -201,6 +227,7 @@ export function HostAvailability({
       ) : null}
       {error ? <p className="mt-4 text-sm text-[#ff453a]">{error}</p> : null}
 
+      {section !== "eventTypes" ? (
       <div className="mt-6 flex flex-wrap gap-2">
         {AVAIL_TABS.map((id) => (
           <button
@@ -221,8 +248,11 @@ export function HostAvailability({
           </button>
         ))}
       </div>
+      ) : null}
 
-      {tab === "schedules" ? (
+      {section === "eventTypes" || tab === "schedules" ? (
+        <>
+      {section !== "eventTypes" ? (
         <>
       <HostScheduleHours
         weeklyHours={draft.weeklyHours}
@@ -434,7 +464,10 @@ export function HostAvailability({
           </select>
         </label>
       </div>
+        </>
+      ) : null}
 
+      {section === "eventTypes" ? (
       <div className="mt-8 border-t border-white/10 pt-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="font-display text-xl">{t.eventTypesTitle}</h3>
@@ -839,7 +872,9 @@ export function HostAvailability({
           ))}
         </ul>
       </div>
+      ) : null}
 
+      {section !== "eventTypes" ? (
       <div className="mt-8 border-t border-white/10 pt-6">
         <label className="flex items-center gap-3 office-field text-sm">
           <input
@@ -876,6 +911,7 @@ export function HostAvailability({
           </label>
         ) : null}
       </div>
+      ) : null}
         </>
       ) : tab === "calendars" ? (
         <div className="mt-6">

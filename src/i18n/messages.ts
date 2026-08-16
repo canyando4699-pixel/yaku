@@ -153,6 +153,42 @@ export type Messages = {
   appearancePreviewLabel: string;
   dashShareLink: string;
   dashIntegrations: string;
+  dashCreate: string;
+  dashCreateEventType: string;
+  dashCreateOneOff: string;
+  dashCreatePoll: string;
+  dashCreateCopyLink: string;
+  dashScheduling: string;
+  dashMeetings: string;
+  dashContacts: string;
+  dashWorkflows: string;
+  dashRouting: string;
+  dashUpgrade: string;
+  dashAnalytics: string;
+  dashAdmin: string;
+  dashTabEventTypes: string;
+  dashTabOneOff: string;
+  dashTabPolls: string;
+  dashTabDiscover: string;
+  dashTabManage: string;
+  dashEmptyOneOffTitle: string;
+  dashEmptyOneOffBody: string;
+  dashEmptyPollsTitle: string;
+  dashEmptyPollsBody: string;
+  dashEmptyContactsTitle: string;
+  dashEmptyContactsBody: string;
+  dashEmptyWorkflowsTitle: string;
+  dashEmptyWorkflowsBody: string;
+  dashEmptyIntegrationsDiscoverTitle: string;
+  dashEmptyIntegrationsDiscoverBody: string;
+  dashEmptyIntegrationsManageTitle: string;
+  dashEmptyIntegrationsManageBody: string;
+  dashEmptyRoutingTitle: string;
+  dashEmptyRoutingBody: string;
+  dashEmptyUpgradeTitle: string;
+  dashEmptyUpgradeBody: string;
+  dashEmptyAnalyticsTitle: string;
+  dashEmptyAnalyticsBody: string;
   dashMyActivity: string;
   dashSelectBooking: string;
   integrationsTitle: string;
@@ -407,6 +443,42 @@ export const messages: Record<Locale, Messages> = {
     appearancePreviewLabel: "Vorschau",
     dashShareLink: "Link teilen",
     dashIntegrations: "Integrationen",
+    dashCreate: "Erstellen",
+    dashCreateEventType: "Neuer Ereignistyp",
+    dashCreateOneOff: "Einweglink",
+    dashCreatePoll: "Umfrage",
+    dashCreateCopyLink: "Buchungslink kopieren",
+    dashScheduling: "Terminplanung",
+    dashMeetings: "Meetings",
+    dashContacts: "Kontakte",
+    dashWorkflows: "Arbeitsabläufe",
+    dashRouting: "Routing",
+    dashUpgrade: "Upgrade",
+    dashAnalytics: "Analytics",
+    dashAdmin: "Admin",
+    dashTabEventTypes: "Ereignistypen",
+    dashTabOneOff: "Einweglinks",
+    dashTabPolls: "Umfragen",
+    dashTabDiscover: "Entdecken",
+    dashTabManage: "Verwalten",
+    dashEmptyOneOffTitle: "Einweglinks",
+    dashEmptyOneOffBody: "Kommt als Nächstes.",
+    dashEmptyPollsTitle: "Umfragen",
+    dashEmptyPollsBody: "Kommt als Nächstes.",
+    dashEmptyContactsTitle: "Kontakte",
+    dashEmptyContactsBody: "Kommt als Nächstes.",
+    dashEmptyWorkflowsTitle: "Arbeitsabläufe",
+    dashEmptyWorkflowsBody: "Kommt als Nächstes.",
+    dashEmptyIntegrationsDiscoverTitle: "Integrationen",
+    dashEmptyIntegrationsDiscoverBody: "Entdecken kommt als Nächstes. Keine Verbindung.",
+    dashEmptyIntegrationsManageTitle: "Verwalten",
+    dashEmptyIntegrationsManageBody: "Verwalten kommt als Nächstes. Keine Verbindung.",
+    dashEmptyRoutingTitle: "Routing",
+    dashEmptyRoutingBody: "Kommt als Nächstes.",
+    dashEmptyUpgradeTitle: "Upgrade",
+    dashEmptyUpgradeBody: "Kommt als Nächstes.",
+    dashEmptyAnalyticsTitle: "Analytics",
+    dashEmptyAnalyticsBody: "Kommt als Nächstes.",
     dashMyActivity: "Meine Termine",
     dashSelectBooking: "Wähle einen Termin in der Woche.",
     integrationsTitle: "Kalender verbinden",
@@ -658,7 +730,7 @@ export const messages: Record<Locale, Messages> = {
     continueWithApple: "Continue with Apple",
     orContinueWithEmail: "or",
     authOauthSoon: "Google and Apple sign-in are coming next.",
-    dashSchedule: "Schedule",
+    dashSchedule: "Plan",
     dashList: "List",
     dashAvailability: "Availability",
     dashAppearance: "View",
@@ -667,6 +739,42 @@ export const messages: Record<Locale, Messages> = {
     appearancePreviewLabel: "Preview",
     dashShareLink: "Share link",
     dashIntegrations: "Integrations",
+    dashCreate: "Create",
+    dashCreateEventType: "New event type",
+    dashCreateOneOff: "One-off link",
+    dashCreatePoll: "Poll",
+    dashCreateCopyLink: "Copy booking link",
+    dashScheduling: "Scheduling",
+    dashMeetings: "Meetings",
+    dashContacts: "Contacts",
+    dashWorkflows: "Workflows",
+    dashRouting: "Routing",
+    dashUpgrade: "Upgrade",
+    dashAnalytics: "Analytics",
+    dashAdmin: "Admin",
+    dashTabEventTypes: "Event types",
+    dashTabOneOff: "One-off links",
+    dashTabPolls: "Polls",
+    dashTabDiscover: "Discover",
+    dashTabManage: "Manage",
+    dashEmptyOneOffTitle: "One-off links",
+    dashEmptyOneOffBody: "Coming next.",
+    dashEmptyPollsTitle: "Polls",
+    dashEmptyPollsBody: "Coming next.",
+    dashEmptyContactsTitle: "Contacts",
+    dashEmptyContactsBody: "Coming next.",
+    dashEmptyWorkflowsTitle: "Workflows",
+    dashEmptyWorkflowsBody: "Coming next.",
+    dashEmptyIntegrationsDiscoverTitle: "Integrations",
+    dashEmptyIntegrationsDiscoverBody: "Discover is next. No connection.",
+    dashEmptyIntegrationsManageTitle: "Manage",
+    dashEmptyIntegrationsManageBody: "Manage is next. No connection.",
+    dashEmptyRoutingTitle: "Routing",
+    dashEmptyRoutingBody: "Coming next.",
+    dashEmptyUpgradeTitle: "Upgrade",
+    dashEmptyUpgradeBody: "Coming next.",
+    dashEmptyAnalyticsTitle: "Analytics",
+    dashEmptyAnalyticsBody: "Coming next.",
     dashMyActivity: "My activity",
     dashSelectBooking: "Select a booking in the week view.",
     integrationsTitle: "Connect calendars",
@@ -918,7 +1026,7 @@ export const messages: Record<Locale, Messages> = {
     continueWithApple: "Appleで続ける",
     orContinueWithEmail: "または",
     authOauthSoon: "GoogleとAppleのログインは次に追加します。",
-    dashSchedule: "スケジュール",
+    dashSchedule: "プラン",
     dashList: "リスト",
     dashAvailability: "空き時間",
     dashAppearance: "表示",
@@ -927,6 +1035,42 @@ export const messages: Record<Locale, Messages> = {
     appearancePreviewLabel: "プレビュー",
     dashShareLink: "リンク共有",
     dashIntegrations: "連携",
+    dashCreate: "作成",
+    dashCreateEventType: "新しいイベントタイプ",
+    dashCreateOneOff: "ワンタイムリンク",
+    dashCreatePoll: "アンケート",
+    dashCreateCopyLink: "予約リンクをコピー",
+    dashScheduling: "スケジュール設定",
+    dashMeetings: "ミーティング",
+    dashContacts: "連絡先",
+    dashWorkflows: "ワークフロー",
+    dashRouting: "ルーティング",
+    dashUpgrade: "アップグレード",
+    dashAnalytics: "分析",
+    dashAdmin: "管理",
+    dashTabEventTypes: "イベントタイプ",
+    dashTabOneOff: "ワンタイムリンク",
+    dashTabPolls: "アンケート",
+    dashTabDiscover: "見つける",
+    dashTabManage: "管理",
+    dashEmptyOneOffTitle: "ワンタイムリンク",
+    dashEmptyOneOffBody: "次に追加します。",
+    dashEmptyPollsTitle: "アンケート",
+    dashEmptyPollsBody: "次に追加します。",
+    dashEmptyContactsTitle: "連絡先",
+    dashEmptyContactsBody: "次に追加します。",
+    dashEmptyWorkflowsTitle: "ワークフロー",
+    dashEmptyWorkflowsBody: "次に追加します。",
+    dashEmptyIntegrationsDiscoverTitle: "連携",
+    dashEmptyIntegrationsDiscoverBody: "発見は次です。未接続です。",
+    dashEmptyIntegrationsManageTitle: "管理",
+    dashEmptyIntegrationsManageBody: "管理は次です。未接続です。",
+    dashEmptyRoutingTitle: "ルーティング",
+    dashEmptyRoutingBody: "次に追加します。",
+    dashEmptyUpgradeTitle: "アップグレード",
+    dashEmptyUpgradeBody: "次に追加します。",
+    dashEmptyAnalyticsTitle: "分析",
+    dashEmptyAnalyticsBody: "次に追加します。",
     dashMyActivity: "マイ予定",
     dashSelectBooking: "週の予定から選択してください。",
     integrationsTitle: "カレンダー連携",

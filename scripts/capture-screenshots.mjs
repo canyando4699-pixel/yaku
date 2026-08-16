@@ -390,6 +390,9 @@ async function main() {
     await goto(cdp, BASE + "/host");
     await sleep(2500);
     await assertEnglish(cdp, "host-schedule");
+
+    await clickNav(cdp, "Meetings");
+    await sleep(1000);
     await screenshot(cdp, "host-schedule-v2.png");
 
     await clickNav(cdp, "List");
@@ -405,8 +408,8 @@ async function main() {
     await sleep(1200);
     await screenshot(cdp, "host-appearance-v2.png");
 
-    await clickNav(cdp, "Share link");
-    await sleep(1200);
+    await clickNav(cdp, "Create");
+    await sleep(400);
     await screenshot(cdp, "host-share-v2.png");
 
     cdp.close();

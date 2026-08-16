@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HostAppearance } from "@/components/booking/HostAppearance";
 import { HostAvailability } from "@/components/booking/HostAvailability";
 import { HostBookingList } from "@/components/booking/HostBookingList";
 import { HostScheduleCalendar } from "@/components/booking/HostScheduleCalendar";
+import { OfficeEmptyState } from "@/components/booking/OfficeEmptyState";
 import { OfficeShell, type OfficeRoom } from "@/components/booking/OfficeShell";
 import { ReschedulePicker } from "@/components/booking/ReschedulePicker";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -38,6 +39,125 @@ import {
 } from "@/lib/booking/types";
 
 type NavKey = OfficeRoom;
+type SchedulingTab = "eventTypes" | "oneOff" | "polls";
+type MeetingsTab = "plan" | "list";
+type IntegrationsTab = "discover" | "manage";
+type SidebarRoom =
+  | "scheduling"
+  | "meetings"
+  | "availability"
+  | "contacts"
+  | "workflows"
+  | "integrations"
+  | "routing";
+type IconName =
+  | "list"
+  | "calendar"
+  | "clock"
+  | "user"
+  | "settings"
+  | "grid"
+  | "arrowRight";
+
+function CreateMenu({
+  variant,
+  copied,
+  onAction,
+}: {
+  variant: "gold" | "chip";
+  copied: boolean;
+  onAction: (action: "eventType" | "oneOff" | "polls" | "copy") => void;
+}) {
+  const { t } = useLocale();
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  function choose(action: "eventType" | "oneOff" | "polls" | "copy") {
+    onAction(action);
+    setOpen(false);
+  }
+
+  return (
+    <div ref={rootRef} className={variant === "gold" ? "relative w-full" : "relative shrink-0"}>
+      <button
+        type="button"
+        className={
+          variant === "gold"
+            ? "office-dc-btn-gold mt-4 w-full justify-start"
+            : "office-dc-chip shrink-0"
+        }
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        {variant === "gold" ? <Icon name="plus" className="h-3.5 w-3.5" /> : null}
+        <span>{copied ? t.linkCopied : t.dashCreate}</span>
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          className={
+            variant === "gold"
+              ? "absolute z-20 mt-1 w-full office-dc-card p-1"
+              : "absolute z-30 mt-1 min-w-[12.5rem] office-dc-card p-1"
+          }
+        >
+          <button
+            type="button"
+            role="menuitem"
+            className="office-dc-nav-row"
+            onClick={() => choose("eventType")}
+          >
+            <span>{t.dashCreateEventType}</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="office-dc-nav-row"
+            onClick={() => choose("oneOff")}
+          >
+            <span>{t.dashCreateOneOff}</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="office-dc-nav-row"
+            onClick={() => choose("polls")}
+          >
+            <span>{t.dashCreatePoll}</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="office-dc-nav-row"
+            onClick={() => choose("copy")}
+          >
+            <span>{t.dashCreateCopyLink}</span>
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 function durationMinutes(start: Date, end: Date) {
   return Math.max(1, Math.round((+end - +start) / 60000));
@@ -48,7 +168,12 @@ export function HostDashboard() {
   const router = useRouter();
   const [session, setSession] = useState<AuthSession | null>(null);
   const [ready, setReady] = useState(false);
-  const [nav, setNav] = useState<NavKey>("schedule");
+  const [nav, setNav] = useState<NavKey>("scheduling");
+  const [schedulingTab, setSchedulingTab] = useState<SchedulingTab>("eventTypes");
+  const [meetingsTab, setMeetingsTab] = useState<MeetingsTab>("plan");
+  const [integrationsTab, setIntegrationsTab] = useState<IntegrationsTab>("discover");
+  const [spawnEventTypeKey, setSpawnEventTypeKey] = useState(0);
+  const spawnConsumedRef = useRef(0);
   const [host, setHost] = useState<HostProfile>(() =>
     loadHostProfile(defaultHostProfile.slug),
   );
@@ -150,6 +275,26 @@ export function HostDashboard() {
     }
   }
 
+  function applyCreate(action: "eventType" | "oneOff" | "polls" | "copy") {
+    if (action === "eventType") {
+      setNav("scheduling");
+      setSchedulingTab("eventTypes");
+      setSpawnEventTypeKey((k) => k + 1);
+      return;
+    }
+    if (action === "oneOff") {
+      setNav("scheduling");
+      setSchedulingTab("oneOff");
+      return;
+    }
+    if (action === "polls") {
+      setNav("scheduling");
+      setSchedulingTab("polls");
+      return;
+    }
+    void copyBookingLink();
+  }
+
   function handleLogout() {
     signOut();
     router.replace("/login");
@@ -164,16 +309,17 @@ export function HostDashboard() {
   }
 
   const navItems: {
-    key: NavKey;
+    key: SidebarRoom;
     label: string;
-    icon: "calendar" | "list" | "clock" | "settings" | "link" | "grid";
+    icon: IconName;
   }[] = [
-    { key: "schedule", label: t.dashSchedule, icon: "calendar" },
-    { key: "list", label: t.dashList, icon: "list" },
+    { key: "scheduling", label: t.dashScheduling, icon: "list" },
+    { key: "meetings", label: t.dashMeetings, icon: "calendar" },
     { key: "availability", label: t.dashAvailability, icon: "clock" },
-    { key: "appearance", label: t.dashAppearance, icon: "settings" },
-    { key: "share", label: t.dashShareLink, icon: "link" },
+    { key: "contacts", label: t.dashContacts, icon: "user" },
+    { key: "workflows", label: t.dashWorkflows, icon: "settings" },
     { key: "integrations", label: t.dashIntegrations, icon: "grid" },
+    { key: "routing", label: t.dashRouting, icon: "arrowRight" },
   ];
 
   return (
@@ -188,17 +334,11 @@ export function HostDashboard() {
             Office
           </p>
 
-          <button
-            type="button"
-            onClick={() => {
-              setNav("share");
-              void copyBookingLink();
-            }}
-            className="office-dc-btn-gold mt-4 w-full justify-start"
-          >
-            <Icon name="plus" className="h-3.5 w-3.5" />
-            <span>{t.dashShareLink}</span>
-          </button>
+          <CreateMenu
+            variant="gold"
+            copied={copied}
+            onAction={applyCreate}
+          />
 
           <nav className="mt-5 flex flex-col">
             {navItems.map((item, index) => {
@@ -221,12 +361,40 @@ export function HostDashboard() {
           </nav>
 
           <div className="office-nav-footer mt-auto space-y-2 border-t border-[color:var(--office-border)] pt-3">
+            <button
+              type="button"
+              onClick={() => setNav("upgrade")}
+              className="office-dc-nav-row"
+              data-active={nav === "upgrade" ? "true" : "false"}
+            >
+              <span>{t.dashUpgrade}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setNav("analytics")}
+              className="office-dc-nav-row"
+              data-active={nav === "analytics" ? "true" : "false"}
+            >
+              <span>{t.dashAnalytics}</span>
+            </button>
+            <button type="button" disabled className="office-dc-nav-row">
+              <span>{t.dashAdmin}</span>
+            </button>
             <div className="office-dc-nav-row pointer-events-none">
               <div className="min-w-0 leading-tight">
                 <p className="truncate text-xs font-medium">{session.displayName}</p>
                 <p className="office-muted truncate text-[10px]">{session.email}</p>
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setNav("appearance")}
+              className="office-dc-nav-row"
+              data-active={nav === "appearance" ? "true" : "false"}
+            >
+              <span>{t.dashAppearance}</span>
+              <Icon name="settings" className="h-3.5 w-3.5" />
+            </button>
             <LanguageSwitcher className="office-dc-nav-row" />
             <button
               type="button"
@@ -258,7 +426,13 @@ export function HostDashboard() {
         </div>
       </header>
 
-      <div className="office-mobile-nav flex gap-2 overflow-x-auto border-b px-3 py-2 md:hidden">
+      <div className="office-mobile-nav flex items-center gap-2 border-b px-3 py-2 md:hidden">
+        <CreateMenu
+          variant="chip"
+          copied={copied}
+          onAction={applyCreate}
+        />
+        <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto">
         {navItems.map((item) => (
           <button
             key={item.key}
@@ -270,76 +444,128 @@ export function HostDashboard() {
             {item.label}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setNav("appearance")}
+          className="office-dc-chip shrink-0"
+          data-active={nav === "appearance" ? "true" : "false"}
+        >
+          {t.dashAppearance}
+        </button>
+        </div>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
           <main
             className={[
               "flex min-h-0 min-w-0 flex-1 flex-col",
-              nav === "schedule"
+              nav === "meetings" && meetingsTab === "plan"
                 ? "overflow-hidden p-2 md:p-3"
-                : nav === "list"
+                : nav === "meetings" && meetingsTab === "list"
                   ? "office-list-main overflow-hidden p-3 md:p-5"
                   : "overflow-auto px-4 py-5 md:px-6 md:py-6",
             ].join(" ")}
           >
             {error ? <p className="mb-3 shrink-0 text-sm text-[#ff8a80]">{error}</p> : null}
 
-            {nav === "availability" ? (
-              <HostAvailability
-                slug={host.slug}
-                onSaved={(profile) => setHost(profile)}
-              />
-            ) : null}
-
-            {nav === "appearance" ? (
-              <HostAppearance slug={host.slug} onSaved={setHost} />
-            ) : null}
-
-            {nav === "share" ? (
-              <div className="office-dc-card mx-auto max-w-lg p-6">
-                <h2 className="font-display text-2xl">{t.dashShareLink}</h2>
-                <p className="office-muted mt-2 text-sm">
-                  /b/{host.slug}
-                </p>
-                <div className="mt-6 flex flex-wrap items-center gap-2">
+            {nav === "scheduling" ? (
+              <div className="mb-4 flex flex-wrap gap-2">
+                {(
+                  [
+                    ["eventTypes", t.dashTabEventTypes],
+                    ["oneOff", t.dashTabOneOff],
+                    ["polls", t.dashTabPolls],
+                  ] as const
+                ).map(([id, label]) => (
                   <button
+                    key={id}
                     type="button"
-                    className="office-dc-btn-gold"
-                    onClick={() => void copyBookingLink()}
+                    aria-pressed={schedulingTab === id}
+                    onClick={() => setSchedulingTab(id)}
+                    className={[
+                      "rounded-full px-3.5 py-2 text-sm font-medium transition",
+                      schedulingTab === id ? "office-liquid-glass" : "office-chip-idle",
+                    ].join(" ")}
                   >
-                    <Icon name="link" className="h-4 w-4" />
-                    {copied ? t.linkCopied : t.copyLink}
+                    {label}
                   </button>
-                  <Link
-                    href={`/b/${host.slug}?from=host`}
-                    className="office-dc-btn-dark"
+                ))}
+              </div>
+            ) : null}
+
+            {nav === "meetings" ? (
+              <div className="mb-4 flex flex-wrap gap-2">
+                {(
+                  [
+                    ["plan", t.dashSchedule],
+                    ["list", t.dashList],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={meetingsTab === id}
+                    onClick={() => setMeetingsTab(id)}
+                    className={[
+                      "rounded-full px-3.5 py-2 text-sm font-medium transition",
+                      meetingsTab === id ? "office-liquid-glass" : "office-chip-idle",
+                    ].join(" ")}
                   >
-                    {t.openBookingLink}
-                  </Link>
-                </div>
+                    {label}
+                  </button>
+                ))}
               </div>
             ) : null}
 
             {nav === "integrations" ? (
-              <div className="office-dc-card mx-auto max-w-lg p-6">
-                <h2 className="font-display text-2xl">{t.integrationsTitle}</h2>
-                <p className="office-muted mt-2 text-sm">{t.integrationsHint}</p>
+              <div className="mb-4 flex flex-wrap gap-2">
+                {(
+                  [
+                    ["discover", t.dashTabDiscover],
+                    ["manage", t.dashTabManage],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={integrationsTab === id}
+                    onClick={() => setIntegrationsTab(id)}
+                    className={[
+                      "rounded-full px-3.5 py-2 text-sm font-medium transition",
+                      integrationsTab === id ? "office-liquid-glass" : "office-chip-idle",
+                    ].join(" ")}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             ) : null}
 
-            {nav === "list" ? (
-              <HostBookingList
-                bookings={confirmed}
-                onOpen={(booking) => {
-                  setSelectedId(booking.id);
-                  setNav("schedule");
-                  setFocusDate(new Date(booking.startsAt));
-                }}
+            {nav === "scheduling" && schedulingTab === "eventTypes" ? (
+              <HostAvailability
+                slug={host.slug}
+                section="eventTypes"
+                spawnEventTypeKey={spawnEventTypeKey}
+                spawnConsumedRef={spawnConsumedRef}
+                onSaved={(p) => setHost(p)}
               />
             ) : null}
 
-            {nav === "schedule" ? (
+            {nav === "scheduling" && schedulingTab === "oneOff" ? (
+              <OfficeEmptyState
+                title={t.dashEmptyOneOffTitle}
+                body={t.dashEmptyOneOffBody}
+              />
+            ) : null}
+
+            {nav === "scheduling" && schedulingTab === "polls" ? (
+              <OfficeEmptyState
+                title={t.dashEmptyPollsTitle}
+                body={t.dashEmptyPollsBody}
+              />
+            ) : null}
+
+            {nav === "meetings" && meetingsTab === "plan" ? (
               <HostScheduleCalendar
                 bookings={confirmed}
                 eventTypes={host.eventTypes}
@@ -352,6 +578,77 @@ export function HostDashboard() {
                   setConfirmCancelId(null);
                   setError(null);
                 }}
+              />
+            ) : null}
+
+            {nav === "meetings" && meetingsTab === "list" ? (
+              <HostBookingList
+                bookings={confirmed}
+                onOpen={(booking) => {
+                  setSelectedId(booking.id);
+                  setFocusDate(new Date(booking.startsAt));
+                }}
+              />
+            ) : null}
+
+            {nav === "availability" ? (
+              <HostAvailability
+                slug={host.slug}
+                section="hours"
+                onSaved={(profile) => setHost(profile)}
+              />
+            ) : null}
+
+            {nav === "appearance" ? (
+              <HostAppearance slug={host.slug} onSaved={setHost} />
+            ) : null}
+
+            {nav === "contacts" ? (
+              <OfficeEmptyState
+                title={t.dashEmptyContactsTitle}
+                body={t.dashEmptyContactsBody}
+              />
+            ) : null}
+
+            {nav === "workflows" ? (
+              <OfficeEmptyState
+                title={t.dashEmptyWorkflowsTitle}
+                body={t.dashEmptyWorkflowsBody}
+              />
+            ) : null}
+
+            {nav === "integrations" && integrationsTab === "discover" ? (
+              <OfficeEmptyState
+                title={t.dashEmptyIntegrationsDiscoverTitle}
+                body={t.dashEmptyIntegrationsDiscoverBody}
+              />
+            ) : null}
+
+            {nav === "integrations" && integrationsTab === "manage" ? (
+              <OfficeEmptyState
+                title={t.dashEmptyIntegrationsManageTitle}
+                body={t.dashEmptyIntegrationsManageBody}
+              />
+            ) : null}
+
+            {nav === "routing" ? (
+              <OfficeEmptyState
+                title={t.dashEmptyRoutingTitle}
+                body={t.dashEmptyRoutingBody}
+              />
+            ) : null}
+
+            {nav === "upgrade" ? (
+              <OfficeEmptyState
+                title={t.dashEmptyUpgradeTitle}
+                body={t.dashEmptyUpgradeBody}
+              />
+            ) : null}
+
+            {nav === "analytics" ? (
+              <OfficeEmptyState
+                title={t.dashEmptyAnalyticsTitle}
+                body={t.dashEmptyAnalyticsBody}
               />
             ) : null}
           </main>

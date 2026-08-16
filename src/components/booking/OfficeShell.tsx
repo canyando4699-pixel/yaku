@@ -4,12 +4,16 @@ import type { ReactNode } from "react";
 import { useTheme } from "@/i18n/ThemeProvider";
 
 export type OfficeRoom =
-  | "schedule"
-  | "list"
+  | "scheduling"
+  | "meetings"
   | "availability"
+  | "contacts"
+  | "workflows"
+  | "integrations"
+  | "routing"
   | "appearance"
-  | "share"
-  | "integrations";
+  | "upgrade"
+  | "analytics";
 
 type OfficeShellProps = {
   children: ReactNode;
