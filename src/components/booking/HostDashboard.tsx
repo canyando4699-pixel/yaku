@@ -34,6 +34,7 @@ import {
   resolveEventTypeOrFallback,
 } from "@/lib/booking/hostProfile";
 import { downloadIcs } from "@/lib/booking/ics";
+import { typeCapsReached } from "@/lib/booking/slots";
 import {
   cancelBooking,
   listBookings,
@@ -295,6 +296,19 @@ function HostDashboardClient({ session }: { session: AuthSession }) {
   }
 
   function handleReschedule(id: string, startsAt: string, endsAt: string) {
+    const current = bookings.find((b) => b.id === id);
+    if (current) {
+      const eventType = resolveEventTypeOrFallback(
+        host.eventTypes,
+        current.eventTypeId,
+        current.eventTitle || host.eventTitle,
+        host.durationMinutes,
+      );
+      if (typeCapsReached(host, eventType, new Date(startsAt), id)) {
+        setError(t.slotTaken);
+        return;
+      }
+    }
     const next = rescheduleBooking(id, startsAt, endsAt);
     if (!next) {
       setError(t.slotTaken);

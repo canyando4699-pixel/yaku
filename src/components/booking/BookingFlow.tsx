@@ -26,6 +26,7 @@ import {
   detectGuestTimezone,
   getAvailableSlots,
   isBookableDay,
+  typeCapsReached,
 } from "@/lib/booking/slots";
 import {
   requiredQuestionsAnswered,
@@ -530,6 +531,7 @@ function BookingFlowClient({
     if (!selectedSlot || !eventType) return;
 
     const endsAt = addMinutes(selectedSlot, eventType.durationMinutes);
+    const slotDate = new Date(selectedSlot);
     if (
       isRangeTaken(
         host.slug,
@@ -538,7 +540,8 @@ function BookingFlowClient({
         undefined,
         host.bufferBeforeMinutes,
         host.bufferAfterMinutes,
-      )
+      ) ||
+      typeCapsReached(activeHost, eventType, slotDate)
     ) {
       setError(t.slotTaken);
       setStep("schedule");
@@ -561,7 +564,11 @@ function BookingFlowClient({
     );
 
     if (!starts) {
-      setError(t.seriesUnavailable);
+      setError(count > 1 ? t.seriesUnavailable : t.slotTaken);
+      if (count <= 1) {
+        setStep("schedule");
+        setSelectedSlot(null);
+      }
       return;
     }
 

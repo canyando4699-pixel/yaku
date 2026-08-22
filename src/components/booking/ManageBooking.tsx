@@ -18,6 +18,7 @@ import {
   getBooking,
   rescheduleBooking,
 } from "@/lib/booking/storage";
+import { typeCapsReached } from "@/lib/booking/slots";
 import type { HostProfile } from "@/lib/booking/types";
 import { useIsClient } from "@/lib/useIsClient";
 
@@ -105,6 +106,21 @@ function ManageBookingClient({
   }
 
   function handleReschedule(startsAt: string, endsAt: string) {
+    const current = getBooking(bookingId);
+    if (!current) {
+      setError(t.bookingMissing);
+      return;
+    }
+    const resolved = resolveEventTypeOrFallback(
+      host.eventTypes,
+      current.eventTypeId,
+      current.eventTitle || host.eventTitle,
+      host.durationMinutes,
+    );
+    if (typeCapsReached(host, resolved, new Date(startsAt), bookingId)) {
+      setError(t.slotTaken);
+      return;
+    }
     const next = rescheduleBooking(bookingId, startsAt, endsAt);
     if (!next) {
       setError(t.slotTaken);
