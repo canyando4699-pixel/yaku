@@ -109,7 +109,8 @@ function extraStartsInMonth(extraStarts: string[], date: Date) {
   }).length;
 }
 
-function typeCapsReached(
+/** True when day/week/month caps for this event type are already full. */
+export function typeCapsReached(
   host: HostProfile,
   eventType: EventType,
   date: Date,
@@ -248,9 +249,18 @@ export function buildSeriesStarts(
   eventType?: EventType,
   now?: Date,
 ): string[] | null {
-  if (count <= 1) return [firstStartsAt];
+  if (count < 1) return null;
 
   const first = new Date(firstStartsAt);
+  if (
+    eventType &&
+    typeCapsReached(host, eventType, first, undefined, [])
+  ) {
+    return null;
+  }
+
+  if (count === 1) return [firstStartsAt];
+
   const starts: string[] = [firstStartsAt];
 
   for (let i = 1; i < count; i += 1) {
